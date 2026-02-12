@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cine Pipoca</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>🎬 Cine Pipoca</h1>
+  <nav>
+    <button onclick="navegar('home')">Home</button>
+    <button onclick="navegar('series')">Séries</button>
+    <button onclick="navegar('filmes')">Filmes</button>
+    <button onclick="navegar('quero')">Quero Assistir ⭐</button>
+    <button onclick="abrirModal('add')" class="btn-add-menu">+</button>
+  </nav>
+</header>
+
+<section class="search-box">
+  <input id="busca" placeholder="Buscar filme ou série..." onkeyup="render()">
+</section>
+
+<main>
+    <div id="page-home" class="page"><h2 class="section-title">Painel Geral</h2><div id="home" class="grid-container"></div></div>
+    <div id="page-series" class="page" style="display:none;"><h2 class="section-title">📺 Séries</h2><div id="series" class="grid"></div></div>
+    <div id="page-filmes" class="page" style="display:none;"><h2 class="section-title">🎬 Filmes</h2><div id="filmes" class="grid"></div></div>
+    <div id="page-quero" class="page" style="display:none;"><h2 class="section-title">⭐ Quero Assistir</h2><div id="queroList" class="grid"></div></div>
+</main>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal()">&times;</span>
+        <h2 id="modal-title">Adicionar Novo</h2>
+        
+        <input id="nome" placeholder="Nome do filme ou série">
+        <input id="imagem" placeholder="URL da Imagem (Poster)">
+        
+        <div class="select-group">
+            <select id="tipo" onchange="toggleSerieFields()">
+                <option value="filme">Filme</option>
+                <option value="serie">Série</option>
+            </select>
+            <select id="status" onchange="toggleRatingFields()">
+                <option value="assistindo">Assistindo</option>
+                <option value="quero">Quero Assistir</option>
+                <option value="assistido">Já Assisti (Assistido)</option>
+            </select>
+        </div>
+
+        <div id="serie-fields" class="select-group" style="display:none;">
+            <input id="temporada" type="number" min="1" placeholder="Temp. Atual">
+            <input id="episodio" type="number" min="1" placeholder="Ep. Atual">
+        </div>
+
+        <div id="campos-finalizacao" style="display:none;">
+            <div class="dual-rating-input">
+                <label>🤵 Nota Arthur (1-5):</label>
+                <input id="notaA" type="number" step="0.5" min="1" max="5" placeholder="5">
+                <input id="comA" placeholder="Comentário Arthur">
+            </div>
+            <div class="dual-rating-input">
+                <label>👰 Nota Daiane (1-5):</label>
+                <input id="notaD" type="number" step="0.5" min="1" max="5" placeholder="5">
+                <input id="comD" placeholder="Comentário Daiane">
+            </div>
+            <input type="hidden" id="item-id-hidden">
+        </div>
+
+        <button id="btn-salvar" class="btn-primary" onclick="adicionar()">Salvar</button>
+        <button id="btn-finalizar" class="btn-primary" style="display:none; background-color: #10b981;" onclick="confirmarFinalizacao()">Finalizar</button>
+    </div>
+</div>
+
+<script src="storage.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

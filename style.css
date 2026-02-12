@@ -1,0 +1,37 @@
+body { background-color: #0b101b; color: white; font-family: sans-serif; margin: 0; }
+header { background-color: #04070d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+header h1 { margin: 0; font-size: 1.5rem; }
+header nav button { background-color: transparent; color: white; border: 1px solid #333; padding: 0.5rem 1rem; margin-left: 0.5rem; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+header nav button:hover { background-color: #1f2937; }
+.btn-add-menu { background-color: #3b82f6 !important; border: none !important; font-weight: bold; }
+.search-box { text-align: center; padding: 1.5rem; }
+.search-box input { width: 50%; padding: 0.7rem; border-radius: 20px; border: none; background-color: #1f2937; color: white; text-align: center; }
+.section-title { padding-left: 2rem; color: white; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; padding: 1rem 2rem; }
+.grid-container { padding: 1rem 2rem; }
+#home h3 { margin-top: 2rem; margin-bottom: 0.5rem; padding-left: 1rem; border-left: 5px solid #3b82f6; color: #e5e7eb; }
+.home-section { display: flex !important; flex-direction: row !important; overflow-x: auto !important; overflow-y: hidden !important; gap: 1rem !important; padding: 0.5rem 0 1rem 0 !important; width: auto !important; scrollbar-width: none; }
+.home-section::-webkit-scrollbar { display: none; }
+.home-section .card { flex: 0 0 200px !important; height: auto !important; }
+.card { background-color: #1f2937; border-radius: 10px; overflow: hidden; transition: 0.3s; position: relative; }
+.card:hover { transform: scale(1.02); }
+.card img { width: 100%; height: 280px; object-fit: cover; }
+.info { padding: 1rem; }
+.btn-primary { width: 100%; padding: 0.5rem; border: none; background: #3b82f6; color: white; cursor: pointer; border-radius: 5px; margin-top: 0.5rem; }
+.card-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 280px; background-color: rgba(0, 0, 0, 0.9); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; padding: 1rem; box-sizing: border-box; text-align: center; }
+.card:hover .card-overlay { opacity: 1; }
+.card-overlay h4 { margin: 0 0 10px 0; font-size: 1.2rem; }
+.card-overlay p { margin: 2px 0; font-size: 0.8rem; font-style: italic; }
+.dual-rating { margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; width: 100%; }
+.dual-rating span { font-weight: bold; color: #3b82f6; }
+.btn-edit { position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.5); color: white; border: none; padding: 8px; border-radius: 50%; cursor: pointer; font-size: 1rem; z-index: 5; transition: 0.3s; }
+.btn-edit:hover { background-color: #3b82f6; }
+.card.assistido { opacity: 0.8; }
+.card.assistido::after { content: 'ASSISTIDO'; position: absolute; top: 15px; left: -25px; background-color: #3b82f6; color: white; padding: 5px 30px; font-size: 0.7rem; font-weight: bold; transform: rotate(-45deg); z-index: 10; }
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); }
+.modal-content { background-color: #1f2937; margin: 5% auto; padding: 2rem; border-radius: 10px; width: 350px; color: white; max-height: 90vh; overflow-y: auto; }
+.select-group { display: flex; gap: 10px; }
+.modal-content input, .modal-content select { width: 100%; box-sizing: border-box; padding: 0.7rem; margin-bottom: 1rem; border-radius: 5px; border: 1px solid #333; background-color: #0b101b; color: white; }
+.close { float: right; cursor: pointer; font-size: 1.5rem; }
+.dual-rating-input { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+.dual-rating-input label { display: block; color: #3b82f6; font-weight: bold; margin-bottom: 5px; }
