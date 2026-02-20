@@ -4,6 +4,7 @@ async function getData() {
     try {
         const response = await fetch(API_URL);
         const json = await response.json();
+        // Garante que se o banco estiver vazio, retorne uma lista vazia []
         return Array.isArray(json) ? json : [];
     } catch (e) {
         console.error("Erro ao buscar dados:", e);
@@ -14,11 +15,12 @@ async function getData() {
 async function saveData(data) {
     try {
         await fetch(API_URL, {
-            method: 'PUT',
+            method: 'PUT', // PUT substitui o arquivo antigo pelo novo com os filmes novos
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
     } catch (e) {
-        alert("Erro ao salvar na nuvem!");
+        console.error("Erro ao salvar:", e);
+        alert("Erro ao sincronizar com a nuvem!");
     }
 }
