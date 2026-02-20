@@ -1,6 +1,11 @@
-// A função getData e saveData devem estar no arquivo storage.js
-let data = getData();
+let data = [];
 let paginaAtual = 'home';
+
+// Inicialização Assíncrona
+async function iniciarApp() {
+    data = await getData();
+    render();
+}
 
 function navegar(pagina) {
     paginaAtual = pagina;
@@ -53,13 +58,12 @@ function fecharModal() {
     document.getElementById('campos-finalizacao').style.display = 'none';
 }
 
-// AÇÕES - ADICIONAR (Estrutura Dual + Corrigida)
-function adicionar() {
+// AÇÕES - ADICIONAR (Agora salva na nuvem)
+async function adicionar() {
     const nome = document.getElementById('nome').value;
     const imagem = document.getElementById('imagem').value;
     const tipo = document.getElementById('tipo').value;
     const status = document.getElementById('status').value;
-    
     const temporada = document.getElementById('temporada').value || 1;
     const episodio = document.getElementById('episodio').value || 1;
 
@@ -77,7 +81,6 @@ function adicionar() {
         episodio: tipo === 'serie' ? episodio : null
     };
 
-    // CORREÇÃO: Captura notas se status for assistido na adição
     if (status === 'assistido') {
         novoItem.notas.arthur = parseFloat(document.getElementById('notaA').value.replace(',', '.')) || 0;
         novoItem.notas.daiane = parseFloat(document.getElementById('notaD').value.replace(',', '.')) || 0;
@@ -88,119 +91,95 @@ function adicionar() {
     }
 
     data.push(novoItem);
-    saveData(data);
+    await saveData(data); // Salva na nuvem
     
-    if (status === 'quero') {
-        navegar('quero');
-    } else {
-        navegar(tipo === 'filme' ? 'filmes' : 'series');
-    }
+    if (status === 'quero') navegar('quero');
+    else navegar(tipo === 'filme' ? 'filmes' : 'series');
     
     fecharModal();
 }
 
-// AÇÕES - FINALIZAR (Dual)
 function finish(id) {
     document.getElementById('item-id-hidden').value = id;
     abrirModal('finalizar');
 }
 
-function confirmarFinalizacao() {
+async function confirmarFinalizacao() {
     const id = document.getElementById('item-id-hidden').value;
-    
-    const notaArthur = document.getElementById('notaA').value;
-    const notaDaiane = document.getElementById('notaD').value;
-    const comA = document.getElementById('comA').value;
-    const comD = document.getElementById('comD').value;
-
     const item = data.find(x => x.id == id);
     if (item) {
-        // CORREÇÃO: Garante que o status mude para assistido
         item.status = 'assistido'; 
-        
-        // Atualiza a estrutura dual usando parseFloat para tratar a vírgula
         item.notas = { 
-            arthur: parseFloat(notaArthur.replace(',', '.')) || 0, 
-            daiane: parseFloat(notaDaiane.replace(',', '.')) || 0 
+            arthur: parseFloat(document.getElementById('notaA').value.replace(',', '.')) || 0, 
+            daiane: parseFloat(document.getElementById('notaD').value.replace(',', '.')) || 0 
         };
         item.comentarios = {
-            arthur: comA || '',
-            daiane: comD || ''
+            arthur: document.getElementById('comA').value || '',
+            daiane: document.getElementById('comD').value || ''
         };
-        
-        // Limpa campos de progresso
         item.temporada = null;
         item.episodio = null;
         
-        saveData(data);
+        await saveData(data); // Salva na nuvem
         render();
         fecharModal();
     }
 }
 
-// EDITAR SÉRIE (Lápis)
-function editarProgresso(id) {
+async function editarProgresso(id) {
     const item = data.find(x => x.id === id);
     if (!item) return;
 
     const novaTemp = prompt(`Temporada atual de ${item.nome}:`, item.temporada);
     const novoEp = prompt(`Episódio atual de ${item.nome}:`, item.episodio);
 
-    if (novaTemp && novoEp) {
+    if (novaTemp !== null && novoEp !== null) {
         item.temporada = novaTemp;
         item.episodio = novoEp;
-        saveData(data);
+        await saveData(data); // Salva na nuvem
         render();
+    }
+}
+
+async function start(id){
+    const i = data.find(x => x.id === id);
+    if(i){
+        i.status = 'assistindo';
+        await saveData(data); // Salva na nuvem
+        navegar(i.tipo === 'filme' ? 'filmes' : 'series');
     }
 }
 
 // RENDERIZAÇÃO
 function render() {
     document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-    document.getElementById('page-' + paginaAtual).style.display = 'block';
+    const containerAtivo = document.getElementById('page-' + paginaAtual);
+    if(containerAtivo) containerAtivo.style.display = 'block';
 
     const search = document.getElementById('busca')?.value?.toLowerCase() || '';
     const filtered = data.filter(i => i.nome.toLowerCase().includes(search));
 
-    if (paginaAtual === 'home') {
-        renderHome(filtered);
-    } else if (paginaAtual === 'series') {
-        renderList('series', 'serie', filtered);
-    } else if (paginaAtual === 'filmes') {
-        renderList('filmes', 'filme', filtered);
-    } else if (paginaAtual === 'quero') {
-        renderQuero(filtered);
-    }
+    if (paginaAtual === 'home') renderHome(filtered);
+    else if (paginaAtual === 'series') renderList('series', 'serie', filtered);
+    else if (paginaAtual === 'filmes') renderList('filmes', 'filme', filtered);
+    else if (paginaAtual === 'quero') renderQuero(filtered);
 }
 
-// RENDERIZAÇÃO DA HOME (Ordenação pela média)
 function renderHome(list){
     const h = document.getElementById('home');
-    
     const assistindoFilmes = list.filter(i => i.status === 'assistindo' && i.tipo === 'filme');
     const assistindoSeries = list.filter(i => i.status === 'assistindo' && i.tipo === 'serie');
     const assistidos = list.filter(i => i.status === 'assistido');
     
-    // Média para ordenação
     const calcMedia = (i) => (i.notas.arthur + i.notas.daiane) / 2;
-    
-    const topFilmes = [...assistidos]
-        .filter(i => i.tipo === 'filme')
-        .sort((a,b) => calcMedia(b) - calcMedia(a))
-        .slice(0,10);
-        
-    const topSeries = [...assistidos]
-        .filter(i => i.tipo === 'serie')
-        .sort((a,b) => calcMedia(b) - calcMedia(a))
-        .slice(0,10);
+    const topFilmes = [...assistidos].filter(i => i.tipo === 'filme').sort((a,b) => calcMedia(b) - calcMedia(a)).slice(0,10);
+    const topSeries = [...assistidos].filter(i => i.tipo === 'serie').sort((a,b) => calcMedia(b) - calcMedia(a)).slice(0,10);
     
     h.innerHTML = `
         ${assistindoFilmes.length > 0 ? `<h3>Filmes que está vendo</h3><div class='home-section'>${assistindoFilmes.map(card).join('')}</div>` : ''}
         ${assistindoSeries.length > 0 ? `<h3>Séries que está vendo</h3><div class='home-section'>${assistindoSeries.map(card).join('')}</div>` : ''}
-        
         ${topFilmes.length > 0 ? `<h3>Top 10 Filmes 🏆</h3><div class='home-section'>${topFilmes.map(card).join('')}</div>` : ''}
         ${topSeries.length > 0 ? `<h3>Top 10 Séries 🏆</h3><div class='home-section'>${topSeries.map(card).join('')}</div>` : ''}
-        
         ${list.length === 0 ? '<p style="text-align:center; padding:2rem;">Nenhum item cadastrado ainda!</p>' : ''}
     `;
 }
@@ -217,20 +196,18 @@ function renderQuero(list){
     el.innerHTML = `<div class='grid'>${arr.map(cardQuero).join('')}</div>`;
 }
 
-// CARD ATUALIZADO (Visualização Dual)
 function card(i){
     const classeAssistido = i.status === 'assistido' ? 'assistido' : '';
-    
     let overlay = '';
-    // CORREÇÃO: Verifica status 'assistido'
+    
     if (i.status === 'assistido') {
         overlay = `<div class="card-overlay">
             <div class="dual-rating">
-                <span>🤵 Arthur: ${i.notas.arthur}/5 🍿</span>
+                <span>🤵 Arthur: ${i.notas.arthur}/5</span>
                 <p><i>"${i.comentarios.arthur}"</i></p>
             </div>
             <div class="dual-rating">
-                <span>👰 Daiane: ${i.notas.daiane}/5 🍿</span>
+                <span>👰 Daiane: ${i.notas.daiane}/5</span>
                 <p><i>"${i.comentarios.daiane}"</i></p>
             </div>
         </div>`;
@@ -260,13 +237,5 @@ function cardQuero(i){
     <button class='btn-primary' onclick='start(${i.id})'>Começar</button></div></div>`;
 }
 
-function start(id){
-    const i = data.find(x => x.id === id);
-    if(i){
-        i.status = 'assistindo';
-        saveData(data);
-        navegar(i.tipo === 'filme' ? 'filmes' : 'series');
-    }
-}
-
-render();
+// Inicia o App
+iniciarApp();
