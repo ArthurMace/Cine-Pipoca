@@ -2,9 +2,9 @@ const API_URL = "https://api.npoint.io/599c72fcba5f910e8401";
 
 async function getData() {
     try {
-        const response = await fetch(API_URL);
+        // O "?t=" + Date.now() força o celular a buscar dados novos, não os salvos no histórico
+        const response = await fetch(API_URL + "?t=" + Date.now());
         const json = await response.json();
-        // Garante que se o banco estiver vazio, retorne uma lista vazia []
         return Array.isArray(json) ? json : [];
     } catch (e) {
         console.error("Erro ao buscar dados:", e);
@@ -14,13 +14,14 @@ async function getData() {
 
 async function saveData(data) {
     try {
-        await fetch(API_URL, {
-            method: 'PUT', // PUT substitui o arquivo antigo pelo novo com os filmes novos
+        const response = await fetch(API_URL, {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+        if (!response.ok) throw new Error('Falha ao salvar');
     } catch (e) {
         console.error("Erro ao salvar:", e);
-        alert("Erro ao sincronizar com a nuvem!");
+        alert("Erro de sincronização! Verifique a internet.");
     }
 }
