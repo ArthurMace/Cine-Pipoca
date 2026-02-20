@@ -1,7 +1,7 @@
 let data = [];
 let paginaAtual = 'home';
 
-// Inicialização: Busca na nuvem assim que o site abre
+// Inicialização: Espera a nuvem antes de mostrar qualquer coisa
 async function iniciarApp() {
     data = await getData();
     render();
@@ -14,49 +14,32 @@ function navegar(pagina) {
 
 function abrirModal(modo = 'add') {
     const modal = document.getElementById('modal');
-    const titulo = document.getElementById('modal-title');
-    const btnSalvar = document.getElementById('btn-salvar');
-    const btnFinalizar = document.getElementById('btn-finalizar');
-    const camposFinalizacao = document.getElementById('campos-finalizacao');
-    const serieFields = document.getElementById('serie-fields');
-    const camposCadastro = document.querySelectorAll('#nome, #imagem, #tipo, #status');
-
     modal.style.display = 'block';
-
     if (modo === 'finalizar') {
-        titulo.innerText = 'Finalizar Filme/Série';
-        btnSalvar.style.display = 'none';
-        btnFinalizar.style.display = 'block';
-        camposFinalizacao.style.display = 'block';
-        serieFields.style.display = 'none';
-        camposCadastro.forEach(el => el.style.display = 'none');
+        document.getElementById('modal-title').innerText = 'Finalizar Filme/Série';
+        document.getElementById('btn-salvar').style.display = 'none';
+        document.getElementById('btn-finalizar').style.display = 'block';
+        document.getElementById('campos-finalizacao').style.display = 'block';
     } else {
-        titulo.innerText = 'Adicionar Novo';
-        btnSalvar.style.display = 'block';
-        btnFinalizar.style.display = 'none';
-        camposCadastro.forEach(el => el.style.display = 'block');
-        toggleSerieFields();
+        document.getElementById('modal-title').innerText = 'Adicionar Novo';
+        document.getElementById('btn-salvar').style.display = 'block';
+        document.getElementById('btn-finalizar').style.display = 'none';
+        document.getElementById('campos-finalizacao').style.display = 'none';
     }
 }
 
 function fecharModal() {
     document.getElementById('modal').style.display = 'none';
-    document.querySelectorAll('.modal-content input, .modal-content select').forEach(el => el.value = '');
 }
 
-function toggleSerieFields() {
-    const tipo = document.getElementById('tipo').value;
-    const fields = document.getElementById('serie-fields');
-    if (fields) fields.style.display = tipo === 'serie' ? 'flex' : 'none';
-}
-
+// ADICIONAR: Agora ele espera a confirmação da nuvem
 async function adicionar() {
     const nome = document.getElementById('nome').value;
     const imagem = document.getElementById('imagem').value;
     const tipo = document.getElementById('tipo').value;
     const status = document.getElementById('status').value;
 
-    if (!nome || !imagem) return alert('Preencha nome e imagem!');
+    if (!nome || !imagem) return alert('Preencha os campos!');
 
     const novoItem = {
         id: Date.now(),
@@ -65,18 +48,21 @@ async function adicionar() {
         tipo,
         status,
         notas: { arthur: 0, daiane: 0 },
-        comentarios: { arthur: '', daiane: '' },
-        temporada: tipo === 'serie' ? document.getElementById('temporada').value : null,
-        episodio: tipo === 'serie' ? document.getElementById('episodio').value : null
+        comentarios: { arthur: '', daiane: '' }
     };
 
     data.push(novoItem);
-    await saveData(data); // Envia para o npoint
     
-    navegar(status === 'quero' ? 'quero' : (tipo === 'filme' ? 'filmes' : 'series'));
+    // ESPERA SALVAR NA NUVEM ANTES DE CONTINUAR
+    await saveData(data); 
+    
     fecharModal();
+    render();
+    if (status === 'quero') navegar('quero');
+    else navegar(tipo === 'filme' ? 'filmes' : 'series');
 }
 
+// FINALIZAR: Também espera a nuvem
 async function confirmarFinalizacao() {
     const id = document.getElementById('item-id-hidden').value;
     const item = data.find(x => x.id == id);
@@ -86,7 +72,8 @@ async function confirmarFinalizacao() {
             arthur: parseFloat(document.getElementById('notaA').value) || 0,
             daiane: parseFloat(document.getElementById('notaD').value) || 0
         };
-        await saveData(data); // Atualiza na nuvem
+        
+        await saveData(data); // Espera atualizar na nuvem
         render();
         fecharModal();
     }
@@ -117,5 +104,5 @@ function render() {
     `).join('')}</div>`;
 }
 
-// Inicia o processo
+// Inicia o App buscando dados da nuvem
 iniciarApp();
