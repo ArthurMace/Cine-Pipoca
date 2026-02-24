@@ -78,17 +78,17 @@ h3 {
 
 .card img {
     width: 100%;
-    aspect-ratio: 2 / 3;
-    object-fit: cover; /* Garante que a imagem preencha o poster sem esticar */
+    aspect-ratio: 2 / 3; /* Isso força o formato de poster de cinema */
+    object-fit: cover;   /* Isso impede que a imagem estique; ela se ajusta ao corte */
     display: block;
 }
 
 /* GRID PARA PÁGINAS FIXAS (Filmes, Séries, Quero Assistir) */
 .grid-comum {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 20px;
-    padding: 20px 4%;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 150px é o tamanho ideal para parecer streaming */
+    gap: 15px; 
+    padding: 1rem 2rem;
 }
 
 /* INFORMAÇÕES NO CARD */
@@ -128,3 +128,4 @@ h3 {
     width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; 
     border-radius: 5px; border: 1px solid #333; background-color: #0b101b; color: white; box-sizing: border-box;
 }
+
