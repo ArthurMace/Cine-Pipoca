@@ -1,183 +1,143 @@
-import { getData, saveData } from "./storage.js";
+import { getData, addItem, updateItem, deleteItem } from "./storage.js";
 
 let data = [];
-let paginaAtual = 'home';
+let paginaAtual = "home";
 
-// -------------------- INICIAR --------------------
+// ---------------- INICIAR ----------------
 async function iniciarApp() {
-    data = await getData();
-    render();
+  data = await getData();
+  render();
 }
 
-// -------------------- NAVEGAÇÃO --------------------
+// ---------------- NAVEGAÇÃO ----------------
 function navegar(pagina) {
-    paginaAtual = pagina;
-    render();
+  paginaAtual = pagina;
+  render();
 }
 
-// -------------------- MOSTRAR CAMPOS DE SÉRIE --------------------
+// ---------------- CAMPOS SÉRIE ----------------
 function toggleSerieFields() {
-    const tipo = document.getElementById("tipo").value;
-    const camposSerie = document.getElementById("serie-fields");
-
-    camposSerie.style.display = (tipo === "serie") ? "flex" : "none";
+  const tipo = document.getElementById("tipo").value;
+  document.getElementById("serie-fields").style.display =
+    tipo === "serie" ? "flex" : "none";
 }
 
-// -------------------- MODAL --------------------
-function abrirModal(modo = 'add', id = null) {
-    const modal = document.getElementById('modal');
-    modal.style.display = 'block';
-
-    if (modo === 'finalizar' && id) {
-        document.getElementById('modal-title').innerText = 'Finalizar Filme/Série';
-        document.getElementById('btn-salvar').style.display = 'none';
-        document.getElementById('btn-finalizar').style.display = 'block';
-        document.getElementById('campos-finalizacao').style.display = 'block';
-        document.getElementById('item-id-hidden').value = id;
-    } else {
-        document.getElementById('modal-title').innerText = 'Adicionar Novo';
-        document.getElementById('btn-salvar').style.display = 'block';
-        document.getElementById('btn-finalizar').style.display = 'none';
-        document.getElementById('campos-finalizacao').style.display = 'none';
-    }
-
-    toggleSerieFields();
+// ---------------- MODAL ----------------
+function abrirModal() {
+  document.getElementById("modal").style.display = "block";
+  toggleSerieFields();
 }
 
 function fecharModal() {
-    document.getElementById('modal').style.display = 'none';
+  document.getElementById("modal").style.display = "none";
 }
 
-// -------------------- ADICIONAR --------------------
+// ---------------- ADICIONAR ----------------
 async function adicionar() {
-    const nome = document.getElementById('nome').value;
-    const imagem = document.getElementById('imagem').value;
-    const tipo = document.getElementById('tipo').value;
-    const status = document.getElementById('status').value;
+  const nome = nomeInput.value;
+  const imagem = imagemInput.value;
+  const tipo = tipoInput.value;
+  const status = statusInput.value;
+  const temporada = temporadaInput.value || null;
+  const episodio = episodioInput.value || null;
 
-    const temporada = document.getElementById('temporada')?.value || null;
-    const episodio = document.getElementById('episodio')?.value || null;
+  const novo = {
+    nome,
+    imagem,
+    tipo,
+    status,
+    temporada,
+    episodio,
+    notas: {},
+    comentarios: {}
+  };
 
-    if (!nome || !imagem) return alert('Preencha os campos!');
+  const firebaseId = await addItem(novo);
+  novo.firebaseId = firebaseId;
+  data.push(novo);
 
-    const novoItem = {
-        id: Date.now(),
-        nome,
-        imagem,
-        tipo,
-        status,
-        temporada,
-        episodio,
-        notas: { arthur: 0, daiane: 0 },
-        comentarios: { arthur: '', daiane: '' }
-    };
-
-    data.push(novoItem);
-    await saveData(data);
-
-    fecharModal();
-    render();
+  fecharModal();
+  render();
 }
 
-// -------------------- FINALIZAR --------------------
-async function confirmarFinalizacao() {
-    const id = Number(document.getElementById('item-id-hidden').value);
-    const item = data.find(x => x.id === id);
+// ---------------- EDITAR PROGRESSO ----------------
+async function editarProgresso(id) {
+  const item = data.find(i => i.firebaseId === id);
 
-    if (item) {
-        item.status = 'assistido';
-        item.notas = {
-            arthur: parseFloat(document.getElementById('notaA').value) || 0,
-            daiane: parseFloat(document.getElementById('notaD').value) || 0
-        };
-        item.comentarios = {
-            arthur: document.getElementById('comA').value || '',
-            daiane: document.getElementById('comD').value || ''
-        };
+  const novaTemp = prompt("Nova Temporada:", item.temporada || 1);
+  const novoEp = prompt("Novo Episódio:", item.episodio || 1);
 
-        await saveData(data);
-        render();
-        fecharModal();
-    }
+  if (!novaTemp || !novoEp) return;
+
+  item.temporada = novaTemp;
+  item.episodio = novoEp;
+
+  await updateItem(item.firebaseId, {
+    temporada: novaTemp,
+    episodio: novoEp
+  });
+
+  render();
 }
 
-// -------------------- EXCLUIR --------------------
+// ---------------- EXCLUIR ----------------
 async function excluirItem(id) {
-    if (!confirm("Deseja realmente excluir?")) return;
+  if (!confirm("Deseja excluir?")) return;
 
-    data = data.filter(item => item.id !== id);
-    await saveData(data);
-    render();
+  await deleteItem(id);
+  data = data.filter(i => i.firebaseId !== id);
+  render();
 }
 
-// -------------------- RENDER --------------------
+// ---------------- RENDER ----------------
 function render() {
-    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+  document.getElementById("page-" + paginaAtual).style.display = "block";
 
-    const container = document.getElementById('page-' + paginaAtual);
-    if (container) container.style.display = 'block';
+  const lista = document.getElementById(
+    paginaAtual === "home"
+      ? "home"
+      : paginaAtual === "quero"
+      ? "queroList"
+      : paginaAtual
+  );
 
-    const listaDiv = document.getElementById(
-        paginaAtual === 'home'
-            ? 'home'
-            : (paginaAtual === 'quero'
-                ? 'queroList'
-                : paginaAtual)
-    );
+  const busca = document.getElementById("busca").value.toLowerCase();
 
-    if (!listaDiv) return;
+  const filtrado = data.filter(i => {
+    const match = i.nome.toLowerCase().includes(busca);
 
-    const busca = document.getElementById("busca")?.value?.toLowerCase() || "";
+    if (paginaAtual === "home") return i.status === "assistindo" && match;
+    if (paginaAtual === "quero") return i.status === "quero" && match;
 
-    const filtered = data.filter(i => {
-        const matchBusca = i.nome.toLowerCase().includes(busca);
+    return i.tipo === (paginaAtual === "filmes" ? "filme" : "serie") && match;
+  });
 
-        if (paginaAtual === 'home')
-            return i.status === 'assistindo' && matchBusca;
+  lista.innerHTML = filtrado.map(item => `
+    <div class="card">
+      <img src="${item.imagem}">
+      <div class="info">
+        <b>${item.nome}</b><br>
 
-        if (paginaAtual === 'quero')
-            return i.status === 'quero' && matchBusca;
+        ${item.tipo === "serie" ? `
+          <small>Temp ${item.temporada || 1} • Ep ${item.episodio || 1}</small><br>
+          <button onclick="editarProgresso('${item.firebaseId}')">✏ Atualizar</button>
+        ` : ""}
 
-        return i.tipo === (paginaAtual === 'filmes' ? 'filme' : 'serie')
-            && i.status !== 'quero'
-            && matchBusca;
-    });
-
-    listaDiv.innerHTML = `
-        <div class="grid">
-            ${filtered.map(item => `
-                <div class="card ${item.status === 'assistido' ? 'assistido' : ''}">
-                    <img src="${item.imagem}">
-                    <div class="info">
-                        <b>${item.nome}</b><br>
-
-                        ${item.tipo === 'serie' && item.temporada
-                            ? `<small>Temp ${item.temporada} • Ep ${item.episodio || 1}</small><br>`
-                            : ''}
-
-                        ${item.status === 'assistindo'
-                            ? `<button class="btn-primary" onclick="abrirModal('finalizar', ${item.id})">Finalizar</button>`
-                            : ''}
-
-                        <button class="btn-danger" onclick="excluirItem(${item.id})">
-                            Excluir
-                        </button>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
+        <button onclick="excluirItem('${item.firebaseId}')">Excluir</button>
+      </div>
+    </div>
+  `).join("");
 }
 
-// -------------------- EXPOR GLOBAL --------------------
+// ---------------- GLOBAL ----------------
 window.navegar = navegar;
 window.abrirModal = abrirModal;
 window.fecharModal = fecharModal;
 window.adicionar = adicionar;
-window.confirmarFinalizacao = confirmarFinalizacao;
+window.editarProgresso = editarProgresso;
 window.excluirItem = excluirItem;
 window.toggleSerieFields = toggleSerieFields;
 window.render = render;
 
-// -------------------- START --------------------
 iniciarApp();
