@@ -11,12 +11,12 @@ import {
 
 // CONFIGURAÇÃO DO SEU FIREBASE
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_AUTH_DOMAIN",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_STORAGE_BUCKET",
-  messagingSenderId: "SEU_MESSAGING_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyAkygtSvwxw0GWhhVmZdvqFR5JLlh3egBc",
+  authDomain: "cinepipocaad.firebaseapp.com",
+  projectId: "cinepipocaad",
+  storageBucket: "cinepipocaad.firebasestorage.app",
+  messagingSenderId: "325784065807",
+  appId: "1:325784065807:web:0c60cde889ca9b7a65507a"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -46,3 +46,4 @@ export async function saveData(data) {
 
 // 🔥 EXPORTANDO O DB PARA USAR NO APP
 export { db };
+
