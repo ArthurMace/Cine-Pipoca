@@ -24,6 +24,7 @@ function toggleSerieFields() {
 
 // ---------------- MODAL ----------------
 function abrirModal() {
+  limparModal();
   document.getElementById("modal").style.display = "block";
   toggleSerieFields();
 }
@@ -32,8 +33,18 @@ function fecharModal() {
   document.getElementById("modal").style.display = "none";
 }
 
-// ---------------- ADICIONAR ----------------
+function limparModal() {
+  document.getElementById("nome").value = "";
+  document.getElementById("imagem").value = "";
+  document.getElementById("temporada").value = "";
+  document.getElementById("episodio").value = "";
+  document.getElementById("item-id-hidden").value = "";
+}
+
+// ---------------- ADICIONAR / EDITAR ----------------
 async function adicionar() {
+  const idEdicao = document.getElementById("item-id-hidden").value;
+
   const nome = document.getElementById("nome").value;
   const imagem = document.getElementById("imagem").value;
   const tipo = document.getElementById("tipo").value;
@@ -41,43 +52,53 @@ async function adicionar() {
   const temporada = document.getElementById("temporada").value || null;
   const episodio = document.getElementById("episodio").value || null;
 
-  const novo = {
-    nome,
-    imagem,
-    tipo,
-    status,
-    temporada,
-    episodio,
-    notas: {},
-    comentarios: {}
-  };
+  if (idEdicao) {
+    const item = data.find(i => i.firebaseId === idEdicao);
 
-  const firebaseId = await addItem(novo);
-  novo.firebaseId = firebaseId;
-  data.push(novo);
+    item.nome = nome;
+    item.imagem = imagem;
+    item.tipo = tipo;
+    item.status = status;
+    item.temporada = temporada;
+    item.episodio = episodio;
+
+    await updateItem(idEdicao, item);
+  } else {
+    const novo = {
+      nome,
+      imagem,
+      tipo,
+      status,
+      temporada,
+      episodio,
+      notas: {},
+      comentarios: {}
+    };
+
+    const firebaseId = await addItem(novo);
+    novo.firebaseId = firebaseId;
+    data.push(novo);
+  }
 
   fecharModal();
   render();
 }
 
-// ---------------- EDITAR PROGRESSO ----------------
-async function editarProgresso(id) {
+// ---------------- ABRIR EDIÇÃO ----------------
+function abrirEdicao(id) {
   const item = data.find(i => i.firebaseId === id);
 
-  const novaTemp = prompt("Nova Temporada:", item.temporada || 1);
-  const novoEp = prompt("Novo Episódio:", item.episodio || 1);
+  document.getElementById("modal").style.display = "block";
 
-  if (!novaTemp || !novoEp) return;
+  document.getElementById("nome").value = item.nome;
+  document.getElementById("imagem").value = item.imagem;
+  document.getElementById("tipo").value = item.tipo;
+  document.getElementById("status").value = item.status;
+  document.getElementById("temporada").value = item.temporada || "";
+  document.getElementById("episodio").value = item.episodio || "";
+  document.getElementById("item-id-hidden").value = id;
 
-  item.temporada = novaTemp;
-  item.episodio = novoEp;
-
-  await updateItem(item.firebaseId, {
-    temporada: novaTemp,
-    episodio: novoEp
-  });
-
-  render();
+  toggleSerieFields();
 }
 
 // ---------------- EXCLUIR ----------------
@@ -116,17 +137,26 @@ function render() {
   });
 
   lista.innerHTML = filtrado.map(item => `
-    <div class="card">
+    <div class="card ${item.status === "assistido" ? "assistido" : ""}">
+      
+      ${item.tipo === "serie" ? `
+        <button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">
+          ✏
+        </button>
+      ` : ""}
+
       <img src="${item.imagem}">
+
       <div class="info">
         <b>${item.nome}</b><br>
 
         ${item.tipo === "serie" ? `
           <small>Temp ${item.temporada || 1} • Ep ${item.episodio || 1}</small><br>
-          <button onclick="editarProgresso('${item.firebaseId}')">✏ Atualizar</button>
         ` : ""}
 
-        <button onclick="excluirItem('${item.firebaseId}')">Excluir</button>
+        <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')">
+          Excluir
+        </button>
       </div>
     </div>
   `).join("");
@@ -137,7 +167,7 @@ window.navegar = navegar;
 window.abrirModal = abrirModal;
 window.fecharModal = fecharModal;
 window.adicionar = adicionar;
-window.editarProgresso = editarProgresso;
+window.abrirEdicao = abrirEdicao;
 window.excluirItem = excluirItem;
 window.toggleSerieFields = toggleSerieFields;
 window.render = render;
