@@ -25,20 +25,18 @@ function abrirModal(id = null) {
     document.getElementById("modal").style.display = "block";
     if (id && id !== 'add') {
         const item = data.find(i => i.firebaseId === id);
-        if (item) {
-            document.getElementById("modal-title").innerText = "Editar Item";
-            document.getElementById("item-id-hidden").value = id;
-            document.getElementById("nome").value = item.nome || "";
-            document.getElementById("imagem").value = item.imagem || "";
-            document.getElementById("tipo").value = item.tipo || "filme";
-            document.getElementById("status").value = item.status || "assistindo";
-            document.getElementById("temporada").value = item.temporada || "";
-            document.getElementById("episodio").value = item.episodio || "";
-            document.getElementById("notaA").value = item.notas?.arthur || "";
-            document.getElementById("notaD").value = item.notas?.daiane || "";
-            document.getElementById("comA").value = item.comentarios?.arthur || "";
-            document.getElementById("comD").value = item.comentarios?.daiane || "";
-        }
+        document.getElementById("modal-title").innerText = "Editar Item";
+        document.getElementById("item-id-hidden").value = id;
+        document.getElementById("nome").value = item.nome;
+        document.getElementById("imagem").value = item.imagem;
+        document.getElementById("tipo").value = item.tipo;
+        document.getElementById("status").value = item.status;
+        document.getElementById("temporada").value = item.temporada || "";
+        document.getElementById("episodio").value = item.episodio || "";
+        document.getElementById("notaA").value = item.notas?.arthur || "";
+        document.getElementById("notaD").value = item.notas?.daiane || "";
+        document.getElementById("comA").value = item.comentarios?.arthur || "";
+        document.getElementById("comD").value = item.comentarios?.daiane || "";
     } else {
         document.getElementById("modal-title").innerText = "Adicionar Novo";
     }
@@ -49,13 +47,10 @@ function fecharModal() { document.getElementById("modal").style.display = "none"
 
 function limparModal() {
     const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comA", "comD"];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-    });
+    ids.forEach(id => document.getElementById(id).value = "");
 }
 
-// CONSERTO: Função renomeada para 'adicionar' para bater com o seu HTML
+// MANTIDO O NOME 'adicionar' PARA NÃO QUEBRAR O SEU HTML
 async function adicionar() {
     const id = document.getElementById("item-id-hidden").value;
     const itemDados = {
@@ -65,22 +60,10 @@ async function adicionar() {
         status: document.getElementById("status").value,
         temporada: document.getElementById("temporada").value || null,
         episodio: document.getElementById("episodio").value || null,
-        notas: { 
-            arthur: document.getElementById("notaA").value || null, 
-            daiane: document.getElementById("notaD").value || null 
-        },
-        comentarios: { 
-            arthur: document.getElementById("comA").value || "", 
-            daiane: document.getElementById("comD").value || "" 
-        }
+        notas: { arthur: document.getElementById("notaA").value || null, daiane: document.getElementById("notaD").value || null },
+        comentarios: { arthur: document.getElementById("comA").value || "", daiane: document.getElementById("comD").value || "" }
     };
-
-    if (id) {
-        await updateItem(id, itemDados);
-    } else {
-        await addItem(itemDados);
-    }
-    
+    id ? await updateItem(id, itemDados) : await addItem(itemDados);
     fecharModal();
     iniciarApp();
 }
@@ -142,12 +125,11 @@ function renderCards(lista) {
     `).join("");
 }
 
-// EXPOSIÇÃO GLOBAL
 window.navegar = navegar;
 window.abrirModal = abrirModal;
 window.abrirEdicao = (id) => abrirModal(id);
 window.fecharModal = fecharModal;
-window.adicionar = adicionar; // Vinculado ao botão 'Salvar' do HTML
+window.adicionar = adicionar; 
 window.excluirItem = excluir;
 window.toggleSerieFields = atualizarCamposModal;
 window.toggleRatingFields = atualizarCamposModal;
