@@ -1,4 +1,4 @@
-// Importações do Firebase (precisa ter o script no index.html)
+// Importações do Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { 
   getFirestore, 
@@ -8,14 +8,15 @@ import {
   deleteDoc, 
   doc 
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-// CONFIGURAÇÃO (cole a sua aqui)
+
+// CONFIGURAÇÃO DO SEU FIREBASE
 const firebaseConfig = {
-  apiKey: "AIzaSyAkygtSvwxw0GWhhVmZdvqFR5JLlh3egBc",
-  authDomain: "cinepipocaad.firebaseapp.com",
-  projectId: "cinepipocaad",
-  storageBucket: "cinepipocaad.firebasestorage.app",
-  messagingSenderId: "325784065807",
-  appId: "1:325784065807:web:0c60cde889ca9b7a65507a"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_STORAGE_BUCKET",
+  messagingSenderId: "SEU_MESSAGING_ID",
+  appId: "SEU_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -32,15 +33,16 @@ export async function getData() {
 }
 
 export async function saveData(data) {
-  // Apaga tudo antes (simples e funciona para seu caso pequeno)
   const snapshot = await getDocs(filmesCollection);
+
   for (const d of snapshot.docs) {
     await deleteDoc(doc(db, "filmes", d.id));
   }
 
-  // Reinsere tudo atualizado
   for (const item of data) {
     await addDoc(filmesCollection, item);
   }
 }
 
+// 🔥 EXPORTANDO O DB PARA USAR NO APP
+export { db };
