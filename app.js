@@ -20,11 +20,7 @@ function toggleSerieFields() {
     const tipo = document.getElementById("tipo").value;
     const camposSerie = document.getElementById("serie-fields");
 
-    if (tipo === "serie") {
-        camposSerie.style.display = "block";
-    } else {
-        camposSerie.style.display = "none";
-    }
+    camposSerie.style.display = (tipo === "serie") ? "flex" : "none";
 }
 
 // -------------------- MODAL --------------------
@@ -59,8 +55,8 @@ async function adicionar() {
     const tipo = document.getElementById('tipo').value;
     const status = document.getElementById('status').value;
 
-    const temporadas = document.getElementById('temporadas')?.value || null;
-    const episodios = document.getElementById('episodios')?.value || null;
+    const temporada = document.getElementById('temporada')?.value || null;
+    const episodio = document.getElementById('episodio')?.value || null;
 
     if (!nome || !imagem) return alert('Preencha os campos!');
 
@@ -70,8 +66,8 @@ async function adicionar() {
         imagem,
         tipo,
         status,
-        temporadas,
-        episodios,
+        temporada,
+        episodio,
         notas: { arthur: 0, daiane: 0 },
         comentarios: { arthur: '', daiane: '' }
     };
@@ -94,6 +90,10 @@ async function confirmarFinalizacao() {
             arthur: parseFloat(document.getElementById('notaA').value) || 0,
             daiane: parseFloat(document.getElementById('notaD').value) || 0
         };
+        item.comentarios = {
+            arthur: document.getElementById('comA').value || '',
+            daiane: document.getElementById('comD').value || ''
+        };
 
         await saveData(data);
         render();
@@ -103,8 +103,7 @@ async function confirmarFinalizacao() {
 
 // -------------------- EXCLUIR --------------------
 async function excluirItem(id) {
-    const confirmar = confirm("Deseja realmente excluir?");
-    if (!confirmar) return;
+    if (!confirm("Deseja realmente excluir?")) return;
 
     data = data.filter(item => item.id !== id);
     await saveData(data);
@@ -152,8 +151,8 @@ function render() {
                     <div class="info">
                         <b>${item.nome}</b><br>
 
-                        ${item.tipo === 'serie' && item.temporadas 
-                            ? `<small>${item.temporadas} Temporadas - ${item.episodios || 0} Episódios</small><br>`
+                        ${item.tipo === 'serie' && item.temporada
+                            ? `<small>Temp ${item.temporada} • Ep ${item.episodio || 1}</small><br>`
                             : ''}
 
                         ${item.status === 'assistindo'
