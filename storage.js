@@ -47,3 +47,4 @@ export async function saveData(data) {
 // 🔥 EXPORTANDO O DB PARA USAR NO APP
 export { db };
 
+
