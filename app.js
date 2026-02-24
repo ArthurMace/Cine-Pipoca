@@ -112,19 +112,31 @@ function render() {
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
-    return lista.map(item => `
+    return lista.map(item => {
+        // Garantimos que o tipo seja comparado corretamente
+        const isSerie = item.tipo === 'serie';
+        
+        return `
         <div class="card">
             <button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">✏️</button>
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
             <div class="info">
                 <b>${item.nome}</b>
-                ${item.tipo === 'serie' ? `<div style="font-size: 11px; color: #cbd5e1; margin-bottom: 4px;">T${item.temporada || '1'} | Ep${item.episodio || '1'}</div>` : ''}
                 
-                ${item.status === 'assistido' ? `<div style="font-size:10px; color:#3b82f6;">⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}</div>` : ''}
+                ${isSerie ? `
+                    <div style="font-size: 11px; color: #3b82f6; font-weight: bold; margin: 2px 0;">
+                        T${item.temporada || '1'} • Ep${item.episodio || '1'}
+                    </div>
+                ` : ''}
+                
+                ${item.status === 'assistido' ? `
+                    <div style="font-size:10px; color:#aaa;">⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}</div>
+                ` : ''}
+                
                 <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')">Excluir</button>
             </div>
         </div>
-    `).join("");
+    `}).join("");
 }
 
 window.navegar = navegar;
@@ -138,4 +150,5 @@ window.toggleRatingFields = atualizarCamposModal;
 window.render = render;
 
 iniciarApp();
+
 
