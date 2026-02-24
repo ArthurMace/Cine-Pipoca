@@ -1,3 +1,4 @@
+import { getData, saveData } from './storage.js';
 let data = [];
 let paginaAtual = 'home';
 
@@ -106,3 +107,4 @@ function render() {
 
 // Inicia o App buscando dados da nuvem
 iniciarApp();
+
