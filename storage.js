@@ -1,5 +1,5 @@
 // Importações do Firebase (precisa ter o script no index.html)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { 
   getFirestore, 
   collection, 
@@ -7,16 +7,15 @@ import {
   addDoc, 
   deleteDoc, 
   doc 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 // CONFIGURAÇÃO (cole a sua aqui)
 const firebaseConfig = {
-  apiKey: "COLE_AQUI",
-  authDomain: "COLE_AQUI",
-  projectId: "COLE_AQUI",
-  storageBucket: "COLE_AQUI",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI"
+  apiKey: "AIzaSyAkygtSvwxw0GWhhVmZdvqFR5JLlh3egBc",
+  authDomain: "cinepipocaad.firebaseapp.com",
+  projectId: "cinepipocaad",
+  storageBucket: "cinepipocaad.firebasestorage.app",
+  messagingSenderId: "325784065807",
+  appId: "1:325784065807:web:0c60cde889ca9b7a65507a"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -44,3 +43,4 @@ export async function saveData(data) {
     await addDoc(filmesCollection, item);
   }
 }
+
