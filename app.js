@@ -34,12 +34,12 @@ function fecharModal() {
 
 // ---------------- ADICIONAR ----------------
 async function adicionar() {
-  const nome = nomeInput.value;
-  const imagem = imagemInput.value;
-  const tipo = tipoInput.value;
-  const status = statusInput.value;
-  const temporada = temporadaInput.value || null;
-  const episodio = episodioInput.value || null;
+  const nome = document.getElementById("nome").value;
+  const imagem = document.getElementById("imagem").value;
+  const tipo = document.getElementById("tipo").value;
+  const status = document.getElementById("status").value;
+  const temporada = document.getElementById("temporada").value || null;
+  const episodio = document.getElementById("episodio").value || null;
 
   const novo = {
     nome,
@@ -107,10 +107,12 @@ function render() {
   const filtrado = data.filter(i => {
     const match = i.nome.toLowerCase().includes(busca);
 
-    if (paginaAtual === "home") return i.status === "assistindo" && match;
+    if (paginaAtual === "home") return match;
     if (paginaAtual === "quero") return i.status === "quero" && match;
+    if (paginaAtual === "series") return i.tipo === "serie" && match;
+    if (paginaAtual === "filmes") return i.tipo === "filme" && match;
 
-    return i.tipo === (paginaAtual === "filmes" ? "filme" : "serie") && match;
+    return match;
   });
 
   lista.innerHTML = filtrado.map(item => `
