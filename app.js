@@ -15,6 +15,18 @@ function navegar(pagina) {
     render();
 }
 
+// -------------------- MOSTRAR CAMPOS DE SÉRIE --------------------
+function toggleSerieFields() {
+    const tipo = document.getElementById("tipo").value;
+    const camposSerie = document.getElementById("serie-fields");
+
+    if (tipo === "serie") {
+        camposSerie.style.display = "block";
+    } else {
+        camposSerie.style.display = "none";
+    }
+}
+
 // -------------------- MODAL --------------------
 function abrirModal(modo = 'add', id = null) {
     const modal = document.getElementById('modal');
@@ -32,6 +44,8 @@ function abrirModal(modo = 'add', id = null) {
         document.getElementById('btn-finalizar').style.display = 'none';
         document.getElementById('campos-finalizacao').style.display = 'none';
     }
+
+    toggleSerieFields();
 }
 
 function fecharModal() {
@@ -45,6 +59,9 @@ async function adicionar() {
     const tipo = document.getElementById('tipo').value;
     const status = document.getElementById('status').value;
 
+    const temporadas = document.getElementById('temporadas')?.value || null;
+    const episodios = document.getElementById('episodios')?.value || null;
+
     if (!nome || !imagem) return alert('Preencha os campos!');
 
     const novoItem = {
@@ -53,6 +70,8 @@ async function adicionar() {
         imagem,
         tipo,
         status,
+        temporadas,
+        episodios,
         notas: { arthur: 0, daiane: 0 },
         comentarios: { arthur: '', daiane: '' }
     };
@@ -109,7 +128,7 @@ function render() {
 
     if (!listaDiv) return;
 
-    const busca = document.getElementById("busca").value.toLowerCase();
+    const busca = document.getElementById("busca")?.value?.toLowerCase() || "";
 
     const filtered = data.filter(i => {
         const matchBusca = i.nome.toLowerCase().includes(busca);
@@ -133,6 +152,10 @@ function render() {
                     <div class="info">
                         <b>${item.nome}</b><br>
 
+                        ${item.tipo === 'serie' && item.temporadas 
+                            ? `<small>${item.temporadas} Temporadas - ${item.episodios || 0} Episódios</small><br>`
+                            : ''}
+
                         ${item.status === 'assistindo'
                             ? `<button class="btn-primary" onclick="abrirModal('finalizar', ${item.id})">Finalizar</button>`
                             : ''}
@@ -154,6 +177,7 @@ window.fecharModal = fecharModal;
 window.adicionar = adicionar;
 window.confirmarFinalizacao = confirmarFinalizacao;
 window.excluirItem = excluirItem;
+window.toggleSerieFields = toggleSerieFields;
 window.render = render;
 
 // -------------------- START --------------------
