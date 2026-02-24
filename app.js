@@ -23,20 +23,22 @@ function atualizarCamposModal() {
 function abrirModal(id = null) {
     limparModal();
     document.getElementById("modal").style.display = "block";
-    if (id) {
+    if (id && id !== 'add') {
         const item = data.find(i => i.firebaseId === id);
-        document.getElementById("modal-title").innerText = "Editar Item";
-        document.getElementById("item-id-hidden").value = id;
-        document.getElementById("nome").value = item.nome;
-        document.getElementById("imagem").value = item.imagem;
-        document.getElementById("tipo").value = item.tipo;
-        document.getElementById("status").value = item.status;
-        document.getElementById("temporada").value = item.temporada || "";
-        document.getElementById("episodio").value = item.episodio || "";
-        document.getElementById("notaA").value = item.notas?.arthur || "";
-        document.getElementById("notaD").value = item.notas?.daiane || "";
-        document.getElementById("comA").value = item.comentarios?.arthur || "";
-        document.getElementById("comD").value = item.comentarios?.daiane || "";
+        if (item) {
+            document.getElementById("modal-title").innerText = "Editar Item";
+            document.getElementById("item-id-hidden").value = id;
+            document.getElementById("nome").value = item.nome || "";
+            document.getElementById("imagem").value = item.imagem || "";
+            document.getElementById("tipo").value = item.tipo || "filme";
+            document.getElementById("status").value = item.status || "assistindo";
+            document.getElementById("temporada").value = item.temporada || "";
+            document.getElementById("episodio").value = item.episodio || "";
+            document.getElementById("notaA").value = item.notas?.arthur || "";
+            document.getElementById("notaD").value = item.notas?.daiane || "";
+            document.getElementById("comA").value = item.comentarios?.arthur || "";
+            document.getElementById("comD").value = item.comentarios?.daiane || "";
+        }
     } else {
         document.getElementById("modal-title").innerText = "Adicionar Novo";
     }
@@ -47,10 +49,14 @@ function fecharModal() { document.getElementById("modal").style.display = "none"
 
 function limparModal() {
     const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comA", "comD"];
-    ids.forEach(id => document.getElementById(id).value = "");
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
 }
 
-async function salvar() {
+// CONSERTO: Função renomeada para 'adicionar' para bater com o seu HTML
+async function adicionar() {
     const id = document.getElementById("item-id-hidden").value;
     const itemDados = {
         nome: document.getElementById("nome").value,
@@ -59,10 +65,22 @@ async function salvar() {
         status: document.getElementById("status").value,
         temporada: document.getElementById("temporada").value || null,
         episodio: document.getElementById("episodio").value || null,
-        notas: { arthur: document.getElementById("notaA").value || null, daiane: document.getElementById("notaD").value || null },
-        comentarios: { arthur: document.getElementById("comA").value || "", daiane: document.getElementById("comD").value || "" }
+        notas: { 
+            arthur: document.getElementById("notaA").value || null, 
+            daiane: document.getElementById("notaD").value || null 
+        },
+        comentarios: { 
+            arthur: document.getElementById("comA").value || "", 
+            daiane: document.getElementById("comD").value || "" 
+        }
     };
-    id ? await updateItem(id, itemDados) : await addItem(itemDados);
+
+    if (id) {
+        await updateItem(id, itemDados);
+    } else {
+        await addItem(itemDados);
+    }
+    
     fecharModal();
     iniciarApp();
 }
@@ -112,7 +130,7 @@ function render() {
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
     return lista.map(item => `
-        <div class="card ${item.status === 'assistido' ? 'assistido' : ''}">
+        <div class="card">
             <button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">✏️</button>
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
             <div class="info">
@@ -127,9 +145,9 @@ function renderCards(lista) {
 // EXPOSIÇÃO GLOBAL
 window.navegar = navegar;
 window.abrirModal = abrirModal;
-window.abrirEdicao = abrirEdicao;
+window.abrirEdicao = (id) => abrirModal(id);
 window.fecharModal = fecharModal;
-window.adicionar = salvar;
+window.adicionar = adicionar; // Vinculado ao botão 'Salvar' do HTML
 window.excluirItem = excluir;
 window.toggleSerieFields = atualizarCamposModal;
 window.toggleRatingFields = atualizarCamposModal;
