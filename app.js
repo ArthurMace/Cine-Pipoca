@@ -1,26 +1,31 @@
+import { getData, saveData } from "./storage.js";
+
 let data = [];
 let paginaAtual = 'home';
 
-// Inicialização: Espera a nuvem antes de mostrar qualquer coisa
+// -------------------- INICIAR --------------------
 async function iniciarApp() {
     data = await getData();
     render();
 }
 
+// -------------------- NAVEGAÇÃO --------------------
 function navegar(pagina) {
     paginaAtual = pagina;
     render();
 }
 
-function abrirModal(modo = 'add') {
+// -------------------- MODAL --------------------
+function abrirModal(modo = 'add', id = null) {
     const modal = document.getElementById('modal');
     modal.style.display = 'block';
 
-    if (modo === 'finalizar') {
+    if (modo === 'finalizar' && id) {
         document.getElementById('modal-title').innerText = 'Finalizar Filme/Série';
         document.getElementById('btn-salvar').style.display = 'none';
         document.getElementById('btn-finalizar').style.display = 'block';
         document.getElementById('campos-finalizacao').style.display = 'block';
+        document.getElementById('item-id-hidden').value = id;
     } else {
         document.getElementById('modal-title').innerText = 'Adicionar Novo';
         document.getElementById('btn-salvar').style.display = 'block';
@@ -33,7 +38,7 @@ function fecharModal() {
     document.getElementById('modal').style.display = 'none';
 }
 
-// ADICIONAR
+// -------------------- ADICIONAR --------------------
 async function adicionar() {
     const nome = document.getElementById('nome').value;
     const imagem = document.getElementById('imagem').value;
@@ -57,15 +62,12 @@ async function adicionar() {
 
     fecharModal();
     render();
-
-    if (status === 'quero') navegar('quero');
-    else navegar(tipo === 'filme' ? 'filmes' : 'series');
 }
 
-// FINALIZAR
+// -------------------- FINALIZAR --------------------
 async function confirmarFinalizacao() {
-    const id = document.getElementById('item-id-hidden').value;
-    const item = data.find(x => x.id == id);
+    const id = Number(document.getElementById('item-id-hidden').value);
+    const item = data.find(x => x.id === id);
 
     if (item) {
         item.status = 'assistido';
@@ -80,7 +82,7 @@ async function confirmarFinalizacao() {
     }
 }
 
-// EXCLUIR
+// -------------------- EXCLUIR --------------------
 async function excluirItem(id) {
     const confirmar = confirm("Deseja realmente excluir?");
     if (!confirmar) return;
@@ -90,7 +92,7 @@ async function excluirItem(id) {
     render();
 }
 
-// RENDER
+// -------------------- RENDER --------------------
 function render() {
     document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
 
@@ -107,24 +109,32 @@ function render() {
 
     if (!listaDiv) return;
 
+    const busca = document.getElementById("busca").value.toLowerCase();
+
     const filtered = data.filter(i => {
-        if (paginaAtual === 'home') return i.status === 'assistindo';
-        if (paginaAtual === 'quero') return i.status === 'quero';
+        const matchBusca = i.nome.toLowerCase().includes(busca);
+
+        if (paginaAtual === 'home')
+            return i.status === 'assistindo' && matchBusca;
+
+        if (paginaAtual === 'quero')
+            return i.status === 'quero' && matchBusca;
 
         return i.tipo === (paginaAtual === 'filmes' ? 'filme' : 'serie')
-            && i.status !== 'quero';
+            && i.status !== 'quero'
+            && matchBusca;
     });
 
     listaDiv.innerHTML = `
         <div class="grid">
             ${filtered.map(item => `
-                <div class="card">
+                <div class="card ${item.status === 'assistido' ? 'assistido' : ''}">
                     <img src="${item.imagem}">
                     <div class="info">
                         <b>${item.nome}</b><br>
 
                         ${item.status === 'assistindo'
-                            ? `<button class="btn-primary" onclick="finish(${item.id})">Finalizar</button>`
+                            ? `<button class="btn-primary" onclick="abrirModal('finalizar', ${item.id})">Finalizar</button>`
                             : ''}
 
                         <button class="btn-danger" onclick="excluirItem(${item.id})">
@@ -137,5 +147,14 @@ function render() {
     `;
 }
 
-// Inicia o App
+// -------------------- EXPOR GLOBAL --------------------
+window.navegar = navegar;
+window.abrirModal = abrirModal;
+window.fecharModal = fecharModal;
+window.adicionar = adicionar;
+window.confirmarFinalizacao = confirmarFinalizacao;
+window.excluirItem = excluirItem;
+window.render = render;
+
+// -------------------- START --------------------
 iniciarApp();
