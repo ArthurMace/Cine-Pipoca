@@ -1,131 +1,74 @@
-/* CONFIGURAÇÕES GERAIS */
 body { 
     background-color: #0b101b; 
     color: white; 
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    font-family: 'Segoe UI', sans-serif; 
     margin: 0; 
-    overflow-x: hidden; /* Impede que o site "dance" para os lados */
 }
 
-/* HEADER FIXO */
 header { 
     background-color: rgba(4, 7, 13, 0.95); 
     padding: 1rem 4%; 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
-    border-bottom: 1px solid #1f2937;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    position: sticky; top: 0; z-index: 1000;
 }
 
-header h1 { margin: 0; font-size: 1.5rem; color: #3b82f6; }
+header h1 { color: #3b82f6; font-size: 1.5rem; }
 
 header nav button { 
     background: transparent; color: white; border: 1px solid #333; 
-    padding: 0.5rem 1rem; margin-left: 0.5rem; border-radius: 20px; 
-    cursor: pointer; transition: 0.3s; 
+    padding: 0.5rem 1rem; margin-left: 0.5rem; border-radius: 20px; cursor: pointer;
 }
 
-header nav button:hover { background-color: #1f2937; }
-.btn-add-menu { background-color: #3b82f6 !important; border: none !important; }
-
-/* BARRA DE BUSCA */
 .search-box { text-align: center; padding: 1.5rem; }
 .search-box input { 
     width: 50%; padding: 0.7rem; border-radius: 20px; border: none; 
     background-color: #1f2937; color: white; text-align: center; 
 }
 
-/* TÍTULOS DAS SEÇÕES */
-h3 {
-    margin: 25px 0 10px 4%;
-    color: #e5e5e5;
-    font-size: 1.1rem;
-    text-transform: none;
-    font-weight: 500;
-}
+h3 { margin-left: 4%; color: #e5e5e5; font-size: 1.1rem; }
 
-/* CARROSSEL HORIZONTAL (ESTILO NETFLIX) */
 .carrossel {
-    display: flex;
-    overflow-x: auto; /* Permite arrastar para o lado */
-    gap: 15px;
-    padding: 10px 4% 30px 4%;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
+    display: flex; overflow-x: auto; gap: 15px;
+    padding: 10px 4% 30px 4%; scroll-behavior: smooth;
 }
+.carrossel::-webkit-scrollbar { display: none; }
 
-.carrossel::-webkit-scrollbar { display: none; } /* Esconde a barra de rolagem chata */
-
-/* CARDS (POSTERS) */
 .card { 
-    flex: 0 0 160px; /* Largura fixa para não deformar no carrossel */
-    background-color: #1f2937; 
-    border-radius: 6px; 
-    overflow: hidden; 
-    transition: 0.4s ease; 
-    position: relative;
-    cursor: pointer;
+    flex: 0 0 160px; /* Largura fixa como na imagem do Modern Family */
+    background-color: #1f2937; border-radius: 6px; overflow: hidden; 
+    position: relative; transition: 0.3s;
 }
-
-.card:hover { 
-    transform: scale(1.1); /* Efeito de destaque ao passar o mouse */
-    z-index: 10;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-}
+.card:hover { transform: scale(1.05); z-index: 10; }
 
 .card img {
     width: 100%;
-    aspect-ratio: 2 / 3; /* Isso força o formato de poster de cinema */
-    object-fit: cover;   /* Isso impede que a imagem estique; ela se ajusta ao corte */
+    aspect-ratio: 2 / 3; /* Proporção correta de poster */
+    object-fit: cover;   /* Não estica a imagem */
     display: block;
 }
 
-/* GRID PARA PÁGINAS FIXAS (Filmes, Séries, Quero Assistir) */
-.grid-comum {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 150px é o tamanho ideal para parecer streaming */
-    gap: 15px; 
-    padding: 1rem 2rem;
-}
-
-/* INFORMAÇÕES NO CARD */
 .info { 
-    padding: 10px; 
-    background: linear-gradient(transparent, rgba(0,0,0,0.9));
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    position: absolute; bottom: 0; width: 100%; box-sizing: border-box;
 }
-.info b { font-size: 0.85rem; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.info b { font-size: 0.8rem; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 .btn-edit { 
-    position: absolute; top: 5px; right: 5px; 
-    background-color: rgba(0,0,0,0.6); color: white; 
-    border: none; padding: 5px; border-radius: 50%; cursor: pointer; z-index: 20;
+    position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); 
+    color: white; border: none; border-radius: 50%; padding: 5px; cursor: pointer;
 }
 
-.btn-danger {
-    background: #ef4444; border: none; color: white;
-    width: 100%; padding: 4px; margin-top: 5px; border-radius: 4px;
-    font-size: 0.7rem; cursor: pointer;
+.btn-danger { background: #ef4444; border: none; color: white; width: 100%; font-size: 0.7rem; cursor: pointer; margin-top: 5px; }
+
+.grid-comum {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px; padding: 20px 4%;
 }
 
 /* MODAL */
-.modal { 
-    display: none; position: fixed; z-index: 2000; 
-    left: 0; top: 0; width: 100%; height: 100%; 
-    background-color: rgba(0,0,0,0.9); 
-}
-.modal-content { 
-    background-color: #181818; margin: 2% auto; padding: 2rem; 
-    border-radius: 10px; width: 90%; max-width: 400px;
-}
-.modal-content input, .modal-content select { 
-    width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; 
-    border-radius: 5px; border: 1px solid #333; background-color: #0b101b; color: white; box-sizing: border-box;
-}
-
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); }
+.modal-content { background-color: #181818; margin: 2% auto; padding: 2rem; border-radius: 10px; width: 90%; max-width: 400px; }
+.modal-content input, .modal-content select { width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; background-color: #0b101b; color: white; border: 1px solid #333; }
+.btn-primary { width: 100%; padding: 0.8rem; background-color: #3b82f6; border: none; color: white; font-weight: bold; cursor: pointer; }
