@@ -122,10 +122,17 @@ window.finalizarItem = function(id) {
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
-    return lista.map(item => `
-        <div class="card">
-            <button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">✏️</button>
+    
+    return lista.map(item => {
+        // Verifica se está finalizado
+        const estaFinalizado = item.status === 'assistido';
+        
+        return `
+        <div class="card ${estaFinalizado ? 'card-finalizado' : ''}">
+            ${!estaFinalizado ? `<button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">✏️</button>` : ''}
+            
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
+            
             <div class="info">
                 <b>${item.nome}</b>
                 
@@ -133,20 +140,20 @@ function renderCards(lista) {
                     <div class="temp-badge">T${item.temporada || '1'} • E${item.episodio || '1'}</div>
                 ` : ''}
                 
-                ${item.status === 'assistido' ? `
+                ${estaFinalizado ? `
                     <div style="font-size:10px; color:#3b82f6; font-weight:bold; margin-bottom: 5px;">
                         ⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}
                     </div>
                 ` : ''}
 
-                <div style="display: flex; gap: 5px; margin-top: 8px; width: 90%; justify-content: center;">
+                <div style="display: ${estaFinalizado ? 'none' : 'flex'}; gap: 5px; margin-top: 8px; width: 90%; justify-content: center;">
                     <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; flex:1; cursor:pointer; padding:8px; font-size: 14px; display: flex; align-items: center; justify-content: center;">✅</button>
                     
                     <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="flex:1; margin-top:0; padding:8px; display: flex; align-items: center; justify-content: center;">Excluir</button>
                 </div>
             </div>
         </div>
-    `).join("");
+    `}).join("");
 }
 
 // Garanta que esta função esteja EXATAMENTE assim no seu app.js
@@ -175,6 +182,7 @@ window.toggleRatingFields = atualizarCamposModal;
 window.render = render;
 
 iniciarApp();
+
 
 
 
