@@ -98,32 +98,32 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
     .card { flex: 0 0 45%; } /* No carrossel da home, mostra quase 2 cards */
     button { min-height: 44px; } /* Tamanho ideal para o toque do dedo */
 }
-/* Container do card */
+/* Importante: garanta que o .card tenha position: relative */
 .card {
-    position: relative; /* Necessário para a tarja se posicionar */
-    overflow: hidden;   /* Esconde a sobra da tarja */
+    position: relative !important;
+    overflow: hidden;
 }
 
 /* Quando o card estiver finalizado: escurece a imagem */
 .card.card-finalizado img {
-    filter: brightness(0.3) grayscale(0.6);
+    filter: brightness(0.3) grayscale(0.5);
 }
 
-/* A tarja vertical/diagonal no canto */
+/* A tarja ajustada */
 .card.card-finalizado::after {
     content: "ASSISTIDO";
     position: absolute;
-    top: 15px;
-    right: -25px;
-    background: #10b981; /* Verde (ou #ef4444 para vermelho) */
-    color: white;
-    font-size: 9px;
+    top: 15px; 
+    right: -30px; /* Ajustado para encaixar melhor */
+    background: #1e293b; /* Azul Escuro (Cor do site) */
+    color: #3b82f6;    /* Letra azul clara para dar contraste */
+    font-size: 10px;
     font-weight: bold;
-    padding: 4px 30px;
+    padding: 5px 35px;
     transform: rotate(45deg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    z-index: 10;
-    letter-spacing: 1px;
+    z-index: 999;      /* Força ela a ficar na frente de tudo */
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    border: 1px solid #3b82f6; /* Uma bordinha azul para destacar */
 }
 /* Mostra apenas um botão de 'reabrir' se você quiser, ou deixa sem nada */
 
@@ -136,6 +136,7 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 .modal-content { background-color: #181818; margin: 2% auto; padding: 2rem; border-radius: 10px; width: 90%; max-width: 400px; }
 .modal-content input, .modal-content select { width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; background-color: #0b101b; color: white; border: 1px solid #333; }
 .btn-primary { width: 100%; padding: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; color: white; background-color: #3b82f6; }
+
 
 
 
