@@ -124,7 +124,7 @@ function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
     
     return lista.map(item => {
-        // Verifica se está finalizado
+        // Verifica se está finalizado para aplicar a trava e a tarja do CSS
         const estaFinalizado = item.status === 'assistido';
         
         return `
@@ -153,7 +153,8 @@ function renderCards(lista) {
                 </div>
             </div>
         </div>
-    `}).join("");
+        `;
+    }).join("");
 }
 
 // Garanta que esta função esteja EXATAMENTE assim no seu app.js
@@ -182,6 +183,7 @@ window.toggleRatingFields = atualizarCamposModal;
 window.render = render;
 
 iniciarApp();
+
 
 
 
