@@ -98,39 +98,33 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
     .card { flex: 0 0 45%; } /* No carrossel da home, mostra quase 2 cards */
     button { min-height: 44px; } /* Tamanho ideal para o toque do dedo */
 }
-/* Container do card para permitir a tarja por cima */
+/* Container do card */
 .card {
-    position: relative;
-    overflow: hidden;
+    position: relative; /* Necessário para a tarja se posicionar */
+    overflow: hidden;   /* Esconde a sobra da tarja */
 }
 
-/* Efeito de escurecer a imagem */
-.card.finalizado img {
-    filter: brightness(0.4) grayscale(0.5); /* Escurece e tira um pouco a cor */
-    transition: 0.3s;
+/* Quando o card estiver finalizado: escurece a imagem */
+.card.card-finalizado img {
+    filter: brightness(0.3) grayscale(0.6);
 }
 
-/* A Tarja Vertical */
-.card.finalizado::after {
-    content: "FINALIZADO";
+/* A tarja vertical/diagonal no canto */
+.card.card-finalizado::after {
+    content: "ASSISTIDO";
     position: absolute;
-    top: 20px;
+    top: 15px;
     right: -25px;
-    background-color: #ef4444; /* Vermelho vibrante */
+    background: #10b981; /* Verde (ou #ef4444 para vermelho) */
     color: white;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: bold;
-    padding: 5px 30px;
-    transform: rotate(45deg); /* Inclinação charmosa */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    padding: 4px 30px;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     z-index: 10;
+    letter-spacing: 1px;
 }
-
-/* Desativa os botões quando finalizado */
-.card.finalizado button {
-    display: none; /* Esconde os botões de editar/excluir para "travar" */
-}
-
 /* Mostra apenas um botão de 'reabrir' se você quiser, ou deixa sem nada */
 
 .btn-edit { position: absolute; top: 5px; right: 5px; background-color: rgba(0,0,0,0.6); color: white; border: none; padding: 5px; border-radius: 50%; cursor: pointer; z-index: 20; }
@@ -142,6 +136,7 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 .modal-content { background-color: #181818; margin: 2% auto; padding: 2rem; border-radius: 10px; width: 90%; max-width: 400px; }
 .modal-content input, .modal-content select { width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; background-color: #0b101b; color: white; border: 1px solid #333; }
 .btn-primary { width: 100%; padding: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; color: white; background-color: #3b82f6; }
+
 
 
 
