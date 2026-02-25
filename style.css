@@ -73,6 +73,21 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
     justify-content: center;
     transition: 0.2s;
 }
+/* Garante que os botões dentro da info não fiquem gigantes ou tortos */
+.info div button {
+    min-width: 40px;
+    height: 35px;
+}
+
+.btn-danger {
+    background: #ef4444;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-weight: bold;
+}
 
 .btn-finalizar-card:hover {
     background: #059669; /* Fica um verde mais escuro ao passar o mouse */
@@ -87,4 +102,5 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 .modal-content { background-color: #181818; margin: 2% auto; padding: 2rem; border-radius: 10px; width: 90%; max-width: 400px; }
 .modal-content input, .modal-content select { width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; background-color: #0b101b; color: white; border: 1px solid #333; }
 .btn-primary { width: 100%; padding: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; color: white; background-color: #3b82f6; }
+
 
