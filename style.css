@@ -1,157 +1,70 @@
 /* CONFIGURAÇÕES GERAIS */
-
 body { background-color: #0b101b; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
 
-
-
 header { background-color: rgba(4, 7, 13, 0.95); padding: 1rem 4%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-
 header h1 { margin: 0; font-size: 1.5rem; color: #3b82f6; }
-
 header nav button { background: transparent; color: white; border: 1px solid #333; padding: 0.5rem 1rem; margin-left: 0.5rem; border-radius: 20px; cursor: pointer; }
 
-
-
 .search-box { text-align: center; padding: 1.5rem; }
-
 .search-box input { width: 50%; padding: 0.7rem; border-radius: 20px; border: none; background-color: #1f2937; color: white; text-align: center; }
-
-
 
 h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 
-
-
 .carrossel { display: flex; overflow-x: auto; gap: 15px; padding: 10px 4% 30px 4%; scroll-behavior: smooth; }
-
 .carrossel::-webkit-scrollbar { display: none; }
 
-
-
-/* FIX DE TAMANHO E IMAGEM */
-
-.card { flex: 0 0 160px; background-color: #1f2937; border-radius: 6px; overflow: hidden; position: relative; }
+/* CARD E IMAGEM */
+.card { flex: 0 0 160px; background-color: #1f2937; border-radius: 6px; overflow: hidden; position: relative; transition: transform 0.3s; }
+.card:hover { transform: scale(1.05); }
 
 .card img {
-
     width: 100%;
-
     aspect-ratio: 2 / 3;
-
-    object-fit: cover; /* CORREÇÃO AQUI: NÃO ESTICA MAIS */
-
+    object-fit: cover;
     display: block;
-
 }
 
+/* CAMADA DE INFORMAÇÃO (SÓ APARECE NO HOVER) */
 .info { 
-
     padding: 10px; 
-
-    background: linear-gradient(transparent, rgba(0,0,0,0.95) 80%); /* Escurece um pouco mais o fundo do texto */
-
+    background: rgba(0, 0, 0, 0.85); /* Fundo opaco */
     position: absolute; 
-
-    bottom: 0; 
-
-    width: 100%; 
-
-    box-sizing: border-box; 
-
-}
-
-.info { padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); position: absolute; bottom: 0; width: 100%; box-sizing: border-box; }
-
-.info b { font-size: 0.85rem; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-
-
-
-/* Faz o container de informações cobrir o card todo com fundo opaco */
-
-.info { 
-
-    padding: 10px; 
-
-    background: rgba(0, 0, 0, 0.7); /* Deixa o fundo preto opaco */
-
-    position: absolute; 
-
     top: 0; 
-
     left: 0;
-
     width: 100%; 
-
-    height: 100%; /* Ocupa o card inteiro */
-
+    height: 100%; 
     display: flex;
-
     flex-direction: column;
-
-    justify-content: center; /* Centraliza o texto verticalmente */
-
-    align-items: center;     /* Centraliza o texto horizontalmente */
-
+    justify-content: center; 
+    align-items: center;  
     text-align: center;
-
     box-sizing: border-box;
-
-    opacity: 1; /* Mantém visível, ou use 0 se quiser que apareça só no hover */
-
-    transition: 0.3s;
-
+    opacity: 0; /* COMEÇA INVISÍVEL */
+    transition: opacity 0.3s ease; /* EFEITO SUAVE */
 }
 
-
-
-/* Ajuste das fontes dentro do card para ficarem nítidas no fundo escuro */
-
-.info b { 
-
-    font-size: 0.9rem; 
-
-    color: white; 
-
-    margin-bottom: 5px;
-
-    display: block; 
-
+.card:hover .info { 
+    opacity: 1; /* APARECE AO PASSAR O MOUSE */
 }
 
-
+.info b { font-size: 0.9rem; color: white; margin-bottom: 5px; display: block; }
 
 .temp-badge {
-
     background-color: #3b82f6;
-
     color: white;
-
     padding: 2px 8px;
-
     border-radius: 4px;
-
-    font-size: 12px;
-
+    font-size: 11px;
     font-weight: bold;
-
-    margin: 5px 0;
-
+    margin: 4px 0;
 }
 
-
-
 .btn-edit { position: absolute; top: 5px; right: 5px; background-color: rgba(0,0,0,0.6); color: white; border: none; padding: 5px; border-radius: 50%; cursor: pointer; z-index: 20; }
-
-.btn-danger { background: #ef4444; border: none; color: white; width: 100%; padding: 4px; margin-top: 5px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
-
-
+.btn-danger { background: #ef4444; border: none; color: white; width: 80%; padding: 4px; margin-top: 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
 
 .grid-comum { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 1rem 2rem; }
 
-
-
 .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); }
-
 .modal-content { background-color: #181818; margin: 2% auto; padding: 2rem; border-radius: 10px; width: 90%; max-width: 400px; }
-
 .modal-content input, .modal-content select { width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; background-color: #0b101b; color: white; border: 1px solid #333; }
+.btn-primary { width: 100%; padding: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; color: white; background-color: #3b82f6; }
