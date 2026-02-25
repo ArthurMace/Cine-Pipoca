@@ -92,6 +92,12 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 .btn-finalizar-card:hover {
     background: #059669; /* Fica um verde mais escuro ao passar o mouse */
 }
+@media (max-width: 600px) {
+    .search-box input { width: 90%; }
+    .grid-comum { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+    .card { flex: 0 0 45%; } /* No carrossel da home, mostra quase 2 cards */
+    button { min-height: 44px; } /* Tamanho ideal para o toque do dedo */
+}
 
 .btn-edit { position: absolute; top: 5px; right: 5px; background-color: rgba(0,0,0,0.6); color: white; border: none; padding: 5px; border-radius: 50%; cursor: pointer; z-index: 20; }
 .btn-danger { background: #ef4444; border: none; color: white; width: 80%; padding: 4px; margin-top: 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
@@ -102,5 +108,6 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 .modal-content { background-color: #181818; margin: 2% auto; padding: 2rem; border-radius: 10px; width: 90%; max-width: 400px; }
 .modal-content input, .modal-content select { width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; background-color: #0b101b; color: white; border: 1px solid #333; }
 .btn-primary { width: 100%; padding: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; color: white; background-color: #3b82f6; }
+
 
 
