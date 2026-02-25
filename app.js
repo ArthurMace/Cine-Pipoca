@@ -122,12 +122,7 @@ window.finalizarItem = function(id) {
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
-    return lista.map(item => {
-        // Criamos uma variável para facilitar a lógica do botão
-        // O botão verde deve aparecer se NÃO for 'assistido'
-        const exibirCheck = item.status !== 'assistido';
-
-        return `
+    return lista.map(item => `
         <div class="card">
             <button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">✏️</button>
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
@@ -145,15 +140,13 @@ function renderCards(lista) {
                 ` : ''}
 
                 <div style="display: flex; gap: 5px; margin-top: 8px; width: 90%; justify-content: center;">
-                    ${exibirCheck ? `
-                        <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; flex:1; cursor:pointer; padding:6px; font-size: 14px; display: flex; align-items: center; justify-content: center;">✅</button>
-                    ` : ''}
+                    <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; flex:1; cursor:pointer; padding:8px; font-size: 14px; display: flex; align-items: center; justify-content: center;">✅</button>
                     
-                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="flex:1; margin-top:0; padding:6px; display: flex; align-items: center; justify-content: center;">Excluir</button>
+                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="flex:1; margin-top:0; padding:8px; display: flex; align-items: center; justify-content: center;">Excluir</button>
                 </div>
             </div>
         </div>
-    `}).join("");
+    `).join("");
 }
 
 // Garanta que esta função esteja EXATAMENTE assim no seu app.js
@@ -182,6 +175,7 @@ window.toggleRatingFields = atualizarCamposModal;
 window.render = render;
 
 iniciarApp();
+
 
 
 
