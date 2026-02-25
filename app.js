@@ -122,7 +122,12 @@ window.finalizarItem = function(id) {
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
-    return lista.map(item => `
+    return lista.map(item => {
+        // Criamos uma variável para facilitar a lógica do botão
+        // O botão verde deve aparecer se NÃO for 'assistido'
+        const exibirCheck = item.status !== 'assistido';
+
+        return `
         <div class="card">
             <button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">✏️</button>
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
@@ -139,16 +144,31 @@ function renderCards(lista) {
                     </div>
                 ` : ''}
 
-                <div style="display: flex; gap: 5px; margin-top: 5px; width: 90%; justify-content: center;">
-                    ${item.status !== 'assistido' ? `
-                        <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; flex:1; cursor:pointer; padding:6px; font-size: 12px;">✅</button>
+                <div style="display: flex; gap: 5px; margin-top: 8px; width: 90%; justify-content: center;">
+                    ${exibirCheck ? `
+                        <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; flex:1; cursor:pointer; padding:6px; font-size: 14px; display: flex; align-items: center; justify-content: center;">✅</button>
                     ` : ''}
                     
-                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="flex:1; margin-top:0; padding:6px;">Excluir</button>
+                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="flex:1; margin-top:0; padding:6px; display: flex; align-items: center; justify-content: center;">Excluir</button>
                 </div>
             </div>
         </div>
-    `).join("");
+    `}).join("");
+}
+
+// Garanta que esta função esteja EXATAMENTE assim no seu app.js
+window.finalizarItem = function(id) {
+    const item = data.find(i => i.firebaseId === id);
+    if (item) {
+        abrirModal(id); 
+        // Forçamos o valor para o select de status
+        const selectStatus = document.getElementById("status");
+        if(selectStatus) {
+            selectStatus.value = "assistido";
+            atualizarCamposModal();
+        }
+        document.getElementById("modal-title").innerText = "Finalizar: " + item.nome;
+    }
 }
 
 window.navegar = navegar;
@@ -162,6 +182,7 @@ window.toggleRatingFields = atualizarCamposModal;
 window.render = render;
 
 iniciarApp();
+
 
 
 
