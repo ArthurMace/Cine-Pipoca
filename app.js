@@ -109,6 +109,16 @@ function render() {
         divAlvo.innerHTML = `<div class="grid-comum">${renderCards(listaAbas)}</div>`;
     }
 }
+// Função para preparar o item para ser finalizado
+window.finalizarItem = function(id) {
+    const item = data.find(i => i.firebaseId === id);
+    if (item) {
+        abrirModal(id); // Abre o modal com os dados
+        document.getElementById("status").value = "assistido"; // Muda para assistido
+        atualizarCamposModal(); // Faz aparecer os campos de nota automaticamente
+        document.getElementById("modal-title").innerText = "Finalizar: " + item.nome;
+    }
+}
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
@@ -124,12 +134,18 @@ function renderCards(lista) {
                 ` : ''}
                 
                 ${item.status === 'assistido' ? `
-                    <div style="font-size:10px; color:#3b82f6; font-weight:bold;">
+                    <div style="font-size:10px; color:#3b82f6; font-weight:bold; margin-bottom: 5px;">
                         ⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}
                     </div>
                 ` : ''}
-                
-                <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')">Excluir</button>
+
+                <div style="display: flex; gap: 5px; margin-top: 5px; width: 90%; justify-content: center;">
+                    ${item.status !== 'assistido' ? `
+                        <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; flex:1; cursor:pointer; padding:6px; font-size: 12px;">✅</button>
+                    ` : ''}
+                    
+                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="flex:1; margin-top:0; padding:6px;">Excluir</button>
+                </div>
             </div>
         </div>
     `).join("");
@@ -146,6 +162,7 @@ window.toggleRatingFields = atualizarCamposModal;
 window.render = render;
 
 iniciarApp();
+
 
 
 
