@@ -42,8 +42,6 @@ window.toggleSerieFields = function() {
     document.getElementById("campos-finalizacao").style.display = (status === "assistido") ? "block" : "none";
 };
 
-window.toggleRatingFields = window.toggleSerieFields;
-
 window.abrirModal = function(id = null) {
     limparModal();
     document.getElementById("modal").style.display = "block";
@@ -121,7 +119,6 @@ window.render = function() {
     document.getElementById("page-" + paginaAtual).style.display = "block";
 
     const busca = document.getElementById("busca").value.toLowerCase();
-    
     const filtrados = data.filter(i => {
         const pertence = (i.dono === perfilAtivo || i.dono === 'casal' || !i.dono);
         return pertence && i.nome.toLowerCase().includes(busca);
@@ -134,22 +131,15 @@ window.render = function() {
 
         const outroPerfil = perfilAtivo === 'arthur' ? 'day' : 'arthur';
         const escondidos = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
-        
-        const sugestoesOutro = data.filter(i => 
-            i.dono === outroPerfil && 
-            !escondidos.includes(i.firebaseId)
-        );
+        const sugestoesOutro = data.filter(i => i.dono === outroPerfil && !escondidos.includes(i.firebaseId));
 
         containers.home.innerHTML = `
             ${assistindo.length ? `<h3>📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
-            
             ${sugestoesOutro.length ? `
                 <div class="secao-sugestoes">
                     <h3>💡 Sugestões de ${outroPerfil === 'day' ? 'Daiane' : 'Arthur'}</h3>
                     <div class="carrossel">${renderSugestoes(sugestoesOutro)}</div>
-                </div>
-            ` : ''}
-
+                </div>` : ''}
             ${quero.length ? `<h3>⭐ Minha Lista</h3><div class="carrossel">${renderCards(quero)}</div>` : ''}
             ${finalizados.length ? `<h3>✅ Já Finalizados</h3><div class="carrossel">${renderCards(finalizados)}</div>` : ''}
         `;
@@ -165,7 +155,7 @@ window.render = function() {
 };
 
 function renderCards(lista) {
-    if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
+    if (lista.length === 0) return `<p style="padding:20px; opacity:0.5; text-align:center; width:100%;">Nenhum item.</p>`;
     return lista.map(item => {
         const estaFinalizado = item.status === 'assistido';
         const emojiDono = item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿');
@@ -202,13 +192,13 @@ function renderSugestoes(lista) {
     `).join("");
 }
 
-// --- LÓGICA DO SORTEADOR (DADO) ---
-
+// --- LÓGICA DO SORTEADOR (DADO) - APENAS FILMES ---
 window.sortearFilme = function() {
+    // Filtra apenas FILMES da lista de QUERO do CASAL
     const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
 
     if (opcoes.length === 0) {
-        alert("Não achei filmes na lista 'Quero Assistir' do Casal para sortear! 🍿");
+        alert("Nenhum filme disponível no 'Quero Assistir' do Casal! 🍿");
         return;
     }
 
@@ -216,12 +206,12 @@ window.sortearFilme = function() {
     const container = document.getElementById('container-sorteado');
     
     container.innerHTML = `
-        <img src="${sorteado.imagem}">
-        <div class="info-sorteio">
-            <h2 style="font-size: 18px; margin-bottom: 20px;">${sorteado.nome}</h2>
-            <button class="btn-sorteio" onclick="window.começarVer('${sorteado.firebaseId}')">🎬 Bora Assistir!</button>
-            <button class="btn-sorteio" onclick="window.sortearFilme()">🎲 Sortear Outro</button>
-            <p style="margin-top: 15px; font-size: 12px; cursor:pointer;" onclick="window.fecharSorteio()">Fechar</p>
+        <img src="${sorteado.imagem}" style="width:100%; display:block;">
+        <div class="info-sorteio-viva">
+            <h2 style="font-size: 1.2rem; color: white; margin-bottom: 15px;">${sorteado.nome}</h2>
+            <button class="btn-primary" onclick="window.começarVer('${sorteado.firebaseId}')">🎬 Bora Assistir!</button>
+            <button class="btn-sorteio" onclick="window.sortearFilme()" style="background: rgba(255,255,255,0.1); width:100%; margin-top:10px;">🎲 Sortear Outro</button>
+            <p style="margin-top: 20px; font-size: 12px; color:#94a3b8; cursor:pointer;" onclick="window.fecharSorteio()">Fechar</p>
         </div>
     `;
     
@@ -231,6 +221,7 @@ window.sortearFilme = function() {
 window.fecharSorteio = function(e) {
     if (!e || e.target?.id === 'modal-sorteio' || e.target === undefined) {
         document.getElementById('modal-sorteio').style.display = 'none';
+        document.getElementById('container-sorteado').innerHTML = ""; // Limpa para trocar no próximo
     }
 };
 
@@ -241,14 +232,10 @@ window.começarVer = async function(id) {
     window.fecharSorteio();
 };
 
-// --- MAPEAMENTO GLOBAL PARA FIREBASE ---
 window.darMatch = async function(id) {
-    const item = data.find(i => i.firebaseId === id);
-    if (item) {
-        await updateItem(id, { dono: 'casal' });
-        data = await getData();
-        render();
-    }
+    await updateItem(id, { dono: 'casal' });
+    data = await getData();
+    render();
 };
 
 window.darBlock = function(id) {
@@ -262,44 +249,25 @@ window.finalizarItem = function(id) {
     window.abrirModal(id); 
     setTimeout(() => {
         document.getElementById("status").value = "assistido";
-        window.toggleRatingFields();
+        window.toggleSerieFields();
     }, 100);
 };
 
 window.abrirEdicao = (id) => window.abrirModal(id);
 
-// --- ARRASTAR O DADO (DRAG AND DROP) ---
+// --- DRAG AND DROP DO DADO ---
 document.addEventListener('DOMContentLoaded', () => {
     const dado = document.getElementById('dado-flutuante');
     if (!dado) return;
-
-    let offset = [0, 0];
-    let isDown = false;
-
-    const startMove = (clientX, clientY) => {
-        isDown = true;
-        offset = [dado.offsetLeft - clientX, dado.offsetTop - clientY];
-        dado.style.transition = 'none';
-    };
-
-    const doMove = (clientX, clientY) => {
-        if (!isDown) return;
-        dado.style.left = (clientX + offset[0]) + 'px';
-        dado.style.top = (clientY + offset[1]) + 'px';
-        dado.style.right = 'auto';
-        dado.style.bottom = 'auto';
-    };
-
-    // Eventos Mouse
-    dado.addEventListener('mousedown', (e) => startMove(e.clientX, e.clientY));
-    document.addEventListener('mousemove', (e) => doMove(e.clientX, e.clientY));
+    let offset = [0, 0], isDown = false;
+    const start = (clientX, clientY) => { isDown = true; offset = [dado.offsetLeft - clientX, dado.offsetTop - clientY]; dado.style.transition = 'none'; };
+    const move = (clientX, clientY) => { if (!isDown) return; dado.style.left = (clientX + offset[0]) + 'px'; dado.style.top = (clientY + offset[1]) + 'px'; dado.style.right = 'auto'; dado.style.bottom = 'auto'; };
+    dado.addEventListener('mousedown', e => start(e.clientX, e.clientY));
+    document.addEventListener('mousemove', e => move(e.clientX, e.clientY));
     document.addEventListener('mouseup', () => isDown = false);
-
-    // Eventos Touch (Celular)
-    dado.addEventListener('touchstart', (e) => startMove(e.touches[0].clientX, e.touches[0].clientY));
-    document.addEventListener('touchmove', (e) => doMove(e.touches[0].clientX, e.touches[0].clientY));
+    dado.addEventListener('touchstart', e => start(e.touches[0].clientX, e.touches[0].clientY));
+    document.addEventListener('touchmove', e => move(e.touches[0].clientX, e.touches[0].clientY));
     document.addEventListener('touchend', () => isDown = false);
 });
 
-// Inicializa o app
 iniciarApp();
