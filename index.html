@@ -123,9 +123,27 @@
     <div id="container-sorteado" class="modal-content" style="text-align:center;">
         </div>
 </div>
+    <div id="modal-avaliacao" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h2 id="aval-titulo">Dar Nota</h2>
+        <input type="hidden" id="aval-id-hidden">
+        
+        <label id="label-nota">Sua Nota (1 a 5):</label>
+        <input id="aval-nota" type="number" min="1" max="5" placeholder="5">
+        
+        <label>Seu Comentário:</label>
+        <textarea id="aval-comentario" rows="3" style="width:100%; background:#0f172a; color:white; border:1px solid #334155; border-radius:8px; padding:10px; box-sizing:border-box;"></textarea>
+        
+        <div class="modal-btns">
+            <button class="btn-primary" onclick="window.salvarNotaIndividual()">Confirmar ⭐</button>
+            <button class="btn-cancel" onclick="document.getElementById('modal-avaliacao').style.display='none'">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <script type="module" src="app.js"></script>
 </body>
 </html>
+
 
 
