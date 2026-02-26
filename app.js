@@ -4,11 +4,18 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
+// INICIALIZAÇÃO DO APP
 async function iniciarApp() {
-    data = await getData();
-    render();
+    try {
+        data = await getData();
+        console.log("Dados carregados:", data); // Para você ver no F12 se os dados chegaram
+        render();
+    } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+    }
 }
 
+// GESTÃO DE PERFIS
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome;
     document.getElementById('modal-perfil').style.display = 'none';
@@ -27,39 +34,54 @@ window.navegar = function(pagina) {
     render();
 };
 
+// LÓGICA DO MODAL
 window.toggleSerieFields = function() {
     const tipo = document.getElementById("tipo").value;
     const status = document.getElementById("status").value;
-    document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
-    document.getElementById("campos-finalizacao").style.display = (status === "assistido") ? "block" : "none";
+    const serieFields = document.getElementById("serie-fields");
+    const camposFinal = document.getElementById("campos-finalizacao");
+    
+    if(serieFields) serieFields.style.display = (tipo === "serie") ? "flex" : "none";
+    if(camposFinal) camposFinal.style.display = (status === "assistido") ? "block" : "none";
 };
 
 window.abrirModal = function(id = null) {
     limparModal();
     document.getElementById("modal").style.display = "flex";
+    
     if (id && id !== 'add') {
         const item = data.find(i => i.firebaseId === id);
-        document.getElementById("item-id-hidden").value = id;
-        document.getElementById("nome").value = item.nome;
-        document.getElementById("imagem").value = item.imagem;
-        document.getElementById("tipo").value = item.tipo;
-        document.getElementById("status").value = item.status;
-        document.getElementById("dono").value = item.dono || "casal";
-        document.getElementById("temporada").value = item.temporada || "";
-        document.getElementById("episodio").value = item.episodio || "";
-        document.getElementById("notaA").value = item.notaArthur || "";
-        document.getElementById("notaD").value = item.notaDay || "";
+        if (item) {
+            document.getElementById("modal-title").innerText = "Editar " + (item.nome || "Item");
+            document.getElementById("item-id-hidden").value = id;
+            document.getElementById("nome").value = item.nome || "";
+            document.getElementById("imagem").value = item.imagem || "";
+            document.getElementById("tipo").value = item.tipo || "filme";
+            document.getElementById("status").value = item.status || "quero";
+            document.getElementById("dono").value = item.dono || "casal";
+            document.getElementById("temporada").value = item.temporada || "";
+            document.getElementById("episodio").value = item.episodio || "";
+            document.getElementById("notaA").value = item.notaArthur || "";
+            document.getElementById("notaD").value = item.notaDay || "";
+        }
     }
     window.toggleSerieFields();
 };
 
-window.fecharModal = function() { document.getElementById("modal").style.display = "none"; };
+window.fecharModal = function() { 
+    document.getElementById("modal").style.display = "none"; 
+};
 
 function limparModal() {
-    const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD"];
-    ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
+    const campos = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD"];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = "";
+    });
+    document.getElementById("modal-title").innerText = "Adicionar Novo";
 }
 
+// SALVAR/EDITAR NO FIREBASE
 window.adicionar = async function() {
     const id = document.getElementById("item-id-hidden").value;
     const itemDados = {
@@ -71,61 +93,88 @@ window.adicionar = async function() {
         temporada: document.getElementById("temporada").value || null,
         episodio: document.getElementById("episodio").value || null,
         notaArthur: document.getElementById("notaA").value || null,
-        notaDay: document.getElementById("notaD").value || null
+        notaDay: document.getElementById("notaD").value || null,
+        ultimaAtualizacao: new Date().getTime()
     };
-    id ? await updateItem(id, itemDados) : await addItem(itemDados);
-    window.fecharModal();
-    data = await getData();
-    render();
+    
+    try {
+        if (id) {
+            await updateItem(id, itemDados);
+        } else {
+            await addItem(itemDados);
+        }
+        window.fecharModal();
+        data = await getData();
+        render();
+    } catch (e) {
+        alert("Erro ao salvar! Tente novamente.");
+    }
 };
 
+window.excluirItem = async function(id) {
+    if (confirm("Remover da nossa lista para sempre?")) {
+        await deleteItem(id);
+        data = await getData();
+        render();
+    }
+};
+
+// RENDERIZAÇÃO (Onde os filmes aparecem)
 window.render = function() {
     if (!perfilAtivo) return;
+    
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-    document.getElementById("page-" + paginaAtual).style.display = "block";
+    const pagAtiva = document.getElementById("page-" + paginaAtual);
+    if(pagAtiva) pagAtiva.style.display = "block";
 
     const busca = document.getElementById("busca").value.toLowerCase();
     
-    // FILTRO CORRIGIDO: Garante que apareça TUDO do Casal + Tudo do Perfil
-    const filtrados = data.filter(i => 
-        (i.dono === perfilAtivo || i.dono === 'casal') && 
-        (i.nome && i.nome.toLowerCase().includes(busca))
-    );
+    // FILTRO COMPLETO: Mostra tudo do perfil atual + tudo do casal
+    const filtrados = data.filter(i => {
+        const donoMatch = (i.dono === perfilAtivo || i.dono === 'casal');
+        const nomeMatch = i.nome ? i.nome.toLowerCase().includes(busca) : true;
+        return donoMatch && nomeMatch;
+    });
 
     if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
         const quero = filtrados.filter(i => i.status === "quero");
         
+        // Tinder
         const outro = perfilAtivo === 'arthur' ? 'day' : 'arthur';
         const escondidos = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
         const sugestoes = data.filter(i => i.dono === outro && i.status === 'quero' && !escondidos.includes(i.firebaseId));
 
         document.getElementById("home").innerHTML = `
-            ${assistindo.length ? `<h3>📺 Continuando de onde paramos...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
+            ${assistindo.length ? `<h3>📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
             ${sugestoes.length ? `<h3>💡 Match de Filmes (Sugestões de ${outro})</h3><div class="carrossel">${renderSugestoes(sugestoes)}</div>` : ''}
             <h3>⭐ Nossa Lista Principal</h3><div class="grid-comum">${renderCards(quero)}</div>
         `;
     } else {
-        const target = paginaAtual === "series" ? "series" : paginaAtual === "filmes" ? "filmes" : "queroList";
-        const lista = filtrados.filter(i => {
+        const targetId = paginaAtual === "series" ? "series" : (paginaAtual === "filmes" ? "filmes" : "queroList");
+        const listaPorTipo = filtrados.filter(i => {
             if (paginaAtual === "series") return i.tipo === "serie";
             if (paginaAtual === "filmes") return i.tipo === "filme";
             return i.status === "quero";
         });
-        document.getElementById(target).innerHTML = `<div class="grid-comum">${renderCards(lista)}</div>`;
+        
+        const container = document.getElementById(targetId);
+        if(container) container.innerHTML = `<div class="grid-comum">${renderCards(listaPorTipo)}</div>`;
     }
 };
 
 function renderCards(lista) {
+    if (lista.length === 0) return `<p style="color:gray; padding:20px;">Nenhum item aqui ainda.</p>`;
     return lista.map(item => `
         <div class="card">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
             <button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>
-            <img src="${item.imagem}">
+            <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
             <div class="info">
-                <b>${item.nome}</b>
-                ${item.tipo === 'serie' ? `<p>T${item.temporada || '?'} | E${item.episodio || '?'}</p>` : ''}
-                ${item.status === 'assistido' ? `<p>⭐ A:${item.notaArthur || '-'} | D:${item.notaDay || '-'}</p>` : ''}
+                <b style="font-size:14px;">${item.nome}</b>
+                ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
+                ${item.status === 'assistido' ? `<p style="font-size:11px;">⭐ A:${item.notaArthur || '-'} | D:${item.notaDay || '-'}</p>` : ''}
+                <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:red; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
             </div>
         </div>`).join("");
 }
@@ -135,43 +184,51 @@ function renderSugestoes(lista) {
         <div class="card" style="border: 2px solid #3b82f6;">
             <img src="${item.imagem}" style="filter: brightness(0.4);">
             <div class="info" style="opacity: 1; background: transparent;">
-                <p>${item.nome}</p>
-                <div style="display:flex; gap:15px;">
-                    <button onclick="window.darMatch('${item.firebaseId}')" style="background:none; border:none; font-size:28px; cursor:pointer;">🍿</button>
-                    <button onclick="window.darBlock('${item.firebaseId}')" style="background:none; border:none; font-size:28px; cursor:pointer;">🚫</button>
+                <p style="font-weight:bold;">${item.nome}</p>
+                <div style="display:flex; gap:15px; margin-top:10px;">
+                    <button onclick="window.darMatch('${item.firebaseId}')" style="background:none; border:none; font-size:30px; cursor:pointer;">🍿</button>
+                    <button onclick="window.darBlock('${item.firebaseId}')" style="background:none; border:none; font-size:30px; cursor:pointer;">🚫</button>
                 </div>
             </div>
         </div>`).join("");
 }
 
-window.darMatch = async (id) => { await updateItem(id, { dono: 'casal' }); data = await getData(); render(); };
-window.darBlock = (id) => { 
-    let esc = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
-    esc.push(id); localStorage.setItem('escondidos_' + perfilAtivo, JSON.stringify(esc)); render();
+// MATCH DO TINDER
+window.darMatch = async (id) => {
+    await updateItem(id, { dono: 'casal' });
+    data = await getData();
+    render();
 };
 
-// --- SORTEIO CORRIGIDO ---
+window.darBlock = (id) => {
+    let esc = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
+    esc.push(id);
+    localStorage.setItem('escondidos_' + perfilAtivo, JSON.stringify(esc));
+    render();
+};
+
+// SORTEIO (CORRIGIDO PARA FILMES E DINÂMICO)
 window.sortearFilme = function() {
-    // Agora filtra APENAS filmes que são do CASAL e que estão no QUERO ASSISTIR
     const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
-    
-    if (opcoes.length === 0) return alert("Não achei filmes do casal na lista 'Quero Assistir'!");
+    if (opcoes.length === 0) return alert("Adicione filmes para o Casal na lista 'Quero Assistir' para sortear!");
     
     const sorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
+    const container = document.getElementById("container-sorteado");
     
-    document.getElementById("container-sorteado").innerHTML = `
-        <h2 style="color:#3b82f6;">O que vamos ver?</h2>
-        <img src="${sorteado.imagem}" style="width:100%; max-width:200px; border-radius:15px; margin: 15px 0;">
+    container.innerHTML = `
+        <h2 style="color:#3b82f6; font-size:20px;">O que vamos ver?</h2>
+        <img src="${sorteado.imagem}" style="width:180px; border-radius:15px; margin: 15px 0; border: 2px solid #3b82f6;">
         <h3 style="color:white; margin-bottom:20px;">${sorteado.nome}</h3>
         <div style="display:flex; flex-direction:column; gap:10px;">
-            <button class="btn-primary" onclick="window.marcarComoAssistindo('${sorteado.firebaseId}')">Assistir este!</button>
-            <button class="btn-cancel" onclick="window.sortearFilme()">Sortear outro 🎲</button>
+            <button class="btn-primary" onclick="window.marcarAssistindoSorteado('${sorteado.firebaseId}')">Assistir este agora! ✅</button>
+            <button style="background:none; border:1px solid #94a3b8; color:white; padding:10px; border-radius:8px; cursor:pointer;" onclick="window.sortearFilme()">Sortear outro 🎲</button>
+            <button style="background:none; border:none; color:gray; cursor:pointer;" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
         </div>
     `;
     document.getElementById("modal-sorteio").style.display = "flex";
 };
 
-window.marcarComoAssistindo = async (id) => {
+window.marcarAssistindoSorteado = async (id) => {
     await updateItem(id, { status: 'assistindo' });
     document.getElementById("modal-sorteio").style.display = "none";
     data = await getData();
