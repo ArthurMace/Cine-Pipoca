@@ -189,7 +189,8 @@ window.render = function() {
     if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
         const quero = filtrados.filter(i => i.status === "quero");
-        const jaAssistidos = filtrados.filter(i => i.status === "assistido"); // RECUPERADO
+        const aguardando = filtrados.filter(i => i.status === "avaliacao"); // ADICIONADO
+        const jaAssistidos = filtrados.filter(i => i.status === "assistido"); 
         
         const outroPerfil = (perfilAtivo === 'arthur') ? 'day' : 'arthur';
         const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
@@ -197,11 +198,18 @@ window.render = function() {
 
         document.getElementById("home").innerHTML = `
             ${assistindo.length ? `<h3 class="section-title">📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
+            
+            ${aguardando.length ? `
+                <h3 class="section-title" style="color: #fbbf24;">⏳ Aguardando Notas</h3>
+                <div class="carrossel">${renderCards(aguardando)}</div>
+            ` : ''}
+
             ${sugestoes.length ? `<h3 class="section-title">💡 Tinder (Sugestões de ${outroPerfil})</h3><div class="carrossel">${renderSugestoes(sugestoes)}</div>` : ''}
             <h3 class="section-title">⭐ Nossa Lista</h3><div class="grid-comum">${renderCards(quero)}</div>
             ${jaAssistidos.length ? `<h3 class="section-title">✅ Já Assistidos</h3><div class="carrossel">${renderCards(jaAssistidos)}</div>` : ''}
         `;
     } else {
+        // MANTIVE TODA A SUA LÓGICA DE FILMES E SÉRIES ABAIXO
         let listaFinal = [];
         let targetId = "";
         
@@ -325,6 +333,7 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
 
 
 
