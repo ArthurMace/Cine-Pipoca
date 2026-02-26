@@ -201,6 +201,14 @@ function renderCards(lista) {
     if (lista.length === 0) return `<p style="color:gray; padding:20px;">Vazio.</p>`;
     return lista.map(item => {
         const jaAssistido = item.status === 'assistido';
+        
+        // --- ADICIONADO: Lógica para mudar o texto do botão ---
+        let textoBotao = "Finalizar ✅";
+        if (item.tipo === 'serie' && item.status === 'quero') {
+            textoBotao = "Assistir 📺";
+        }
+        // -----------------------------------------------------
+
         return `
         <div class="card" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''}">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
@@ -218,7 +226,7 @@ function renderCards(lista) {
                 ${!jaAssistido ? `
                     <button onclick="window.finalizarRapido('${item.firebaseId}')" 
                             style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
-                        Finalizar ✅
+                        ${textoBotao}
                     </button>
                     <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
                 ` : ''}
@@ -294,4 +302,5 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
 
