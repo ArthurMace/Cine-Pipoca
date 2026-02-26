@@ -156,6 +156,7 @@ window.render = function() {
 
     const busca = document.getElementById("busca").value.toLowerCase();
     
+    // Filtro Geral (Respeita o Perfil Ativo ou Casal)
     const filtrados = data.filter(i => {
         const donoMatch = (i.dono === perfilAtivo || i.dono === 'casal');
         const nomeMatch = (i.nome || "").toLowerCase().includes(busca);
@@ -165,6 +166,7 @@ window.render = function() {
     if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
         const quero = filtrados.filter(i => i.status === "quero");
+        const jaAssistidos = filtrados.filter(i => i.status === "assistido"); // RECUPERADO
         
         const outroPerfil = (perfilAtivo === 'arthur') ? 'day' : 'arthur';
         const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
@@ -174,6 +176,7 @@ window.render = function() {
             ${assistindo.length ? `<h3 class="section-title">📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
             ${sugestoes.length ? `<h3 class="section-title">💡 Tinder (Sugestões de ${outroPerfil})</h3><div class="carrossel">${renderSugestoes(sugestoes)}</div>` : ''}
             <h3 class="section-title">⭐ Nossa Lista</h3><div class="grid-comum">${renderCards(quero)}</div>
+            ${jaAssistidos.length ? `<h3 class="section-title">✅ Já Assistidos</h3><div class="carrossel">${renderCards(jaAssistidos)}</div>` : ''}
         `;
     } else {
         let listaFinal = [];
@@ -201,9 +204,13 @@ function renderCards(lista) {
         return `
         <div class="card" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''}">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
+            
             ${!jaAssistido ? `<button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
+            
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
+            
             ${jaAssistido ? `<div class="tarja-finalizado"></div>` : ''}
+            
             <div class="info">
                 <b style="font-size:14px;">${item.nome}</b>
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
@@ -213,6 +220,7 @@ function renderCards(lista) {
                             style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
                         Finalizar ✅
                     </button>
+                    <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
                 ` : ''}
 
                 ${jaAssistido ? `
@@ -221,13 +229,10 @@ function renderCards(lista) {
                         <p style="font-size:10px; font-style:italic; color:#94a3b8; margin-top:5px;">"${item.comentario || 'Sem comentário.'}"</p>
                     </div>
                 ` : ''}
-                
-                <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
             </div>
         </div>`;
     }).join("");
 }
-
 function renderSugestoes(lista) {
     return lista.map(item => `
         <div class="card" style="border: 2px solid #3b82f6;">
@@ -289,3 +294,4 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
