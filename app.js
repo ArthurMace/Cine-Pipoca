@@ -9,7 +9,6 @@ async function iniciarApp() {
     render();
 }
 
-// --- FUNÇÕES DE PERFIL ---
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome;
     document.getElementById('modal-perfil').style.display = 'none';
@@ -28,7 +27,13 @@ window.navegar = function(pagina) {
     render();
 };
 
-// --- MODAL E EDIÇÃO ---
+window.toggleSerieFields = function() {
+    const tipo = document.getElementById("tipo").value;
+    const status = document.getElementById("status").value;
+    document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
+    document.getElementById("campos-finalizacao").style.display = (status === "assistido") ? "block" : "none";
+};
+
 window.abrirModal = function(id = null) {
     limparModal();
     document.getElementById("modal").style.display = "block";
@@ -43,13 +48,14 @@ window.abrirModal = function(id = null) {
         document.getElementById("dono").value = item.dono || "casal";
         document.getElementById("temporada").value = item.temporada || "";
         document.getElementById("episodio").value = item.episodio || "";
+        window.toggleSerieFields();
     }
 };
 
 window.fecharModal = function() { document.getElementById("modal").style.display = "none"; };
 
 function limparModal() {
-    const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comA", "comD"];
+    const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD"];
     ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
 }
 
@@ -62,7 +68,9 @@ window.adicionar = async function() {
         status: document.getElementById("status").value,
         dono: document.getElementById("dono").value,
         temporada: document.getElementById("temporada").value || null,
-        episodio: document.getElementById("episodio").value || null
+        episodio: document.getElementById("episodio").value || null,
+        notaArthur: document.getElementById("notaA").value || null,
+        notaDay: document.getElementById("notaD").value || null
     };
     id ? await updateItem(id, itemDados) : await addItem(itemDados);
     window.fecharModal();
@@ -78,7 +86,6 @@ window.excluirItem = async function(id) {
     }
 };
 
-// --- RENDERIZAÇÃO (TINDER E CARDS) ---
 window.render = function() {
     if (!perfilAtivo) return;
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
@@ -91,7 +98,7 @@ window.render = function() {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
         const quero = filtrados.filter(i => i.status === "quero");
         const outro = perfilAtivo === 'arthur' ? 'day' : 'arthur';
-        const sugestoes = data.filter(i => i.dono === outro);
+        const sugestoes = data.filter(i => i.dono === outro && i.status === 'quero');
 
         document.getElementById("home").innerHTML = `
             ${assistindo.length ? `<h3>📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
@@ -112,7 +119,7 @@ function renderCards(lista) {
             <button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
             <div class="info">
-                <b style="font-size:12px;">${item.nome}</b>
+                <b>${item.nome}</b>
                 <button onclick="window.excluirItem('${item.firebaseId}')" style="color:red; background:none; border:none; cursor:pointer; margin-top:10px;">Excluir</button>
             </div>
         </div>`).join("");
@@ -123,11 +130,8 @@ function renderSugestoes(lista) {
         <div class="card" style="border: 1px solid #3b82f6;">
             <img src="${item.imagem}" style="filter: brightness(0.35);">
             <div class="info" style="opacity: 1; background: transparent;">
-                <p style="font-size:11px; font-weight:bold;">Match com ${perfilAtivo === 'arthur' ? 'Day' : 'Arthur'}?</p>
-                <div style="display:flex; gap:15px;">
-                    <button onclick="window.darMatch('${item.firebaseId}')" style="background:none; border:none; font-size:28px; cursor:pointer;">🍿</button>
-                    <button onclick="window.darBlock('${item.firebaseId}')" style="background:none; border:none; font-size:28px; cursor:pointer;">🚫</button>
-                </div>
+                <p>Match com ${perfilAtivo === 'arthur' ? 'Day' : 'Arthur'}?</p>
+                <button onclick="window.darMatch('${item.firebaseId}')" style="background:none; border:none; font-size:28px; cursor:pointer;">🍿</button>
             </div>
         </div>`).join("");
 }
@@ -140,9 +144,11 @@ window.darMatch = async (id) => {
 
 window.sortearFilme = function() {
     const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
-    if (opcoes.length === 0) return alert("Adicione filmes para o Casal para sortear!");
+    if (opcoes.length === 0) return alert("Sem filmes do Casal!");
     const sorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
-    alert("Sorteado: " + sorteado.nome);
+    document.getElementById("modal-sorteio").style.display = "flex";
+    document.getElementById("nome-sorteado").innerText = sorteado.nome;
+    document.getElementById("img-sorteada").innerHTML = `<img src="${sorteado.imagem}" style="width:200px; border-radius:10px;">`;
 };
 
 iniciarApp();
