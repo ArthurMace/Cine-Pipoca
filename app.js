@@ -193,18 +193,31 @@ function renderCards(lista) {
 }
 function renderSugestoes(lista) {
     return lista.map(item => `
-        <div class="card" style="border: 2px solid #3b82f6;">
-            <img src="${item.imagem}" style="filter: brightness(0.4);">
-            <div class="info" style="opacity: 1; background: transparent;">
-                <p style="font-weight:bold;">${item.nome}</p>
-                <div style="display:flex; gap:15px; margin-top:10px;">
-                    <button onclick="window.darMatch('${item.firebaseId}')" style="background:none; border:none; font-size:30px; cursor:pointer;">🍿</button>
-                    <button onclick="window.darBlock('${item.firebaseId}')" style="background:none; border:none; font-size:30px; cursor:pointer;">🚫</button>
-                </div>
-            </div>
-        </div>`).join("");
-}
+       <div class="info">
+    <b style="font-size:14px;">${item.nome}</b>
+    ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
+    
+    ${!jaAssistido ? `
+        <button onclick="window.finalizarRapido('${item.firebaseId}')" 
+                style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
+            Finalizar ✅
+        </button>
+    ` : ''}
 
+    ${jaAssistido ? `
+        <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.2); padding-top:10px; text-align:center;">
+            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;">
+                <p style="font-size:11px; color:#fbbf24;">🤵‍♂️ A: ${item.notaArthur || '-'}</p>
+                <p style="font-size:11px; color:#fbbf24;">👰‍♀️ D: ${item.notaDay || '-'}</p>
+            </div>
+            <p style="font-size:10px; font-style:italic; color:#94a3b8; max-width:90%; line-height:1.4;">
+                "${item.comentario || 'Sem comentário.'}"
+            </p>
+        </div>
+    ` : ''}
+    
+    <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
+</div>
 // MATCH DO TINDER
 window.darMatch = async (id) => {
     await updateItem(id, { dono: 'casal' });
@@ -266,6 +279,7 @@ window.marcarAssistindoSorteado = async (id) => {
 };
 
 iniciarApp();
+
 
 
 
