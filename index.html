@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cine Pipoca</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,26 +25,25 @@
   </div>
 </div>
 
-<header id="header-principal" style="opacity: 0;">
-  <div class="perfil-selector" onclick="resetarPerfil()">
-     <h1 id="titulo-app">🎬 Cine Pipoca</h1>
-     <span class="setinha">▼</span>
+<header>
+  <div onclick="resetarPerfil()" style="cursor:pointer">
+    <h1 id="titulo-app">🎬 Cine Pipoca</h1>
+    <span style="font-size:10px; color:#3b82f6;">Trocar Perfil ▼</span>
   </div>
-  
   <nav>
     <button onclick="navegar('home')">Home</button>
     <button onclick="navegar('series')">Séries</button>
     <button onclick="navegar('filmes')">Filmes</button>
-    <button onclick="navegar('quero')">Quero ⭐</button>
+    <button onclick="navegar('quero')">Quero Assistir ⭐</button>
     <button onclick="abrirModal('add')" class="btn-add-menu">+</button>
   </nav>
 </header>
 
-<section class="search-box" style="opacity: 0;">
+<section class="search-box">
   <input id="busca" placeholder="Buscar filme ou série..." onkeyup="render()">
 </section>
 
-<main id="conteudo-principal" style="opacity: 0;">
+<main>
     <div id="page-home" class="page"><h2 class="section-title">Painel Geral</h2><div id="home" class="grid-container"></div></div>
     <div id="page-series" class="page" style="display:none;"><h2 class="section-title">📺 Séries</h2><div id="series" class="grid"></div></div>
     <div id="page-filmes" class="page" style="display:none;"><h2 class="section-title">🎬 Filmes</h2><div id="filmes" class="grid"></div></div>
@@ -58,10 +56,10 @@
         <h2 id="modal-title">Adicionar Novo</h2>
         
         <input id="nome" placeholder="Nome do filme ou série">
-        <input id="imagem" placeholder="URL da Imagem">
+        <input id="imagem" placeholder="URL da Imagem (Poster)">
         
-        <label style="font-size: 11px; color: #3b82f6; margin-bottom: 4px; display: block;">Pertence a:</label>
-        <select id="dono" style="margin-bottom: 10px;">
+        <label style="font-size: 12px; color: #3b82f6; display: block; margin-top:10px;">Para quem é?</label>
+        <select id="dono">
             <option value="casal">🍿 Casal</option>
             <option value="arthur">🤵‍♂️ Arthur</option>
             <option value="day">👰‍♀️ Day</option>
@@ -74,26 +72,29 @@
             </select>
             <select id="status" onchange="toggleRatingFields()">
                 <option value="assistindo">Assistindo</option>
-                <option value="quero">Quero</option>
-                <option value="assistido">Assistido</option>
+                <option value="quero">Quero Assistir</option>
+                <option value="assistido">Já Assisti (Assistido)</option>
             </select>
         </div>
 
         <div id="serie-fields" class="select-group" style="display:none;">
-            <input id="temporada" type="number" placeholder="T">
-            <input id="episodio" type="number" placeholder="E">
+            <input id="temporada" type="number" min="1" placeholder="Temp. Atual">
+            <input id="episodio" type="number" min="1" placeholder="Ep. Atual">
         </div>
 
         <div id="campos-finalizacao" style="display:none;">
             <div class="dual-rating-input">
-                <label>🤵 A:</label> <input id="notaA" type="number" step="0.5" max="5">
+                <label>🤵 Nota Arthur (1-5):</label>
+                <input id="notaA" type="number" step="0.5" min="1" max="5" placeholder="5">
                 <input id="comA" placeholder="Comentário Arthur">
             </div>
             <div class="dual-rating-input">
-                <label>👰 D:</label> <input id="notaD" type="number" step="0.5" max="5">
+                <label>👰 Nota Daiane (1-5):</label>
+                <input id="notaD" type="number" step="0.5" min="1" max="5" placeholder="5">
                 <input id="comD" placeholder="Comentário Daiane">
             </div>
         </div>
+        
         <input type="hidden" id="item-id-hidden">
         <button id="btn-salvar" class="btn-primary" onclick="adicionar()">Salvar</button>
     </div>
