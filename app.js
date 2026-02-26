@@ -63,6 +63,7 @@ window.abrirModal = function(id = null) {
             document.getElementById("episodio").value = item.episodio || "";
             document.getElementById("notaA").value = item.notaArthur || "";
             document.getElementById("notaD").value = item.notaDay || "";
+            document.getElementById("comentario").value = item.comentario || "";
         }
     }
     window.toggleSerieFields();
@@ -73,7 +74,7 @@ window.fecharModal = function() {
 };
 
 function limparModal() {
-    const campos = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD"];
+    const campos = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comentario"];
     campos.forEach(id => {
         const el = document.getElementById(id);
         if(el) el.value = "";
@@ -265,5 +266,6 @@ window.marcarAssistindoSorteado = async (id) => {
 };
 
 iniciarApp();
+
 
 
