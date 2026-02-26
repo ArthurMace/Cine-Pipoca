@@ -4,36 +4,100 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-async function iniciarApp() {
-    data = await getData();
-}
-
-// Expõe a função para o HTML
+// INCLUSÕES DOS PERFIS
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome;
-    
-    // Esconde a seleção e mostra o site
     document.getElementById('modal-perfil').style.display = 'none';
-    document.getElementById('header-principal').style.opacity = "1";
-    document.getElementById('conteudo-principal').style.opacity = "1";
-    document.querySelector('.search-box').style.opacity = "1";
-    
     const emoji = nome === 'arthur' ? '🤵‍♂️' : '👰‍♀️';
     document.getElementById('titulo-app').innerHTML = `🎬 Cine Pipoca - ${emoji}`;
-    
     render();
 }
 
 window.resetarPerfil = function() {
     perfilAtivo = null;
     document.getElementById('modal-perfil').style.display = 'flex';
-    document.getElementById('header-principal').style.opacity = "0";
-    document.getElementById('conteudo-principal').style.opacity = "0";
-    document.querySelector('.search-box').style.opacity = "0";
+}
+
+async function iniciarApp() {
+    data = await getData();
+    // Não chama render aqui para esperar o perfil ser escolhido
+}
+
+function navegar(pagina) {
+    paginaAtual = pagina;
+    render();
+}
+
+function atualizarCamposModal() {
+    const tipo = document.getElementById("tipo").value;
+    const status = document.getElementById("status").value;
+    document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
+    document.getElementById("campos-finalizacao").style.display = (status === "assistido") ? "block" : "none";
+}
+
+function abrirModal(id = null) {
+    limparModal();
+    document.getElementById("modal").style.display = "block";
+    if (id && id !== 'add') {
+        const item = data.find(i => i.firebaseId === id);
+        document.getElementById("modal-title").innerText = "Editar Item";
+        document.getElementById("item-id-hidden").value = id;
+        document.getElementById("nome").value = item.nome;
+        document.getElementById("imagem").value = item.imagem;
+        document.getElementById("tipo").value = item.tipo;
+        document.getElementById("status").value = item.status;
+        document.getElementById("dono").value = item.dono || "casal"; // Inclusão do dono
+        document.getElementById("temporada").value = item.temporada || "";
+        document.getElementById("episodio").value = item.episodio || "";
+        document.getElementById("notaA").value = item.notas?.arthur || "";
+        document.getElementById("notaD").value = item.notas?.daiane || "";
+        document.getElementById("comA").value = item.comentarios?.arthur || "";
+        document.getElementById("comD").value = item.comentarios?.daiane || "";
+    } else {
+        document.getElementById("modal-title").innerText = "Adicionar Novo";
+    }
+    atualizarCamposModal();
+}
+
+function fecharModal() { document.getElementById("modal").style.display = "none"; }
+
+function limparModal() {
+    const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comA", "comD"];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = "";
+    });
+}
+
+async function adicionar() {
+    const id = document.getElementById("item-id-hidden").value;
+    const itemDados = {
+        nome: document.getElementById("nome").value,
+        imagem: document.getElementById("imagem").value,
+        tipo: document.getElementById("tipo").value,
+        status: document.getElementById("status").value,
+        dono: document.getElementById("dono").value, // Inclusão salvando dono
+        temporada: document.getElementById("temporada").value || null,
+        episodio: document.getElementById("episodio").value || null,
+        notas: { arthur: document.getElementById("notaA").value || null, daiane: document.getElementById("notaD").value || null },
+        comentarios: { arthur: document.getElementById("comA").value || "", daiane: document.getElementById("comD").value || "" }
+    };
+    id ? await updateItem(id, itemDados) : await addItem(itemDados);
+    fecharModal();
+    data = await getData();
+    render();
+}
+
+async function excluir(id) {
+    if (confirm("Tem certeza que deseja excluir?")) {
+        await deleteItem(id);
+        data = await getData();
+        render();
+    }
 }
 
 function render() {
-    if (!perfilAtivo) return;
+    if (!perfilAtivo) return; // Trava para não bugar sem perfil
 
     const containers = {
         home: document.getElementById("home"),
@@ -47,9 +111,10 @@ function render() {
 
     const busca = document.getElementById("busca").value.toLowerCase();
     
+    // FILTRO DE PERFIL (SÓ MOSTRA O SEU + CASAL)
     const filtrados = data.filter(i => {
-        const pertenceAoPerfil = (i.dono === perfilAtivo || i.dono === 'casal' || !i.dono);
-        return pertenceAoPerfil && i.nome.toLowerCase().includes(busca);
+        const pertence = (i.dono === perfilAtivo || i.dono === 'casal' || !i.dono);
+        return pertence && i.nome.toLowerCase().includes(busca);
     });
 
     if (paginaAtual === "home") {
@@ -73,7 +138,6 @@ function render() {
     }
 }
 
-// Mantendo suas outras funções (abrirModal, adicionar, renderCards, etc) idênticas às suas
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
     return lista.map(item => {
@@ -87,27 +151,26 @@ function renderCards(lista) {
             <div class="info">
                 <b>${item.nome}</b>
                 ${item.tipo === 'serie' ? `<div class="temp-badge">T${item.temporada || '1'} • E${item.episodio || '1'}</div>` : ''}
-                ${estaFinalizado ? `<div style="font-size:10px; color:#3b82f6; font-weight:bold;">⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}</div>` : ''}
+                ${estaFinalizado ? `<div style="font-size:10px; color:#3b82f6;">⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}</div>` : ''}
                 <div style="display: ${estaFinalizado ? 'none' : 'flex'}; gap: 5px; margin-top: 8px;">
                     <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; padding:8px;">✅</button>
-                    <button onclick="excluirItem('${item.firebaseId}')" class="btn-danger" style="padding:8px;">Excluir</button>
+                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="padding:8px;">Excluir</button>
                 </div>
             </div>
         </div>`;
     }).join("");
 }
 
-// Funções globais obrigatórias
+// RESTAURANDO AS CHAMADAS QUE VOCÊ TINHA NO FINAL
 window.navegar = navegar;
 window.abrirModal = abrirModal;
 window.abrirEdicao = (id) => abrirModal(id);
 window.fecharModal = fecharModal;
 window.adicionar = adicionar; 
 window.excluirItem = excluir;
-window.render = render;
 window.toggleSerieFields = atualizarCamposModal;
 window.toggleRatingFields = atualizarCamposModal;
-
+window.render = render;
 window.finalizarItem = function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (item) {
