@@ -4,7 +4,7 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// --- FUNÇÕES DE PERFIL (VINCULADAS AO WINDOW IMEDIATAMENTE) ---
+// --- FUNÇÕES DE PERFIL ---
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome;
     const modal = document.getElementById('modal-perfil');
@@ -172,15 +172,15 @@ function renderCards(lista) {
         return `
         <div class="card ${estaFinalizado ? 'card-finalizado' : ''}">
             <div class="perfil-tag">${emojiDono}</div>
-            ${!estaFinalizado ? `<button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">✏️</button>` : ''}
+            ${!estaFinalizado ? `<button class="btn-edit" onclick="window.abrirEdicao('${item.firebaseId}')">✏️</button>` : ''}
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
             <div class="info">
                 <b>${item.nome}</b>
                 ${item.tipo === 'serie' ? `<div class="temp-badge">T${item.temporada || '1'} • E${item.episodio || '1'}</div>` : ''}
                 ${estaFinalizado ? `<div style="font-size:10px; color:#3b82f6;">⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}</div>` : ''}
                 <div style="display: ${estaFinalizado ? 'none' : 'flex'}; gap: 5px; margin-top: 8px;">
-                    <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; padding:8px; cursor:pointer;">✅</button>
-                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="padding:8px; background:#ef4444; border:none; color:white; border-radius:4px; cursor:pointer;">Excluir</button>
+                    <button onclick="window.finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; padding:8px; cursor:pointer;">✅</button>
+                    <button class="btn-danger" onclick="window.excluirItem('${item.firebaseId}')" style="padding:8px; background:#ef4444; border:none; color:white; border-radius:4px; cursor:pointer;">Excluir</button>
                 </div>
             </div>
         </div>`;
@@ -194,15 +194,54 @@ function renderSugestoes(lista) {
             <div class="overlay-sugestao">
                 <p class="pergunta-sugestao">Ver "${item.nome}" com ${perfilAtivo === 'arthur' ? 'a Day' : 'o Arthur'}?</p>
                 <div class="botoes-sugestao">
-                    <button class="btn-match" onclick="darMatch('${item.firebaseId}')" title="Bora ver!">🍿</button>
-                    <button class="btn-match" onclick="darBlock('${item.firebaseId}')" title="Não quero">🚫</button>
+                    <button class="btn-match" onclick="window.darMatch('${item.firebaseId}')" title="Bora ver!">🍿</button>
+                    <button class="btn-match" onclick="window.darBlock('${item.firebaseId}')" title="Não quero">🚫</button>
                 </div>
             </div>
         </div>
     `).join("");
 }
 
-// MATCH E BLOCK
+// --- LÓGICA DO SORTEADOR (DADO) ---
+
+window.sortearFilme = function() {
+    const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
+
+    if (opcoes.length === 0) {
+        alert("Não achei filmes na lista 'Quero Assistir' do Casal para sortear! 🍿");
+        return;
+    }
+
+    const sorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
+    const container = document.getElementById('container-sorteado');
+    
+    container.innerHTML = `
+        <img src="${sorteado.imagem}">
+        <div class="info-sorteio">
+            <h2 style="font-size: 18px; margin-bottom: 20px;">${sorteado.nome}</h2>
+            <button class="btn-sorteio" onclick="window.começarVer('${sorteado.firebaseId}')">🎬 Bora Assistir!</button>
+            <button class="btn-sorteio" onclick="window.sortearFilme()">🎲 Sortear Outro</button>
+            <p style="margin-top: 15px; font-size: 12px; cursor:pointer;" onclick="window.fecharSorteio()">Fechar</p>
+        </div>
+    `;
+    
+    document.getElementById('modal-sorteio').style.display = 'flex';
+};
+
+window.fecharSorteio = function(e) {
+    if (!e || e.target?.id === 'modal-sorteio' || e.target === undefined) {
+        document.getElementById('modal-sorteio').style.display = 'none';
+    }
+};
+
+window.começarVer = async function(id) {
+    await updateItem(id, { status: 'assistindo' });
+    data = await getData();
+    render();
+    window.fecharSorteio();
+};
+
+// --- MAPEAMENTO GLOBAL PARA FIREBASE ---
 window.darMatch = async function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (item) {
@@ -229,5 +268,38 @@ window.finalizarItem = function(id) {
 
 window.abrirEdicao = (id) => window.abrirModal(id);
 
-iniciarApp();
+// --- ARRASTAR O DADO (DRAG AND DROP) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const dado = document.getElementById('dado-flutuante');
+    if (!dado) return;
 
+    let offset = [0, 0];
+    let isDown = false;
+
+    const startMove = (clientX, clientY) => {
+        isDown = true;
+        offset = [dado.offsetLeft - clientX, dado.offsetTop - clientY];
+        dado.style.transition = 'none';
+    };
+
+    const doMove = (clientX, clientY) => {
+        if (!isDown) return;
+        dado.style.left = (clientX + offset[0]) + 'px';
+        dado.style.top = (clientY + offset[1]) + 'px';
+        dado.style.right = 'auto';
+        dado.style.bottom = 'auto';
+    };
+
+    // Eventos Mouse
+    dado.addEventListener('mousedown', (e) => startMove(e.clientX, e.clientY));
+    document.addEventListener('mousemove', (e) => doMove(e.clientX, e.clientY));
+    document.addEventListener('mouseup', () => isDown = false);
+
+    // Eventos Touch (Celular)
+    dado.addEventListener('touchstart', (e) => startMove(e.touches[0].clientX, e.touches[0].clientY));
+    document.addEventListener('touchmove', (e) => doMove(e.touches[0].clientX, e.touches[0].clientY));
+    document.addEventListener('touchend', () => isDown = false);
+});
+
+// Inicializa o app
+iniciarApp();
