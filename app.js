@@ -186,6 +186,22 @@ window.render = function() {
         return donoMatch && nomeMatch;
     });
 
+   window.render = function() {
+    if (!perfilAtivo) return;
+    
+    document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+    const pag = document.getElementById("page-" + paginaAtual);
+    if(pag) pag.style.display = "block";
+
+    const busca = document.getElementById("busca").value.toLowerCase();
+    
+    // Filtro Geral (Respeita o Perfil Ativo ou Casal)
+    const filtrados = data.filter(i => {
+        const donoMatch = (i.dono === perfilAtivo || i.dono === 'casal');
+        const nomeMatch = (i.nome || "").toLowerCase().includes(busca);
+        return donoMatch && nomeMatch;
+    });
+
     if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
         const quero = filtrados.filter(i => i.status === "quero");
@@ -211,8 +227,29 @@ window.render = function() {
             
             ${jaAssistidos.length ? `<h3 class="section-title">✅ Já Assistidos</h3><div class="carrossel">${renderCards(jaAssistidos)}</div>` : ''}
         `;
-    }
     } else {
+        // LÓGICA DAS OUTRAS ABAS (Séries, Filmes e Quero)
+        let listaFinal = [];
+        let targetId = "";
+        
+        if (paginaAtual === "series") {
+            listaFinal = filtrados.filter(i => i.tipo === "serie");
+            targetId = "series";
+        } else if (paginaAtual === "filmes") {
+            listaFinal = filtrados.filter(i => i.tipo === "filme");
+            targetId = "filmes";
+        } else if (paginaAtual === "quero") {
+            listaFinal = filtrados.filter(i => i.status === "quero");
+            targetId = "queroList";
+        }
+        
+        // Renderiza no grid comum para as páginas específicas preencherem a tela
+        const container = document.getElementById(targetId);
+        if (container) {
+            container.innerHTML = `<div class="grid-comum">${renderCards(listaFinal)}</div>`;
+        }
+    }
+};
         // MANTIVE TODA A SUA LÓGICA DE FILMES E SÉRIES ABAIXO
         let listaFinal = [];
         let targetId = "";
@@ -368,6 +405,7 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
 
 
 
