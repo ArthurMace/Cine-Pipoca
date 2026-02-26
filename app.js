@@ -116,44 +116,49 @@ window.adicionar = async function() {
 };
 
 // FINALIZAÇÃO RÁPIDA (Check verde no card)
-window.finalizarRapido = async function(id) {
+// Abre o modal bonito na tela
+window.finalizarRapido = function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (!item) return;
 
-    // Pergunta a nota APENAS para o perfil que está ativo agora
-    const nomeUsuario = perfilAtivo === 'arthur' ? 'Arthur' : 'Day';
-    const nota = prompt(`${nomeUsuario}, dê sua nota (1 a 5) para "${item.nome}":`, "5");
-    const coment = prompt(`Seu comentário individual:`, "");
+    document.getElementById("aval-id-hidden").value = id;
+    document.getElementById("aval-titulo").innerText = `Nota de ${perfilAtivo === 'arthur' ? 'Arthur' : 'Day'}`;
+    document.getElementById("aval-nota").value = "5";
+    document.getElementById("aval-comentario").value = "";
+    document.getElementById("modal-avaliacao").style.display = "flex";
+};
 
-    if (nota !== null) {
-        let dadosAtualizados = { ...item };
+// Salva os dados no Firebase e decide se finaliza ou deixa em espera
+window.salvarNotaIndividual = async function() {
+    const id = document.getElementById("aval-id-hidden").value;
+    const nota = document.getElementById("aval-nota").value;
+    const coment = document.getElementById("aval-comentario").value;
+    
+    const item = data.find(i => i.firebaseId === id);
+    let dadosAtualizados = { ...item };
 
-        // Salva os dados na "gaveta" de quem está logado
-        if (perfilAtivo === 'arthur') {
-            dadosAtualizados.notaArthur = nota;
-            dadosAtualizados.comentarioArthur = coment || "";
-        } else if (perfilAtivo === 'day') {
-            dadosAtualizados.notaDay = nota;
-            dadosAtualizados.comentarioDay = coment || "";
-        }
-
-        // VERIFICAÇÃO: Os dois já votaram?
-        // Só finaliza se a nota que já existia no banco E a nota nova estiverem preenchidas
-        if (dadosAtualizados.notaArthur && dadosAtualizados.notaDay) {
-            dadosAtualizados.status = 'assistido';
-            // Junta os comentários para o histórico final
-            const cA = dadosAtualizados.comentarioArthur || "";
-            const cD = dadosAtualizados.comentarioDay || "";
-            dadosAtualizados.comentario = `A: ${cA} | D: ${cD}`;
-        } else {
-            // Se falta uma nota, o status vira "avaliacao"
-            dadosAtualizados.status = 'avaliacao';
-        }
-
-        await updateItem(id, dadosAtualizados);
-        data = await getData();
-        render();
+    if (perfilAtivo === 'arthur') {
+        dadosAtualizados.notaArthur = nota;
+        dadosAtualizados.comentarioArthur = coment;
+    } else {
+        dadosAtualizados.notaDay = nota;
+        dadosAtualizados.comentarioDay = coment;
     }
+
+    // Se os dois votaram, vai para assistido. Senão, fica em avaliação.
+    if (dadosAtualizados.notaArthur && dadosAtualizados.notaDay) {
+        dadosAtualizados.status = 'assistido';
+        const cA = dadosAtualizados.comentarioArthur || "";
+        const cD = dadosAtualizados.comentarioDay || "";
+        dadosAtualizados.comentario = `A: ${cA} | D: ${cD}`;
+    } else {
+        dadosAtualizados.status = 'avaliacao';
+    }
+
+    await updateItem(id, dadosAtualizados);
+    document.getElementById("modal-avaliacao").style.display = "none";
+    data = await getData();
+    render();
 };
 
 window.excluirItem = async function(id) {
@@ -320,6 +325,7 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
 
 
 
