@@ -4,7 +4,7 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// INCLUSÕES DOS PERFIS
+// FUNÇÕES DE PERFIL
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome;
     document.getElementById('modal-perfil').style.display = 'none';
@@ -20,7 +20,6 @@ window.resetarPerfil = function() {
 
 async function iniciarApp() {
     data = await getData();
-    // Não chama render aqui para esperar o perfil ser escolhido
 }
 
 function navegar(pagina) {
@@ -46,7 +45,7 @@ function abrirModal(id = null) {
         document.getElementById("imagem").value = item.imagem;
         document.getElementById("tipo").value = item.tipo;
         document.getElementById("status").value = item.status;
-        document.getElementById("dono").value = item.dono || "casal"; // Inclusão do dono
+        document.getElementById("dono").value = item.dono || "casal";
         document.getElementById("temporada").value = item.temporada || "";
         document.getElementById("episodio").value = item.episodio || "";
         document.getElementById("notaA").value = item.notas?.arthur || "";
@@ -55,6 +54,7 @@ function abrirModal(id = null) {
         document.getElementById("comD").value = item.comentarios?.daiane || "";
     } else {
         document.getElementById("modal-title").innerText = "Adicionar Novo";
+        document.getElementById("dono").value = "casal";
     }
     atualizarCamposModal();
 }
@@ -76,7 +76,7 @@ async function adicionar() {
         imagem: document.getElementById("imagem").value,
         tipo: document.getElementById("tipo").value,
         status: document.getElementById("status").value,
-        dono: document.getElementById("dono").value, // Inclusão salvando dono
+        dono: document.getElementById("dono").value,
         temporada: document.getElementById("temporada").value || null,
         episodio: document.getElementById("episodio").value || null,
         notas: { arthur: document.getElementById("notaA").value || null, daiane: document.getElementById("notaD").value || null },
@@ -97,7 +97,7 @@ async function excluir(id) {
 }
 
 function render() {
-    if (!perfilAtivo) return; // Trava para não bugar sem perfil
+    if (!perfilAtivo) return;
 
     const containers = {
         home: document.getElementById("home"),
@@ -111,7 +111,7 @@ function render() {
 
     const busca = document.getElementById("busca").value.toLowerCase();
     
-    // FILTRO DE PERFIL (SÓ MOSTRA O SEU + CASAL)
+    // FILTRO DE PERFIL
     const filtrados = data.filter(i => {
         const pertence = (i.dono === perfilAtivo || i.dono === 'casal' || !i.dono);
         return pertence && i.nome.toLowerCase().includes(busca);
@@ -154,14 +154,14 @@ function renderCards(lista) {
                 ${estaFinalizado ? `<div style="font-size:10px; color:#3b82f6;">⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}</div>` : ''}
                 <div style="display: ${estaFinalizado ? 'none' : 'flex'}; gap: 5px; margin-top: 8px;">
                     <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; padding:8px;">✅</button>
-                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="padding:8px;">Excluir</button>
+                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="padding:8px; background:#ef4444; border:none; color:white; border-radius:4px;">Excluir</button>
                 </div>
             </div>
         </div>`;
     }).join("");
 }
 
-// RESTAURANDO AS CHAMADAS QUE VOCÊ TINHA NO FINAL
+// MAPEAMENTO GLOBAL (PARA OS BOTÕES DO HTML FUNCIONAREM)
 window.navegar = navegar;
 window.abrirModal = abrirModal;
 window.abrirEdicao = (id) => abrirModal(id);
