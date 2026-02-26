@@ -209,23 +209,41 @@ window.darBlock = (id) => {
 
 // SORTEIO (CORRIGIDO PARA FILMES E DINÂMICO)
 window.sortearFilme = function() {
+    // Filtra filmes do casal que estão na lista "Quero Assistir"
     const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
-    if (opcoes.length === 0) return alert("Adicione filmes para o Casal na lista 'Quero Assistir' para sortear!");
     
-    const sorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
+    const modalSorteio = document.getElementById("modal-sorteio");
     const container = document.getElementById("container-sorteado");
+
+    // Mostra o modal primeiro
+    modalSorteio.style.display = "flex";
+
+    if (opcoes.length === 0) {
+        // Em vez de alert, injeta o aviso direto no HTML do modal
+        container.innerHTML = `
+            <div style="padding: 20px;">
+                <h2 style="color: #ef4444;">Ops! 🍿</h2>
+                <p style="color: #94a3b8; margin: 15px 0;">Não encontramos filmes do <b>Casal</b> na lista <b>"Quero Assistir"</b>.</p>
+                <p style="font-size: 13px; color: gray;">Adicione novos filmes ou mude o dono para "Casal" para poder sortear.</p>
+                <button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'" style="margin-top:20px; color: #3b82f6; font-weight: bold; cursor:pointer;">Entendido</button>
+            </div>
+        `;
+        return;
+    }
+
+    // Se houver filmes, segue o sorteio normal
+    const sorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
     
     container.innerHTML = `
-        <h2 style="color:#3b82f6; font-size:20px;">O que vamos ver?</h2>
-        <img src="${sorteado.imagem}" style="width:180px; border-radius:15px; margin: 15px 0; border: 2px solid #3b82f6;">
-        <h3 style="color:white; margin-bottom:20px;">${sorteado.nome}</h3>
-        <div style="display:flex; flex-direction:column; gap:10px;">
-            <button class="btn-primary" onclick="window.marcarAssistindoSorteado('${sorteado.firebaseId}')">Assistir este agora! ✅</button>
-            <button style="background:none; border:1px solid #94a3b8; color:white; padding:10px; border-radius:8px; cursor:pointer;" onclick="window.sortearFilme()">Sortear outro 🎲</button>
-            <button style="background:none; border:none; color:gray; cursor:pointer;" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
+        <h2 style="color:#3b82f6;">O escolhido foi:</h2>
+        <img src="${sorteado.imagem}" style="width:100%; max-width:200px; border-radius:15px; margin: 15px 0; border: 2px solid #3b82f6;">
+        <h3 style="color:white;">${sorteado.nome}</h3>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+            <button class="btn-primary" onclick="window.marcarAssistindoSorteado('${sorteado.firebaseId}')">Assistir este! ✅</button>
+            <button class="btn-cancel" onclick="window.sortearFilme()">Sortear outro 🎲</button>
+            <button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
         </div>
     `;
-    document.getElementById("modal-sorteio").style.display = "flex";
 };
 
 window.marcarAssistindoSorteado = async (id) => {
@@ -236,3 +254,4 @@ window.marcarAssistindoSorteado = async (id) => {
 };
 
 iniciarApp();
+
