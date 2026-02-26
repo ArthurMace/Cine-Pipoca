@@ -117,17 +117,35 @@ function render() {
         return pertence && i.nome.toLowerCase().includes(busca);
     });
 
-    if (paginaAtual === "home") {
+if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
         const finalizados = filtrados.filter(i => i.status === "assistido");
         const quero = filtrados.filter(i => i.status === "quero");
 
+        // NOVA LÓGICA: Sugestões do outro perfil (Tinder de Filmes)
+        const outroPerfil = perfilAtivo === 'arthur' ? 'day' : 'arthur';
+        const escondidos = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
+        
+        const sugestoesOutro = data.filter(i => 
+            i.dono === outroPerfil && 
+            !escondidos.includes(i.firebaseId)
+        );
+
         containers.home.innerHTML = `
             ${assistindo.length ? `<h3>📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
+            
+            ${sugestoesOutro.length ? `
+                <div class="secao-sugestoes">
+                    <h3>💡 Sugestões de ${outroPerfil === 'day' ? 'Daiane' : 'Arthur'}</h3>
+                    <div class="carrossel">${renderSugestoes(sugestoesOutro)}</div>
+                </div>
+            ` : ''}
+
             ${quero.length ? `<h3>⭐ Minha Lista</h3><div class="carrossel">${renderCards(quero)}</div>` : ''}
             ${finalizados.length ? `<h3>✅ Já Finalizados</h3><div class="carrossel">${renderCards(finalizados)}</div>` : ''}
         `;
     } else {
+        // ESSA PARTE É PARA AS ABAS: SÉRIES, FILMES E QUERO ASSISTIR
         const divAlvo = paginaAtual === "series" ? containers.series : paginaAtual === "filmes" ? containers.filmes : containers.quero;
         const listaAbas = filtrados.filter(i => {
             if (paginaAtual === "series") return i.tipo === "serie";
@@ -136,7 +154,6 @@ function render() {
         });
         divAlvo.innerHTML = `<div class="grid-comum">${renderCards(listaAbas)}</div>`;
     }
-}
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
@@ -179,5 +196,42 @@ window.finalizarItem = function(id) {
         atualizarCamposModal();
     }
 }
+// Função para aceitar ver junto (Vira Casal)
+window.darMatch = async function(id) {
+    const item = data.find(i => i.firebaseId === id);
+    if (item) {
+        item.dono = 'casal';
+        await updateItem(id, { dono: 'casal' });
+        data = await getData();
+        render();
+    }
+}
+
+// Função para recusar (Soma da vista da pessoa atual)
+window.darBlock = async function(id) {
+    const item = data.find(i => i.firebaseId === id);
+    if (item) {
+        // Criamos uma lista de 'escondidos' no localStorage para não precisar mexer no Firebase agora
+        let escondidos = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
+        escondidos.push(id);
+        localStorage.setItem('escondidos_' + perfilAtivo, JSON.stringify(escondidos));
+        render();
+    }
+}
+function renderSugestoes(lista) {
+    return lista.map(item => `
+        <div class="card card-sugestao">
+            <img src="${item.imagem}">
+            <div class="overlay-sugestao">
+                <p class="pergunta-sugestao">Ver com ${perfilAtivo === 'arthur' ? 'a Day' : 'o Arthur'}?</p>
+                <div class="botoes-sugestao">
+                    <button class="btn-match" onclick="darMatch('${item.firebaseId}')" title="Bora ver!">🍿</button>
+                    <button class="btn-match" onclick="darBlock('${item.firebaseId}')" title="Não quero">🚫</button>
+                </div>
+            </div>
+        </div>
+    `).join("");
+}
 
 iniciarApp();
+
