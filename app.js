@@ -7,23 +7,36 @@ let perfilAtivo = null;
 // Função para selecionar perfil no início
 function selecionarPerfil(nome) {
     perfilAtivo = nome;
+    
+    // Esconde o modal de perfil
     document.getElementById('modal-perfil').style.display = 'none';
     
-    // Altera o título para dar o toque pessoal
-    document.querySelector('h1').innerHTML = `🎬 Cine Pipoca - ${nome === 'arthur' ? '🤵‍♂️' : '👰‍♀️'}`;
+    // Mostra o conteúdo do site (caso estivesse escondido)
+    document.querySelector('header').style.opacity = "1";
+    document.querySelector('main').style.opacity = "1";
+    document.querySelector('.search-box').style.opacity = "1";
     
-    render(); // Desenha a tela após escolher o perfil
-}
-
-async function iniciarApp() {
-    data = await getData();
-    // O render só acontece agora depois que selecionarPerfil for chamado
-}
-
-function navegar(pagina) {
-    paginaAtual = pagina;
+    // Atualiza o título com o emoji e o nome
+    const emoji = nome === 'arthur' ? '🤵‍♂️' : '👰‍♀️';
+    document.getElementById('titulo-app').innerHTML = `🎬 Cine Pipoca - ${emoji}`;
+    
     render();
 }
+
+// NOVA FUNÇÃO: Para voltar à tela de seleção
+function resetarPerfil() {
+    perfilAtivo = null;
+    // Mostra o modal novamente
+    document.getElementById('modal-perfil').style.display = 'flex';
+    
+    // Opcional: esconde o fundo para focar só nos perfis
+    document.querySelector('header').style.opacity = "0";
+    document.querySelector('main').style.opacity = "0";
+    document.querySelector('.search-box').style.opacity = "0";
+}
+
+// Exponha a função para o HTML
+window.resetarPerfil = resetarPerfil;
 
 function atualizarCamposModal() {
     const tipo = document.getElementById("tipo").value;
@@ -195,3 +208,4 @@ window.toggleRatingFields = atualizarCamposModal;
 window.render = render;
 
 iniciarApp();
+
