@@ -38,13 +38,14 @@ window.toggleSerieFields = function() {
     const tipo = document.getElementById("tipo").value;
     const status = document.getElementById("status").value;
     
-    // Mostra temporada/episódio se for série
+    // Mostra temporada/episódio se for série (Mantido original)
     document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
     
-    // Mostra notas/comentário se o status for 'Já Assisti'
-    document.getElementById("campos-finalizacao").style.display = (status === "assistido") ? "block" : "none";
-};
-
+    // Mostra notas/comentário se o status for 'Já Assisti' OU 'Aguardando Notas'
+    // Adicionei o (status === "avaliacao") para o modal abrir os campos de nota também nesse caso.
+    const deveMostrarNotas = (status === "assistido" || status === "avaliacao");
+    document.getElementById("campos-finalizacao").style.display = deveMostrarNotas ? "block" : "none";
+};;
 // ABRIR E FECHAR MODAL
 window.abrirModal = function(id = null) {
     limparModal();
@@ -302,5 +303,6 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
 
 
