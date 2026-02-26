@@ -2,10 +2,22 @@ import { getData, addItem, updateItem, deleteItem } from "./storage.js";
 
 let data = [];
 let paginaAtual = "home";
+let perfilAtivo = null;
+
+// Função para selecionar perfil no início
+function selecionarPerfil(nome) {
+    perfilAtivo = nome;
+    document.getElementById('modal-perfil').style.display = 'none';
+    
+    // Altera o título para dar o toque pessoal
+    document.querySelector('h1').innerHTML = `🎬 Cine Pipoca - ${nome === 'arthur' ? '🤵‍♂️' : '👰‍♀️'}`;
+    
+    render(); // Desenha a tela após escolher o perfil
+}
 
 async function iniciarApp() {
     data = await getData();
-    render();
+    // O render só acontece agora depois que selecionarPerfil for chamado
 }
 
 function navegar(pagina) {
@@ -31,6 +43,7 @@ function abrirModal(id = null) {
         document.getElementById("imagem").value = item.imagem;
         document.getElementById("tipo").value = item.tipo;
         document.getElementById("status").value = item.status;
+        document.getElementById("dono").value = item.dono || "casal"; // Carrega o dono atual
         document.getElementById("temporada").value = item.temporada || "";
         document.getElementById("episodio").value = item.episodio || "";
         document.getElementById("notaA").value = item.notas?.arthur || "";
@@ -39,6 +52,7 @@ function abrirModal(id = null) {
         document.getElementById("comD").value = item.comentarios?.daiane || "";
     } else {
         document.getElementById("modal-title").innerText = "Adicionar Novo";
+        document.getElementById("dono").value = "casal"; // Padrão para novos
     }
     atualizarCamposModal();
 }
@@ -47,10 +61,12 @@ function fecharModal() { document.getElementById("modal").style.display = "none"
 
 function limparModal() {
     const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comA", "comD"];
-    ids.forEach(id => document.getElementById(id).value = "");
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = "";
+    });
 }
 
-// MANTIDO O NOME 'adicionar' PARA NÃO QUEBRAR O SEU HTML
 async function adicionar() {
     const id = document.getElementById("item-id-hidden").value;
     const itemDados = {
@@ -58,6 +74,7 @@ async function adicionar() {
         imagem: document.getElementById("imagem").value,
         tipo: document.getElementById("tipo").value,
         status: document.getElementById("status").value,
+        dono: document.getElementById("dono").value, // SALVANDO O DONO
         temporada: document.getElementById("temporada").value || null,
         episodio: document.getElementById("episodio").value || null,
         notas: { arthur: document.getElementById("notaA").value || null, daiane: document.getElementById("notaD").value || null },
@@ -65,17 +82,22 @@ async function adicionar() {
     };
     id ? await updateItem(id, itemDados) : await addItem(itemDados);
     fecharModal();
-    iniciarApp();
+    // Recarregar dados para refletir as mudanças
+    data = await getData();
+    render();
 }
 
 async function excluir(id) {
     if (confirm("Tem certeza que deseja excluir?")) {
         await deleteItem(id);
-        iniciarApp();
+        data = await getData();
+        render();
     }
 }
 
 function render() {
+    if (!perfilAtivo) return; // Não renderiza nada se não escolheu perfil
+
     const containers = {
         home: document.getElementById("home"),
         series: document.getElementById("series"),
@@ -87,7 +109,13 @@ function render() {
     document.getElementById("page-" + paginaAtual).style.display = "block";
 
     const busca = document.getElementById("busca").value.toLowerCase();
-    const filtrados = data.filter(i => i.nome.toLowerCase().includes(busca));
+    
+    // FILTRO DE PERFIL + BUSCA
+    const filtrados = data.filter(i => {
+        const pertenceAoPerfil = (i.dono === perfilAtivo || i.dono === 'casal' || !i.dono);
+        const combinaBusca = i.nome.toLowerCase().includes(busca);
+        return pertenceAoPerfil && combinaBusca;
+    });
 
     if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
@@ -109,46 +137,31 @@ function render() {
         divAlvo.innerHTML = `<div class="grid-comum">${renderCards(listaAbas)}</div>`;
     }
 }
-// Função para preparar o item para ser finalizado
-window.finalizarItem = function(id) {
-    const item = data.find(i => i.firebaseId === id);
-    if (item) {
-        abrirModal(id); // Abre o modal com os dados
-        document.getElementById("status").value = "assistido"; // Muda para assistido
-        atualizarCamposModal(); // Faz aparecer os campos de nota automaticamente
-        document.getElementById("modal-title").innerText = "Finalizar: " + item.nome;
-    }
-}
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
     
     return lista.map(item => {
-        // Verifica se está finalizado para aplicar a trava e a tarja do CSS
         const estaFinalizado = item.status === 'assistido';
+        const emojiDono = item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿');
         
         return `
         <div class="card ${estaFinalizado ? 'card-finalizado' : ''}">
+            <div class="perfil-tag">${emojiDono}</div>
             ${!estaFinalizado ? `<button class="btn-edit" onclick="abrirEdicao('${item.firebaseId}')">✏️</button>` : ''}
             
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
             
             <div class="info">
                 <b>${item.nome}</b>
-                
-                ${item.tipo === 'serie' ? `
-                    <div class="temp-badge">T${item.temporada || '1'} • E${item.episodio || '1'}</div>
-                ` : ''}
-                
+                ${item.tipo === 'serie' ? `<div class="temp-badge">T${item.temporada || '1'} • E${item.episodio || '1'}</div>` : ''}
                 ${estaFinalizado ? `
                     <div style="font-size:10px; color:#3b82f6; font-weight:bold; margin-bottom: 5px;">
                         ⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}
                     </div>
                 ` : ''}
-
                 <div style="display: ${estaFinalizado ? 'none' : 'flex'}; gap: 5px; margin-top: 8px; width: 90%; justify-content: center;">
                     <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; flex:1; cursor:pointer; padding:8px; font-size: 14px; display: flex; align-items: center; justify-content: center;">✅</button>
-                    
                     <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="flex:1; margin-top:0; padding:8px; display: flex; align-items: center; justify-content: center;">Excluir</button>
                 </div>
             </div>
@@ -157,12 +170,12 @@ function renderCards(lista) {
     }).join("");
 }
 
-// Garanta que esta função esteja EXATAMENTE assim no seu app.js
+// Funções globais
+window.selecionarPerfil = selecionarPerfil;
 window.finalizarItem = function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (item) {
         abrirModal(id); 
-        // Forçamos o valor para o select de status
         const selectStatus = document.getElementById("status");
         if(selectStatus) {
             selectStatus.value = "assistido";
@@ -171,7 +184,6 @@ window.finalizarItem = function(id) {
         document.getElementById("modal-title").innerText = "Finalizar: " + item.nome;
     }
 }
-
 window.navegar = navegar;
 window.abrirModal = abrirModal;
 window.abrirEdicao = (id) => abrirModal(id);
@@ -183,13 +195,3 @@ window.toggleRatingFields = atualizarCamposModal;
 window.render = render;
 
 iniciarApp();
-
-
-
-
-
-
-
-
-
-
