@@ -1,25 +1,94 @@
-body { background-color: #0b101b; color: white; font-family: sans-serif; margin: 0; }
-header { background-color: #0f172a; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-header nav { display: flex; gap: 10px; }
-header nav button { background-color: #1e293b; color: white; border: 1px solid #334155; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
-.btn-add-novo { background-color: #3b82f6 !important; width: 40px; height: 40px; border-radius: 50% !important; border: none; font-size: 24px; color: white; cursor: pointer; }
+/* --- GERAL --- */
+body { background-color: #0b101b; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
 
+/* --- HEADER --- */
+header { 
+    background-color: #0f172a; padding: 15px 5%; display: flex; 
+    justify-content: space-between; align-items: center; 
+    position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+header h1 { margin: 0; font-size: 1.2rem; color: #3b82f6; }
+header nav { display: flex; gap: 10px; align-items: center; }
+
+header nav button {
+    background-color: #1e293b; color: #e2e8f0; border: 1px solid #334155;
+    padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 11px;
+    font-weight: bold; text-transform: uppercase; transition: 0.3s;
+}
+header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
+
+.btn-add-novo {
+    background-color: #3b82f6 !important; width: 42px; height: 42px; 
+    border-radius: 50% !important; border: none; font-size: 24px; color: white;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* --- BUSCA --- */
+.search-box { text-align: center; padding: 25px 10px; }
+.search-box input {
+    width: 85%; max-width: 500px; padding: 12px 20px; border-radius: 30px;
+    border: 1px solid #334155; background: #1f2937; color: white; text-align: center; outline: none;
+}
+
+/* --- GRIDS E CARDS --- */
+.section-title { padding: 0 5%; margin-top: 30px; font-size: 1.2rem; color: #94a3b8; }
 .grid-comum { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
-.carrossel { display: flex; overflow-x: auto; gap: 15px; padding: 20px 5%; }
-.card { flex: 0 0 160px; background: #1f2937; border-radius: 12px; overflow: hidden; position: relative; }
-.card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+.carrossel { display: flex; overflow-x: auto; gap: 15px; padding: 10px 5% 20px 5%; scroll-behavior: smooth; }
+.carrossel::-webkit-scrollbar { display: none; }
 
-.perfil-tag { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; z-index: 10; }
-.btn-edit { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; color: white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+.card { 
+    flex: 0 0 155px; background: #1f2937; border-radius: 12px; 
+    overflow: hidden; position: relative; transition: 0.3s; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+.card:hover { transform: translateY(-5px); }
+.card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
 
-.info { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; text-align: center; padding: 10px; }
+/* ELEMENTOS DENTRO DO CARD */
+.perfil-tag { 
+    position: absolute; top: 8px; left: 8px; background: rgba(15, 23, 42, 0.8);
+    border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 10;
+}
+.btn-edit { 
+    position: absolute; top: 8px; right: 8px; background: rgba(15, 23, 42, 0.8);
+    border: none; color: white; border-radius: 50%; width: 30px; height: 30px; 
+    cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
+}
+
+.info { 
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(15, 23, 42, 0.92); display: flex; flex-direction: column; 
+    justify-content: center; align-items: center; opacity: 0; transition: 0.3s; padding: 10px; text-align: center;
+}
 .card:hover .info { opacity: 1; }
+.btn-del { background: #ef4444; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 11px; }
 
-.modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-.modal-content { background: #1e293b; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; }
-.modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-.btn-primary { width: 100%; padding: 12px; background: #3b82f6; border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; }
-.btn-cancelar { width: 100%; background: none; border: none; color: gray; margin-top: 10px; cursor: pointer; }
+/* --- TINDER CARD --- */
+.tinder-card { border: 2px solid #3b82f6; }
+.info-tinder { 
+    position: absolute; bottom: 0; width: 100%; background: linear-gradient(transparent, #0f172a);
+    padding: 10px; text-align: center;
+}
+.tinder-btns { display: flex; justify-content: center; gap: 15px; margin-top: 5px; }
+.tinder-btns button { background: none; border: none; font-size: 28px; cursor: pointer; transition: 0.2s; }
+.tinder-btns button:hover { transform: scale(1.2); }
 
-.floating-dice { position: fixed; bottom: 25px; right: 25px; font-size: 40px; cursor: pointer; z-index: 1000; }
-.overlay-perfil { position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+/* --- MODAIS --- */
+.overlay-perfil { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+.perfil { text-align: center; cursor: pointer; transition: 0.3s; }
+.perfil:hover { transform: scale(1.1); }
+.avatar { font-size: 80px; display: block; }
+
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+.modal-content { background: #1e293b; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.modal-content label { font-size: 12px; color: #94a3b8; display: block; margin-top: 10px; }
+.modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+
+.flex-row { display: flex; gap: 10px; }
+.modal-btns { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.btn-primary { background: #3b82f6; border: none; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.btn-cancel { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 13px; }
+
+/* --- DADO --- */
+.floating-dice { position: fixed; bottom: 30px; right: 30px; font-size: 45px; cursor: pointer; z-index: 1000; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); transition: 0.3s; }
+.floating-dice:hover { transform: rotate(20deg) scale(1.1); }
