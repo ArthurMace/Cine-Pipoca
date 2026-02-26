@@ -1,13 +1,13 @@
-/* 1. RESET E FUNDO */
+/* FUNDO E GERAL */
 body { 
     background-color: #0b101b; 
     color: white; 
-    font-family: 'Segoe UI', Roboto, sans-serif; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     margin: 0; 
-    overflow-x: hidden; 
+    padding: 0;
 }
 
-/* 2. HEADER E MENU (AQUI ESTÁ A MUDANÇA) */
+/* HEADER E MENU SUPERIOR */
 header { 
     background-color: #0f172a; 
     padding: 15px 4%; 
@@ -20,39 +20,35 @@ header {
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-header h1 { margin: 0; font-size: 1.2rem; color: #3b82f6; cursor: pointer; }
+header nav { display: flex; align-items: center; gap: 10px; }
 
-header nav { display: flex; align-items: center; gap: 8px; }
-
-/* BOTÕES DO MENU (ADEUS BRANCO QUADRADO!) */
+/* ESTILO DOS BOTÕES DO MENU (ADEUS BRANCO QUADRADO) */
 header nav button {
-    background-color: #1e293b; /* Cinza Escuro */
+    background-color: #1e293b;
     color: #e2e8f0;
     border: 1px solid #334155;
-    padding: 8px 14px;
-    border-radius: 20px; /* Formato Pílula */
+    padding: 8px 16px;
+    border-radius: 20px; /* Arredondado estilo pílula */
     cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
+    font-size: 13px;
+    font-weight: 600;
     transition: 0.3s;
-    text-transform: uppercase;
 }
 
 header nav button:hover {
     background-color: #334155;
     border-color: #3b82f6;
-    color: white;
 }
 
-/* BOTÃO DE MAIS (+) AZUL E REDONDO */
+/* BOTÃO DE MAIS (+) */
 .btn-add-novo {
     background-color: #3b82f6 !important;
     color: white !important;
     border: none !important;
-    width: 38px;
-    height: 38px;
-    border-radius: 50% !important;
-    font-size: 22px !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 50% !important; /* Redondo */
+    font-size: 24px !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -60,34 +56,57 @@ header nav button:hover {
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-/* 3. BUSCA E CARDS */
+/* BUSCA */
 .search-box { text-align: center; padding: 20px; }
 .search-box input { 
-    width: 80%; max-width: 400px; padding: 12px; 
+    width: 80%; max-width: 500px; padding: 12px 20px; 
     border-radius: 25px; border: 1px solid #333; 
-    background: #1f2937; color: white; text-align: center;
+    background: #1f2937; color: white; text-align: center; outline: none;
 }
 
-.grid-comum { 
+/* CARDS E GRIDS */
+.grid, .grid-container, .grid-comum { 
     display: flex; flex-wrap: wrap; justify-content: center; 
     gap: 20px; padding: 20px; 
 }
+
+.carrossel { display: flex; overflow-x: auto; gap: 15px; padding: 10px 4%; }
+.carrossel::-webkit-scrollbar { display: none; }
 
 .card { 
     flex: 0 0 160px; background: #1f2937; border-radius: 12px; 
     overflow: hidden; position: relative; transition: 0.3s;
 }
-.card:hover { transform: scale(1.05); }
 .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
 
 .info { 
     position: absolute; top:0; left:0; width:100%; height:100%;
     background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
     justify-content: center; align-items: center; opacity: 0; transition: 0.3s;
+    text-align: center; padding: 10px; box-sizing: border-box;
 }
 .card:hover .info { opacity: 1; }
 
-/* 4. DADO E MODAIS */
+/* MODAIS */
+.modal {
+    display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+    width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+}
+.modal-content {
+    background-color: #1e293b; margin: 5% auto; padding: 20px;
+    border-radius: 15px; width: 90%; max-width: 400px;
+}
+.modal-content input, .modal-content select {
+    width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px;
+    border: 1px solid #334155; background: #0f172a; color: white;
+}
+
+.btn-primary { 
+    background: #3b82f6; color: white; border: none; padding: 12px; 
+    border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
+}
+
+/* DADO */
 .floating-dice {
     position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
     background: #1e293b; border-radius: 50%; display: flex;
@@ -95,19 +114,11 @@ header nav button:hover {
     cursor: grab; z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-.overlay-sorteio {
-    display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-    z-index: 10001; align-items: center; justify-content: center;
+/* PERFIL */
+.overlay-perfil {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center;
 }
-
-.btn-primary { 
-    background: #3b82f6; color: white; border: none; padding: 12px; 
-    border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;
-}
-
-.card-finalizado::after {
-    content: "ASSISTIDO"; position: absolute; top: 15px; right: -30px;
-    background: #1e293b; color: #3b82f6; font-size: 10px;
-    padding: 5px 35px; transform: rotate(45deg); border: 1px solid #3b82f6;
-}
+.opcoes-perfil { display: flex; gap: 30px; }
+.perfil { text-align: center; cursor: pointer; }
+.emoji-perfil { font-size: 60px; display: block; }
