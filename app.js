@@ -189,7 +189,7 @@ window.render = function() {
     if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
         const quero = filtrados.filter(i => i.status === "quero");
-        const aguardando = filtrados.filter(i => i.status === "avaliacao"); // ADICIONADO
+        const aguardando = filtrados.filter(i => i.status === "avaliacao");
         const jaAssistidos = filtrados.filter(i => i.status === "assistido"); 
         
         const outroPerfil = (perfilAtivo === 'arthur') ? 'day' : 'arthur';
@@ -205,9 +205,13 @@ window.render = function() {
             ` : ''}
 
             ${sugestoes.length ? `<h3 class="section-title">💡 Tinder (Sugestões de ${outroPerfil})</h3><div class="carrossel">${renderSugestoes(sugestoes)}</div>` : ''}
-            <h3 class="section-title">⭐ Nossa Lista</h3><div class="grid-comum">${renderCards(quero)}</div>
+            
+            <h3 class="section-title">⭐ Nossa Lista</h3>
+            <div class="carrossel">${renderCards(quero)}</div>
+            
             ${jaAssistidos.length ? `<h3 class="section-title">✅ Já Assistidos</h3><div class="carrossel">${renderCards(jaAssistidos)}</div>` : ''}
         `;
+    }
     } else {
         // MANTIVE TODA A SUA LÓGICA DE FILMES E SÉRIES ABAIXO
         let listaFinal = [];
@@ -364,6 +368,7 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
 
 
 
