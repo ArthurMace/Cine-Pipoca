@@ -10,14 +10,14 @@
 
 <div id="modal-perfil" class="overlay-perfil">
     <div class="perfil-content">
-        <h2 style="text-align:center; margin-bottom:20px;">Quem está assistindo?</h2>
+        <h2 style="text-align:center; margin-bottom: 20px;">Quem está assistindo?</h2>
         <div style="display: flex; gap: 40px; justify-content: center;">
             <div class="perfil" onclick="selecionarPerfil('arthur')">
-                <span style="font-size: 70px; cursor:pointer;">🤵‍♂️</span>
+                <span style="font-size: 70px; cursor: pointer;">🤵‍♂️</span>
                 <p>Arthur</p>
             </div>
             <div class="perfil" onclick="selecionarPerfil('day')">
-                <span style="font-size: 70px; cursor:pointer;">👰‍♀️</span>
+                <span style="font-size: 70px; cursor: pointer;">👰‍♀️</span>
                 <p>Day</p>
             </div>
         </div>
@@ -25,7 +25,7 @@
 </div>
 
 <header>
-    <div onclick="resetarPerfil()" style="cursor:pointer;">
+    <div onclick="resetarPerfil()" style="cursor:pointer; display: flex; align-items: center; gap: 10px;">
         <h1 id="titulo-app">🎬 Cine Pipoca</h1>
     </div>
     <nav>
@@ -38,7 +38,7 @@
 </header>
 
 <section class="search-box">
-    <input id="busca" placeholder="Buscar no nosso acervo..." onkeyup="render()">
+    <input id="busca" type="text" placeholder="Buscar no nosso acervo..." onkeyup="render()">
 </section>
 
 <main>
@@ -46,15 +46,15 @@
         <div id="home"></div>
     </div>
     <div id="page-series" class="page" style="display:none;">
-        <h2 style="padding-left: 5%;">📺 Nossas Séries</h2>
+        <h2 style="padding: 20px 5%;">📺 Nossas Séries</h2>
         <div id="series" class="grid-comum"></div>
     </div>
     <div id="page-filmes" class="page" style="display:none;">
-        <h2 style="padding-left: 5%;">🎬 Nossos Filmes</h2>
+        <h2 style="padding: 20px 5%;">🎬 Nossos Filmes</h2>
         <div id="filmes" class="grid-comum"></div>
     </div>
     <div id="page-quero" class="page" style="display:none;">
-        <h2 style="padding-left: 5%;">⭐ Quero Assistir</h2>
+        <h2 style="padding: 20px 5%;">⭐ Quero Assistir</h2>
         <div id="queroList" class="grid-comum"></div>
     </div>
 </main>
@@ -62,8 +62,9 @@
 <div id="modal" class="modal" style="display:none;">
     <div class="modal-content">
         <h2 id="modal-title">Adicionar Novo</h2>
-        <input id="nome" placeholder="Nome">
-        <input id="imagem" placeholder="URL da Imagem">
+        <input type="hidden" id="item-id-hidden">
+        <input id="nome" type="text" placeholder="Nome">
+        <input id="imagem" type="text" placeholder="URL da Imagem">
         
         <select id="dono">
             <option value="casal">🍿 Casal</option>
@@ -83,17 +84,18 @@
         </select>
 
         <div id="serie-fields" style="display:none; gap: 10px;">
-            <input id="temporada" type="number" placeholder="Temp." style="width:48%;">
-            <input id="episodio" type="number" placeholder="Ep." style="width:48%;">
+            <input id="temporada" type="number" placeholder="Temp." style="width: 48%;">
+            <input id="episodio" type="number" placeholder="Ep." style="width: 48%;">
         </div>
 
         <div id="campos-finalizacao" style="display:none;">
-            <input id="notaA" type="number" placeholder="Nota Arthur (1-5)">
-            <input id="notaD" type="number" placeholder="Nota Day (1-5)">
+            <div style="display: flex; gap: 10px;">
+                <input id="notaA" type="number" placeholder="Nota Arthur (1-5)">
+                <input id="notaD" type="number" placeholder="Nota Day (1-5)">
+            </div>
         </div>
 
-        <input type="hidden" id="item-id-hidden">
-        <button class="btn-primary" onclick="adicionar()">Salvar</button>
+        <button class="btn-primary" onclick="adicionar()">Salvar no Firebase</button>
         <button onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
     </div>
 </div>
@@ -101,8 +103,7 @@
 <div id="dado-flutuante" class="floating-dice" onclick="sortearFilme()">🎲</div>
 
 <div id="modal-sorteio" class="overlay-perfil" style="display:none;" onclick="this.style.display='none'">
-    <div id="container-sorteado" class="modal-content" style="text-align:center;">
-        </div>
+    <div id="container-sorteado" class="modal-content" style="text-align:center;"></div>
 </div>
 
 <script type="module" src="app.js"></script>
