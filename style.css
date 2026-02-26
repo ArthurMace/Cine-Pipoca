@@ -1,62 +1,104 @@
-body { background-color: #0b101b; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; }
+/* FUNDO E FONTE */
+body { 
+    background-color: #0b101b; 
+    color: white; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0; 
+    overflow-x: hidden; 
+}
 
+/* HEADER E MENU (BOTÕES DARK E ARREDONDADOS) */
 header { 
-    background-color: #0f172a; padding: 15px 4%; display: flex; 
-    justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000;
+    background-color: #0f172a; 
+    padding: 15px 4%; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    position: sticky; 
+    top: 0; 
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
+header h1 { margin: 0; font-size: 1.2rem; color: #3b82f6; cursor: pointer; }
+header nav { display: flex; align-items: center; gap: 10px; }
 
-header nav { display: flex; align-items: center; gap: 8px; }
-
-/* BOTÕES NAVEGAÇÃO ARREDONDADOS */
+/* BOTÕES ESTILO PÍLULA */
 header nav button {
-    background-color: #1e293b; color: #e2e8f0; border: 1px solid #334155;
-    padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold;
+    background-color: #1e293b; 
+    color: #e2e8f0; 
+    border: 1px solid #334155;
+    padding: 8px 16px; 
+    border-radius: 20px; 
+    cursor: pointer; 
+    font-size: 12px; 
+    font-weight: bold;
+    transition: 0.3s;
 }
+header nav button:hover { background-color: #334155; border-color: #3b82f6; }
 
+/* BOTÃO MAIS (+) AZUL CIRCULAR */
 .btn-add-novo {
-    background-color: #3b82f6 !important; width: 40px; height: 40px; border-radius: 50% !important;
-    border: none; color: white; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    background-color: #3b82f6 !important; 
+    color: white !important; 
+    width: 42px; height: 42px; 
+    border-radius: 50% !important; 
+    border: none !important;
+    font-size: 24px !important; 
+    display: flex; align-items: center; justify-content: center;
 }
 
-/* CARDS COM ÍCONES E LÁPIS */
-.grid-comum, .carrossel { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
-.carrossel { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; }
+/* BUSCA */
+.search-box { text-align: center; padding: 20px; }
+.search-box input { 
+    width: 85%; max-width: 450px; padding: 12px; 
+    border-radius: 25px; border: 1px solid #333; 
+    background: #1f2937; color: white; text-align: center; outline: none;
+}
+
+/* CARDS COM LÁPIS E TAGS */
+.grid-comum, .grid, .grid-container { 
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; 
+}
+.carrossel { display: flex; overflow-x: auto; gap: 15px; padding: 10px 4%; scroll-behavior: smooth; }
+.carrossel::-webkit-scrollbar { display: none; }
 
 .card { 
-    flex: 0 0 160px; background: #1f2937; border-radius: 12px; overflow: hidden; 
-    position: relative; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    flex: 0 0 160px; background: #1f2937; border-radius: 12px; 
+    overflow: hidden; position: relative; transition: 0.3s;
 }
-
 .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
 
-/* ÍCONE DE DONO (🤵‍♂️/👰‍♀️/🍿) */
+/* TAG DO DONO (🤵‍♂️/👰‍♀️/🍿) */
 .perfil-tag { 
     position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); 
-    border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; z-index: 10;
+    border-radius: 50%; width: 28px; height: 28px; display: flex; 
+    align-items: center; justify-content: center; z-index: 10; font-size: 14px;
 }
 
-/* BOTÃO LÁPIS EDIÇÃO */
+/* BOTÃO LÁPIS (✏️) */
 .btn-edit { 
     position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); 
     border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 50%; 
-    width: 30px; height: 30px; cursor: pointer; z-index: 10;
+    width: 30px; height: 30px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
 }
 
 .info { 
-    position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85);
-    display: flex; flex-direction: column; justify-content: center; align-items: center; 
-    opacity: 0; transition: 0.3s; padding: 10px; text-align: center;
+    position: absolute; top:0; left:0; width:100%; height:100%; 
+    background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
+    justify-content: center; align-items: center; opacity: 0; transition: 0.3s;
 }
 .card:hover .info { opacity: 1; }
 
-/* DADO E MODAIS */
+/* DADO FLUTUANTE */
 .floating-dice {
     position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
     background: #1e293b; border-radius: 50%; display: flex; align-items: center; 
-    justify-content: center; font-size: 30px; cursor: grab; z-index: 9999;
+    justify-content: center; font-size: 30px; cursor: pointer; z-index: 9999; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-.overlay-perfil, .overlay-sorteio {
-    position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b;
-    z-index: 5000; display: flex; align-items: center; justify-content: center;
+/* PERFIL OVERLAY */
+.overlay-perfil {
+    position: fixed; top:0; left:0; width:100%; height:100%; 
+    background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center;
 }
