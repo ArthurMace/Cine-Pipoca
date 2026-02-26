@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cine Pipoca</title>
   
-  <link rel="manifest" href="manifest.json">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <div id="btn-trocar-perfil" class="perfil-selector" onclick="resetarPerfil()">
+     <h1 id="titulo-app" style="margin:0; font-size: 20px;">🎬 Cine Pipoca</h1>
+     <span class="setinha">▼</span>
+  </div>
   
+  <nav>
+    <button onclick="navegar('home')">Home</button>
+    ... botões ...
+  </nav>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -104,3 +109,4 @@
 <script type="module" src="app.js"></script>
 </body>
 </html>
+
