@@ -119,20 +119,44 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
     pointer-events: none; /* Não atrapalha cliques nos botões próximos */
 }
 
-/* O texto "FIM" dentro da tarja */
-
-.tarja-finalizado::after {
-    content: 'ASSISTIDO'; /* Mudado de FIM para ASSISTIDO */
+/* CLASSE DA TARJA DE ASSISTIDO NO CANTO DIREITO (CORRIGIDO) */
+.tarja-finalizado {
     position: absolute;
-    top: -38px; /* Ajustei um pouco para caber a palavra maior */
-    left: 0px;
-    color: white;
-    font-size: 8px; /* Diminuí um pouco a fonte para não cortar */
-    font-weight: bold;
-transform: rotate(-45deg);
-text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    
+    /* Cria o triângulo preenchendo o canto superior direito */
+    border-style: solid;
+    border-width: 0 65px 65px 0; 
+    border-color: transparent rgba(59, 130, 246, 0.95) transparent transparent;
+    
+    z-index: 20;
+    pointer-events: none;
 }
 
+/* O texto "ASSISTIDO" AJUSTADO PARA O LADO DIREITO (CORRIGIDO) */
+.tarja-finalizado::after {
+    content: 'ASSISTIDO';
+    position: absolute;
+    
+    /* Posição calculada para o triângulo 65x65 */
+    top: 12px;
+    right: -62px; 
+    
+    color: white;
+    font-size: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
+    
+    /* Rotação positiva para acompanhar a diagonal da direita */
+    transform: rotate(45deg); 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    
+    width: 70px;
+    text-align: center;
+}
 /* Resto do CSS mantido para não quebrar o visual */
 body { background-color: #0b101b; color: white; font-family: sans-serif; margin: 0; }
 header { background-color: #0f172a; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
@@ -158,6 +182,7 @@ header nav button { background-color: #1e293b; color: white; border: 1px solid #
 
 .floating-dice { position: fixed; bottom: 25px; right: 25px; font-size: 40px; cursor: pointer; z-index: 1000; }
 .overlay-perfil { position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+
 
 
 
