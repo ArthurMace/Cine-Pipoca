@@ -1,3 +1,45 @@
+/* Modal de Perfil ocupando TUDO e centralizado */
+.overlay-perfil {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0b101b; /* Cor escura do site */
+    z-index: 10000; /* Fica na frente de tudo mesmo */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.opcoes-perfil {
+    display: flex;
+    gap: 50px;
+    margin-top: 20px;
+}
+
+/* Estilo para o seletor de perfil no topo (a setinha) */
+.perfil-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.perfil-selector:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.setinha {
+    font-size: 12px;
+    opacity: 0.7;
+}
 overlay-perfil {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: #0b101b; z-index: 9999;
@@ -161,6 +203,7 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 .modal-content { background-color: #181818; margin: 2% auto; padding: 2rem; border-radius: 10px; width: 90%; max-width: 400px; }
 .modal-content input, .modal-content select { width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; background-color: #0b101b; color: white; border: 1px solid #333; }
 .btn-primary { width: 100%; padding: 10px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; color: white; background-color: #3b82f6; }
+
 
 
 
