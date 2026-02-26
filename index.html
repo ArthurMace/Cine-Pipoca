@@ -1,44 +1,44 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cine Pipoca</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cine Pipoca</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="modal-perfil" class="overlay-perfil">
-  <div class="perfil-content">
-    <h2 style="text-align:center;">Quem está assistindo?</h2>
-    <div style="display: flex; gap: 30px;">
-      <div class="perfil" onclick="selecionarPerfil('arthur')">
-        <span style="font-size: 60px;">🤵‍♂️</span>
-        <p>Arthur</p>
-      </div>
-      <div class="perfil" onclick="selecionarPerfil('day')">
-        <span style="font-size: 60px;">👰‍♀️</span>
-        <p>Day</p>
-      </div>
+    <div class="perfil-content">
+        <h2 style="text-align:center;">Quem está assistindo?</h2>
+        <div style="display: flex; gap: 30px; justify-content: center;">
+            <div class="perfil" onclick="selecionarPerfil('arthur')">
+                <span style="font-size: 60px; cursor:pointer;">🤵‍♂️</span>
+                <p>Arthur</p>
+            </div>
+            <div class="perfil" onclick="selecionarPerfil('day')">
+                <span style="font-size: 60px; cursor:pointer;">👰‍♀️</span>
+                <p>Day</p>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <header>
-  <div onclick="resetarPerfil()" style="cursor:pointer; display: flex; align-items: center; gap: 8px;">
-    <h1 id="titulo-app">🎬 Cine Pipoca</h1>
-  </div>
-  <nav>
-    <button onclick="navegar('home')">Home</button>
-    <button onclick="navegar('series')">Séries</button>
-    <button onclick="navegar('filmes')">Filmes</button>
-    <button onclick="navegar('quero')">Quero</button>
-    <button class="btn-add-novo" onclick="abrirModal('add')">+</button>
-  </nav>
+    <div onclick="resetarPerfil()" style="cursor:pointer; display: flex; align-items: center; gap: 8px;">
+        <h1 id="titulo-app">🎬 Cine Pipoca</h1>
+    </div>
+    <nav>
+        <button onclick="navegar('home')">Home</button>
+        <button onclick="navegar('series')">Séries</button>
+        <button onclick="navegar('filmes')">Filmes</button>
+        <button onclick="navegar('quero')">Quero</button>
+        <button class="btn-add-novo" onclick="abrirModal('add')">+</button>
+    </nav>
 </header>
 
 <section class="search-box">
-  <input id="busca" placeholder="Buscar filme ou série..." onkeyup="render()">
+    <input id="busca" placeholder="Buscar filme ou série..." onkeyup="render()">
 </section>
 
 <main>
@@ -59,43 +59,52 @@
     </div>
 </main>
 
-<div id="modal" class="modal">
-    <div class="modal-content">
+<div id="modal" class="modal" style="display:none; position: fixed; z-index: 2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8);">
+    <div class="modal-content" style="background:#1e293b; margin: 5% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 15px;">
         <h2 id="modal-title">Adicionar Novo</h2>
-        <input id="nome" placeholder="Nome do filme ou série">
-        <input id="imagem" placeholder="URL da Imagem">
-        <select id="dono">
+        <input id="nome" placeholder="Nome do filme ou série" style="width:100%; margin: 10px 0; padding: 10px;">
+        <input id="imagem" placeholder="URL da Imagem" style="width:100%; margin: 10px 0; padding: 10px;">
+        
+        <select id="dono" style="width:100%; margin: 10px 0; padding: 10px;">
             <option value="casal">🍿 Casal</option>
             <option value="arthur">🤵‍♂️ Arthur</option>
             <option value="day">👰‍♀️ Day</option>
         </select>
-        <select id="tipo" onchange="toggleSerieFields()">
+        
+        <select id="tipo" onchange="toggleSerieFields()" style="width:100%; margin: 10px 0; padding: 10px;">
             <option value="filme">Filme</option>
             <option value="serie">Série</option>
         </select>
-        <select id="status" onchange="toggleSerieFields()">
+        
+        <select id="status" onchange="toggleSerieFields()" style="width:100%; margin: 10px 0; padding: 10px;">
             <option value="assistindo">Assistindo</option>
             <option value="quero">Quero Assistir</option>
             <option value="assistido">Já Assisti</option>
         </select>
+
         <div id="serie-fields" style="display:none; gap: 10px;">
-            <input id="temporada" type="number" placeholder="Temp.">
-            <input id="episodio" type="number" placeholder="Ep.">
+            <input id="temporada" type="number" placeholder="Temp." style="width:45%; padding:10px;">
+            <input id="episodio" type="number" placeholder="Ep." style="width:45%; padding:10px;">
         </div>
+
         <div id="campos-finalizacao" style="display:none;">
-            <input id="notaA" type="number" placeholder="Nota Arthur (1-5)">
-            <input id="notaD" type="number" placeholder="Nota Day (1-5)">
+            <input id="notaA" type="number" placeholder="Nota Arthur (1-5)" style="width:100%; margin: 5px 0; padding: 10px;">
+            <input id="notaD" type="number" placeholder="Nota Day (1-5)" style="width:100%; margin: 5px 0; padding: 10px;">
         </div>
+
         <input type="hidden" id="item-id-hidden">
-        <button class="btn-primary" onclick="adicionar()">Salvar</button>
-        <button onclick="fecharModal()" style="background:none; border:none; color:gray; width:100%; cursor:pointer; margin-top:10px;">Cancelar</button>
+        <button class="btn-primary" onclick="adicionar()" style="width:100%; padding:15px; background:#3b82f6; border:none; color:white; font-weight:bold; margin-top:10px; border-radius:10px; cursor:pointer;">Salvar</button>
+        <button onclick="fecharModal()" style="width:100%; background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Cancelar</button>
     </div>
 </div>
 
 <div id="dado-flutuante" class="floating-dice" onclick="sortearFilme()">🎲</div>
 
 <div id="modal-sorteio" class="overlay-perfil" style="display:none; background: rgba(0,0,0,0.9);" onclick="this.style.display='none'">
-    <div id="container-sorteado" class="card" style="flex:none; width:280px;"></div>
+    <div id="container-sorteado" style="display:flex; flex-direction:column; align-items:center;">
+        <h2 id="nome-sorteado"></h2>
+        <div id="img-sorteada"></div>
+    </div>
 </div>
 
 <script type="module" src="app.js"></script>
