@@ -119,20 +119,37 @@ window.adicionar = async function() {
 window.finalizarRapido = async function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (!item) return;
-    
-    const nA = prompt(`Nota do Arthur (1 a 5) para "${item.nome}":`, "5");
-    const nD = prompt(`Nota da Day (1 a 5) para "${item.nome}":`, "5");
-    const coment = prompt(`O que acharam do filme?`, "Muito bom!");
 
-    if (nA !== null && nD !== null) {
-        const dadosAtualizados = {
-            ...item,
-            status: 'assistido',
-            notaArthur: nA,
-            notaDay: nD,
-            comentario: coment,
-            ultimaAtualizacao: new Date().getTime()
-        };
+    // Pergunta a nota APENAS para o perfil que está ativo agora
+    const nomeUsuario = perfilAtivo === 'arthur' ? 'Arthur' : 'Day';
+    const nota = prompt(`${nomeUsuario}, dê sua nota (1 a 5) para "${item.nome}":`, "5");
+    const coment = prompt(`Seu comentário individual:`, "");
+
+    if (nota !== null) {
+        let dadosAtualizados = { ...item };
+
+        // Salva os dados na "gaveta" de quem está logado
+        if (perfilAtivo === 'arthur') {
+            dadosAtualizados.notaArthur = nota;
+            dadosAtualizados.comentarioArthur = coment || "";
+        } else if (perfilAtivo === 'day') {
+            dadosAtualizados.notaDay = nota;
+            dadosAtualizados.comentarioDay = coment || "";
+        }
+
+        // VERIFICAÇÃO: Os dois já votaram?
+        // Só finaliza se a nota que já existia no banco E a nota nova estiverem preenchidas
+        if (dadosAtualizados.notaArthur && dadosAtualizados.notaDay) {
+            dadosAtualizados.status = 'assistido';
+            // Junta os comentários para o histórico final
+            const cA = dadosAtualizados.comentarioArthur || "";
+            const cD = dadosAtualizados.comentarioDay || "";
+            dadosAtualizados.comentario = `A: ${cA} | D: ${cD}`;
+        } else {
+            // Se falta uma nota, o status vira "avaliacao"
+            dadosAtualizados.status = 'avaliacao';
+        }
+
         await updateItem(id, dadosAtualizados);
         data = await getData();
         render();
@@ -303,6 +320,7 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
 
 
 
