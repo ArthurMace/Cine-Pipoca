@@ -119,17 +119,20 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
     pointer-events: none; /* Não atrapalha cliques nos botões próximos */
 }
 
-/* O texto "FIM" dentro da tarja */
+/* O texto "ASSISTIDO" dentro da tarja (Versão para o lado DIREITO) */
 .tarja-finalizado::after {
-    content: 'ASSISTIDO'; /* Mudado de FIM para ASSISTIDO */
+    content: 'ASSISTIDO';
     position: absolute;
-    top: -38px; /* Ajustei um pouco para caber a palavra maior */
-    left: 0px;
+    top: 8px;            /* Ajustado para descer um pouco no triângulo */
+    right: -58px;        /* Ajustado para alinhar à direita */
     color: white;
-    font-size: 8px; /* Diminuí um pouco a fonte para não cortar */
+    font-size: 8px;      /* Tamanho ideal para não vazar do triângulo */
     font-weight: bold;
-    transform: rotate(-45deg);
+    text-transform: uppercase;
+    transform: rotate(45deg); /* Rotação invertida (45 positivo) */
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    width: 60px;         /* Define largura para o texto centralizar melhor */
+    text-align: center;
 }
 
 /* Resto do CSS mantido para não quebrar o visual */
@@ -157,6 +160,7 @@ header nav button { background-color: #1e293b; color: white; border: 1px solid #
 
 .floating-dice { position: fixed; bottom: 25px; right: 25px; font-size: 40px; cursor: pointer; z-index: 1000; }
 .overlay-perfil { position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+
 
 
 
