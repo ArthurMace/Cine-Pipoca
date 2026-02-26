@@ -27,6 +27,7 @@
     </div>
   </div>
 </div>
+
 <header>
   <h1>🎬 Cine Pipoca</h1>
   <nav>
@@ -57,6 +58,13 @@
         <input id="nome" placeholder="Nome do filme ou série">
         <input id="imagem" placeholder="URL da Imagem (Poster)">
         
+        <label style="font-size: 12px; color: #3b82f6; margin-top: 10px; display: block;">Para quem é?</label>
+        <select id="dono" style="margin-bottom: 10px; width: 100%;">
+            <option value="casal">🍿 Casal (Ver Juntos)</option>
+            <option value="arthur">🤵‍♂️ Só Arthur</option>
+            <option value="day">👰‍♀️ Só Day</option>
+        </select>
+
         <div class="select-group">
             <select id="tipo" onchange="toggleSerieFields()">
                 <option value="filme">Filme</option>
@@ -85,18 +93,14 @@
                 <input id="notaD" type="number" step="0.5" min="1" max="5" placeholder="5">
                 <input id="comD" placeholder="Comentário Daiane">
             </div>
-            <input type="hidden" id="item-id-hidden">
         </div>
+        
+        <input type="hidden" id="item-id-hidden">
 
         <button id="btn-salvar" class="btn-primary" onclick="adicionar()">Salvar</button>
-        <button id="btn-finalizar" class="btn-primary" style="display:none; background-color: #10b981;" onclick="confirmarFinalizacao()">Finalizar</button>
     </div>
 </div>
 
 <script type="module" src="app.js"></script>
 </body>
 </html>
-
-
-
-
