@@ -89,12 +89,12 @@
         </div>
 
         <label>Status:</label>
-        <select id="status" onchange="toggleSerieFields()">
-            <option value="assistindo">Assistindo</option>
-            <option value="quero">Quero Assistir</option>
-            <option value="assistido">Já Assisti</option>
-        </select>
-
+<select id="status" onchange="toggleSerieFields()">
+    <option value="assistindo">Assistindo</option>
+    <option value="quero">Quero Assistir</option>
+    <option value="avaliacao">⏳ Aguardando Notas</option>
+    <option value="assistido">Já Assisti</option>
+</select>
         <div id="serie-fields" class="flex-row" style="display:none; margin-top:10px;">
             <input id="temporada" type="number" placeholder="Temp.">
             <input id="episodio" type="number" placeholder="Ep.">
@@ -127,4 +127,5 @@
 <script type="module" src="app.js"></script>
 </body>
 </html>
+
 
