@@ -4,24 +4,22 @@ body { background-color: #0b101b; color: white; font-family: 'Segoe UI', sans-se
 header { background-color: rgba(4, 7, 13, 0.95); padding: 1rem 4%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
 header h1 { margin: 0; font-size: 1.5rem; color: #3b82f6; }
 
+/* BARRA DE BUSCA ARREDONDADA */
 .search-box { text-align: center; padding: 1.5rem; }
-.search-box input { width: 50%; max-width: 500px; padding: 0.7rem; border-radius: 20px; border: none; background-color: #1f2937; color: white; text-align: center; }
+.search-box input { width: 80%; max-width: 500px; padding: 12px 20px; border-radius: 25px; border: 1px solid #333; background-color: #1f2937; color: white; text-align: center; outline: none; }
 
 h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 
-/* FLEXBOX PARA CENTRALIZAR TUDO */
+/* FLEXBOX PARA CENTRALIZAR OS CARDS */
 .carrossel { display: flex; overflow-x: auto; gap: 15px; padding: 10px 4% 30px 4%; scroll-behavior: smooth; }
 .carrossel::-webkit-scrollbar { display: none; }
 
 .grid-comum { 
-    display: flex; 
-    flex-wrap: wrap; 
-    justify-content: center; /* Centraliza cards nas abas */
-    gap: 20px; 
-    padding: 20px; 
+    display: flex; flex-wrap: wrap; justify-content: center; 
+    gap: 20px; padding: 20px; 
 }
 
-/* CARDS */
+/* CARDS E INFOS */
 .card { flex: 0 0 160px; background-color: #1f2937; border-radius: 10px; overflow: hidden; position: relative; transition: transform 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 .card:hover { transform: scale(1.05); }
 .card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; }
@@ -33,57 +31,53 @@ h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
 }
 .card:hover .info { opacity: 1; }
 
-/* PERFIL TAG E BOTÕES */
-.perfil-tag { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.6); border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-size: 14px; z-index: 5; }
-.btn-edit { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; cursor: pointer; z-index: 6; padding: 5px; }
+/* ESTILO DOS BOTÕES (VOLTANDO AO BONITO) */
+.btn-primary { 
+    background: #3b82f6; color: white; border: none; padding: 10px 20px; 
+    border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; 
+}
+.btn-primary:hover { background: #2563eb; }
 
-/* BOTÃO FLUTUANTE (DADO) - AJUSTADO DARK OPACO */
+.btn-danger { 
+    background: #ef4444; color: white; border: none; padding: 8px; 
+    border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%;
+}
+
+.btn-edit { 
+    position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); 
+    color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; 
+    width: 30px; height: 30px; cursor: pointer; z-index: 10;
+}
+
+/* DADO FLUTUANTE DARK */
 .floating-dice {
     position: fixed; bottom: 25px; right: 25px; width: 65px; height: 65px;
-    background: #0f172a; /* Azul quase preto opaco */
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 50%;
+    background: #0f172a; border: 1px solid #333; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 30px; cursor: grab; z-index: 9999;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    font-size: 30px; cursor: grab; z-index: 9999; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
 }
 
-/* MODAL DE SORTEIO - CENTRALIZAÇÃO TOTAL */
+/* MODAL DE SORTEIO CENTRALIZADO */
 .overlay-sorteio {
     display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
     z-index: 10001; align-items: center; justify-content: center;
 }
-
 .card-sorteado {
-    width: 90%; max-width: 300px; background: #1e293b; border-radius: 20px;
-    overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.9);
-    animation: decolar 0.4s ease-out;
+    width: 280px; background: #1e293b; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9); border: 1px solid #333;
 }
+.info-sorteio-viva { padding: 20px; text-align: center; }
 
-.info-sorteio-viva { padding: 20px; text-align: center; background: #1e293b; }
+/* BOTÕES DE PERFIL */
+.perfil-tag { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; z-index: 5; }
+.overlay-perfil { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0b101b; z-index: 10005; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.perfil { cursor: pointer; text-align: center; transition: 0.3s; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.03); }
+.perfil:hover { background: rgba(255,255,255,0.1); transform: translateY(-5px); }
 
-@keyframes decolar { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-/* PERFIL OVERLAY */
-.overlay-perfil {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #0b101b; z-index: 10002; display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.opcoes-perfil { display: flex; gap: 40px; margin-top: 30px; }
-.perfil { cursor: pointer; text-align: center; transition: 0.3s; }
-.emoji-perfil { font-size: 80px; display: block; }
-
-/* MODAL DE CADASTRO */
-.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); }
-.modal-content { background: #181818; margin: 5% auto; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; }
-.modal-content input, .modal-content select { width: 100%; padding: 10px; margin-bottom: 15px; background: #0b101b; color: white; border: 1px solid #333; border-radius: 8px; box-sizing: border-box; }
-
-.btn-primary { width: 100%; padding: 12px; background: #3b82f6; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; }
-.btn-sorteio { border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; cursor: pointer; }
-
-/* RESPONSIVIDADE */
-@media (max-width: 600px) {
-    .search-box input { width: 90%; }
-    .card { flex: 0 0 140px; }
-    .opcoes-perfil { gap: 20px; }
+/* TARJA ASSISTIDO */
+.card.card-finalizado::after {
+    content: "ASSISTIDO"; position: absolute; top: 15px; right: -30px;
+    background: #1e293b; color: #3b82f6; font-size: 10px; font-weight: bold;
+    padding: 5px 35px; transform: rotate(45deg); border: 1px solid #3b82f6;
 }
