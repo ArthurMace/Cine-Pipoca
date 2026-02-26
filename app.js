@@ -170,23 +170,39 @@ function renderCards(lista) {
         const jaAssistido = item.status === 'assistido';
         
         return `
-        <div class="card" style="${jaAssistido ? 'border: 1px solid #ef4444; opacity: 0.8;' : ''}">
+        <div class="card" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5); opacity: 0.9;' : ''}">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
             
             ${!jaAssistido ? `<button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
             
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
             
-            ${jaAssistido ? `<div style="position:absolute; top:40%; left:0; width:100%; background:red; color:white; text-align:center; font-weight:bold; padding:5px; z-index:20; transform:rotate(-15deg); font-size:12px;">FINALIZADO</div>` : ''}
+            ${jaAssistido ? `<div class="tarja-finalizado"></div>` : ''}
 
             <div class="info">
                 <b style="font-size:14px;">${item.nome}</b>
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
-                ${jaAssistido ? `
-                    <p style="font-size:11px; color:#fbbf24;">⭐ A:${item.notaArthur || '-'} | D:${item.notaDay || '-'}</p>
-                    <p style="font-size:10px; font-style:italic; color:#94a3b8; max-width:90%;">"${item.comentario || 'Sem comentário'}"</p>
+                
+                ${!jaAssistido ? `
+                    <button onclick="window.finalizarRapido('${item.firebaseId}')" 
+                            style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
+                        Finalizar ✅
+                    </button>
                 ` : ''}
-                <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:red; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
+
+                ${jaAssistido ? `
+                    <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.2); padding-top:10px; text-align:center;">
+                        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;">
+                            <p style="font-size:11px; color:#fbbf24;">🤵‍♂️ A: ${item.notaArthur || '-'}</p>
+                            <p style="font-size:11px; color:#fbbf24;">👰‍♀️ D: ${item.notaDay || '-'}</p>
+                        </div>
+                        <p style="font-size:10px; font-style:italic; color:#94a3b8; max-width:90%; line-height:1.4;">
+                            "${item.comentario || 'Sem comentário.'}"
+                        </p>
+                    </div>
+                ` : ''}
+                
+                <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
             </div>
         </div>`;
     }).join("");
@@ -279,6 +295,7 @@ window.marcarAssistindoSorteado = async (id) => {
 };
 
 iniciarApp();
+
 
 
 
