@@ -12,7 +12,21 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+<div id="modal-perfil" class="overlay-perfil">
+  <div class="perfil-content">
+    <h2>Quem está assistindo?</h2>
+    <div class="opcoes-perfil">
+      <div class="perfil" onclick="selecionarPerfil('arthur')">
+        <span class="emoji-perfil">🤵‍♂️</span>
+        <p>Arthur</p>
+      </div>
+      <div class="perfil" onclick="selecionarPerfil('day')">
+        <span class="emoji-perfil">👰‍♀️</span>
+        <p>Day</p>
+      </div>
+    </div>
+  </div>
+</div>
 <header>
   <h1>🎬 Cine Pipoca</h1>
   <nav>
@@ -82,6 +96,7 @@
 <script type="module" src="app.js"></script>
 </body>
 </html>
+
 
 
 
