@@ -165,20 +165,31 @@ window.render = function() {
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="color:gray; padding:20px;">Nenhum item aqui ainda.</p>`;
-    return lista.map(item => `
-        <div class="card">
+    return lista.map(item => {
+        const jaAssistido = item.status === 'assistido';
+        
+        return `
+        <div class="card" style="${jaAssistido ? 'border: 1px solid #ef4444; opacity: 0.8;' : ''}">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
-            <button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>
+            
+            ${!jaAssistido ? `<button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
+            
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
+            
+            ${jaAssistido ? `<div style="position:absolute; top:40%; left:0; width:100%; background:red; color:white; text-align:center; font-weight:bold; padding:5px; z-index:20; transform:rotate(-15deg); font-size:12px;">FINALIZADO</div>` : ''}
+
             <div class="info">
                 <b style="font-size:14px;">${item.nome}</b>
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
-                ${item.status === 'assistido' ? `<p style="font-size:11px;">⭐ A:${item.notaArthur || '-'} | D:${item.notaDay || '-'}</p>` : ''}
+                ${jaAssistido ? `
+                    <p style="font-size:11px; color:#fbbf24;">⭐ A:${item.notaArthur || '-'} | D:${item.notaDay || '-'}</p>
+                    <p style="font-size:10px; font-style:italic; color:#94a3b8; max-width:90%;">"${item.comentario || 'Sem comentário'}"</p>
+                ` : ''}
                 <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:red; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
             </div>
-        </div>`).join("");
+        </div>`;
+    }).join("");
 }
-
 function renderSugestoes(lista) {
     return lista.map(item => `
         <div class="card" style="border: 2px solid #3b82f6;">
@@ -254,4 +265,5 @@ window.marcarAssistindoSorteado = async (id) => {
 };
 
 iniciarApp();
+
 
