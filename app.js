@@ -38,14 +38,12 @@ window.toggleSerieFields = function() {
     const tipo = document.getElementById("tipo").value;
     const status = document.getElementById("status").value;
     
-    // Mostra temporada/episódio se for série (Mantido original)
     document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
     
-    // Mostra notas/comentário se o status for 'Já Assisti' OU 'Aguardando Notas'
-    // Adicionei o (status === "avaliacao") para o modal abrir os campos de nota também nesse caso.
     const deveMostrarNotas = (status === "assistido" || status === "avaliacao");
     document.getElementById("campos-finalizacao").style.display = deveMostrarNotas ? "block" : "none";
-};;
+};
+
 // ABRIR E FECHAR MODAL
 window.abrirModal = function(id = null) {
     limparModal();
@@ -115,8 +113,7 @@ window.adicionar = async function() {
     render();
 };
 
-// FINALIZAÇÃO RÁPIDA (Check verde no card)
-// Abre o modal bonito na tela
+// FINALIZAÇÃO RÁPIDA
 window.finalizarRapido = function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (!item) return;
@@ -128,7 +125,6 @@ window.finalizarRapido = function(id) {
     document.getElementById("modal-avaliacao").style.display = "flex";
 };
 
-// Salva os dados no Firebase e decide se finaliza ou deixa em espera
 window.salvarNotaIndividual = async function() {
     const id = document.getElementById("aval-id-hidden").value;
     const nota = document.getElementById("aval-nota").value;
@@ -145,7 +141,6 @@ window.salvarNotaIndividual = async function() {
         dadosAtualizados.comentarioDay = coment;
     }
 
-    // Se os dois votaram, vai para assistido. Senão, fica em avaliação.
     if (dadosAtualizados.notaArthur && dadosAtualizados.notaDay) {
         dadosAtualizados.status = 'assistido';
         const cA = dadosAtualizados.comentarioArthur || "";
@@ -179,23 +174,6 @@ window.render = function() {
 
     const busca = document.getElementById("busca").value.toLowerCase();
     
-    // Filtro Geral (Respeita o Perfil Ativo ou Casal)
-    const filtrados = data.filter(i => {
-        const donoMatch = (i.dono === perfilAtivo || i.dono === 'casal');
-        const nomeMatch = (i.nome || "").toLowerCase().includes(busca);
-        return donoMatch && nomeMatch;
-    });
-
-   window.render = function() {
-    if (!perfilAtivo) return;
-    
-    document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-    const pag = document.getElementById("page-" + paginaAtual);
-    if(pag) pag.style.display = "block";
-
-    const busca = document.getElementById("busca").value.toLowerCase();
-    
-    // Filtro Geral (Respeita o Perfil Ativo ou Casal)
     const filtrados = data.filter(i => {
         const donoMatch = (i.dono === perfilAtivo || i.dono === 'casal');
         const nomeMatch = (i.nome || "").toLowerCase().includes(busca);
@@ -214,21 +192,12 @@ window.render = function() {
 
         document.getElementById("home").innerHTML = `
             ${assistindo.length ? `<h3 class="section-title">📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
-            
-            ${aguardando.length ? `
-                <h3 class="section-title" style="color: #fbbf24;">⏳ Aguardando Notas</h3>
-                <div class="carrossel">${renderCards(aguardando)}</div>
-            ` : ''}
-
+            ${aguardando.length ? `<h3 class="section-title" style="color: #fbbf24;">⏳ Aguardando Notas</h3><div class="carrossel">${renderCards(aguardando)}</div>` : ''}
             ${sugestoes.length ? `<h3 class="section-title">💡 Tinder (Sugestões de ${outroPerfil})</h3><div class="carrossel">${renderSugestoes(sugestoes)}</div>` : ''}
-            
-            <h3 class="section-title">⭐ Nossa Lista</h3>
-            <div class="carrossel">${renderCards(quero)}</div>
-            
+            <h3 class="section-title">⭐ Nossa Lista</h3><div class="carrossel">${renderCards(quero)}</div>
             ${jaAssistidos.length ? `<h3 class="section-title">✅ Já Assistidos</h3><div class="carrossel">${renderCards(jaAssistidos)}</div>` : ''}
         `;
     } else {
-        // LÓGICA DAS OUTRAS ABAS (Séries, Filmes e Quero)
         let listaFinal = [];
         let targetId = "";
         
@@ -243,29 +212,10 @@ window.render = function() {
             targetId = "queroList";
         }
         
-        // Renderiza no grid comum para as páginas específicas preencherem a tela
         const container = document.getElementById(targetId);
         if (container) {
             container.innerHTML = `<div class="grid-comum">${renderCards(listaFinal)}</div>`;
         }
-    }
-};
-        // MANTIVE TODA A SUA LÓGICA DE FILMES E SÉRIES ABAIXO
-        let listaFinal = [];
-        let targetId = "";
-        
-        if (paginaAtual === "series") {
-            listaFinal = filtrados.filter(i => i.tipo === "serie");
-            targetId = "series";
-        } else if (paginaAtual === "filmes") {
-            listaFinal = filtrados.filter(i => i.tipo === "filme");
-            targetId = "filmes";
-        } else if (paginaAtual === "quero") {
-            listaFinal = filtrados.filter(i => i.status === "quero");
-            targetId = "queroList";
-        }
-        
-        document.getElementById(targetId).innerHTML = `<div class="grid-comum">${renderCards(listaFinal)}</div>`;
     }
 };
 
@@ -273,16 +223,11 @@ function renderCards(lista) {
     if (lista.length === 0) return `<p style="color:gray; padding:20px;">Vazio.</p>`;
     return lista.map(item => {
         const jaAssistido = item.status === 'assistido';
-        const emAvaliacao = item.status === 'avaliacao'; // Nova verificação
+        const emAvaliacao = item.status === 'avaliacao';
         
-        // --- MANTIDO: Sua lógica de texto do botão ---
         let textoBotao = "Finalizar ✅";
-        if (item.tipo === 'serie' && item.status === 'quero') {
-            textoBotao = "Assistir 📺";
-        }
-        // ---------------------------------------------
+        if (item.tipo === 'serie' && item.status === 'quero') textoBotao = "Assistir 📺";
 
-        // --- ADICIONADO: Lógica de quem falta votar ---
         let avisoFalta = "";
         let podeVotar = !jaAssistido; 
 
@@ -290,7 +235,7 @@ function renderCards(lista) {
             if (perfilAtivo === 'arthur') {
                 if (item.notaArthur) {
                     avisoFalta = "<span style='color:#94a3b8;'>Aguardando nota da Day 👰‍♀️</span>";
-                    podeVotar = false; // Esconde o botão para você, pois já votou
+                    podeVotar = false;
                 } else {
                     avisoFalta = "<span style='color:#fbbf24;'>Falta sua nota! 🤵‍♂️</span>";
                     podeVotar = true;
@@ -298,42 +243,31 @@ function renderCards(lista) {
             } else if (perfilAtivo === 'day') {
                 if (item.notaDay) {
                     avisoFalta = "<span style='color:#94a3b8;'>Aguardando nota do Arthur 🤵‍♂️</span>";
-                    podeVotar = false; // Esconde o botão para ela, pois já votou
+                    podeVotar = false;
                 } else {
                     avisoFalta = "<span style='color:#fbbf24;'>Falta sua nota! 👰‍♀️</span>";
                     podeVotar = true;
                 }
             }
         }
-        // ----------------------------------------------
 
         return `
         <div class="card" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''}">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
-            
             ${!jaAssistido ? `<button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
-            
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
-            
             ${jaAssistido ? `<div class="tarja-finalizado"></div>` : ''}
-            
             <div class="info">
                 <b style="font-size:14px;">${item.nome}</b>
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
-                
                 <p style="font-size:10px; margin-top:5px;">${avisoFalta}</p>
-
                 ${podeVotar ? `
                     <button onclick="window.finalizarRapido('${item.firebaseId}')" 
                             style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
                         ${emAvaliacao ? 'Dar minha nota ⭐' : textoBotao}
                     </button>
                 ` : ''}
-
-                ${!jaAssistido ? `
-                    <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
-                ` : ''}
-
+                ${!jaAssistido ? `<button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>` : ''}
                 ${jaAssistido ? `
                     <div style="margin-top:5px; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; text-align:center;">
                         <p style="font-size:11px; color:#fbbf24;">🤵‍♂️ A: ${item.notaArthur || '-'} | 👰‍♀️ D: ${item.notaDay || '-'}</p>
@@ -344,6 +278,7 @@ function renderCards(lista) {
         </div>`;
     }).join("");
 }
+
 function renderSugestoes(lista) {
     return lista.map(item => `
         <div class="card" style="border: 2px solid #3b82f6;">
@@ -382,12 +317,7 @@ window.sortearFilme = function() {
     document.getElementById("modal-sorteio").style.display = "flex";
 
     if (opcoes.length === 0) {
-        container.innerHTML = `
-            <div style="padding: 20px;">
-                <h2 style="color: #ef4444;">Ops! 🍿</h2>
-                <p style="color: #94a3b8;">Não há filmes do Casal em "Quero Assistir".</p>
-                <button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
-            </div>`;
+        container.innerHTML = `<div style="padding: 20px;"><h2 style="color: #ef4444;">Ops! 🍿</h2><p style="color: #94a3b8;">Não há filmes do Casal.</p><button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button></div>`;
         return;
     }
 
@@ -403,14 +333,4 @@ window.sortearFilme = function() {
         </div>`;
 };
 
-// DISPARA O APP
 iniciarApp();
-
-
-
-
-
-
-
-
-
