@@ -4,7 +4,7 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// FUNÇÕES DE PERFIL
+// --- FUNÇÕES DE PERFIL (VINCULADAS AO WINDOW IMEDIATAMENTE) ---
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome;
     const modal = document.getElementById('modal-perfil');
@@ -15,32 +15,36 @@ window.selecionarPerfil = function(nome) {
     if (titulo) titulo.innerHTML = `🎬 Cine Pipoca - ${emoji}`;
     
     render();
-}
+};
 
 window.resetarPerfil = function() {
     perfilAtivo = null;
     const modal = document.getElementById('modal-perfil');
     if (modal) modal.style.display = 'flex';
-}
+};
 
+// --- INICIALIZAÇÃO ---
 async function iniciarApp() {
     data = await getData();
-    // O app inicia mas aguarda a seleção de perfil no modal para renderizar
+    console.log("Banco de dados carregado.");
 }
 
-function navegar(pagina) {
+// --- NAVEGAÇÃO E MODAIS ---
+window.navegar = function(pagina) {
     paginaAtual = pagina;
     render();
-}
+};
 
-function atualizarCamposModal() {
+window.toggleSerieFields = function() {
     const tipo = document.getElementById("tipo").value;
     const status = document.getElementById("status").value;
     document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
     document.getElementById("campos-finalizacao").style.display = (status === "assistido") ? "block" : "none";
-}
+};
 
-function abrirModal(id = null) {
+window.toggleRatingFields = window.toggleSerieFields;
+
+window.abrirModal = function(id = null) {
     limparModal();
     document.getElementById("modal").style.display = "block";
     if (id && id !== 'add') {
@@ -62,10 +66,10 @@ function abrirModal(id = null) {
         document.getElementById("modal-title").innerText = "Adicionar Novo";
         document.getElementById("dono").value = "casal";
     }
-    atualizarCamposModal();
-}
+    window.toggleSerieFields();
+};
 
-function fecharModal() { document.getElementById("modal").style.display = "none"; }
+window.fecharModal = function() { document.getElementById("modal").style.display = "none"; };
 
 function limparModal() {
     const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comA", "comD"];
@@ -75,7 +79,7 @@ function limparModal() {
     });
 }
 
-async function adicionar() {
+window.adicionar = async function() {
     const id = document.getElementById("item-id-hidden").value;
     const itemDados = {
         nome: document.getElementById("nome").value,
@@ -89,20 +93,21 @@ async function adicionar() {
         comentarios: { arthur: document.getElementById("comA").value || "", daiane: document.getElementById("comD").value || "" }
     };
     id ? await updateItem(id, itemDados) : await addItem(itemDados);
-    fecharModal();
+    window.fecharModal();
     data = await getData();
     render();
-}
+};
 
-async function excluir(id) {
+window.excluirItem = async function(id) {
     if (confirm("Tem certeza que deseja excluir?")) {
         await deleteItem(id);
         data = await getData();
         render();
     }
-}
+};
 
-function render() {
+// --- RENDERIZAÇÃO ---
+window.render = function() {
     if (!perfilAtivo) return;
 
     const containers = {
@@ -157,7 +162,7 @@ function render() {
         });
         divAlvo.innerHTML = `<div class="grid-comum">${renderCards(listaAbas)}</div>`;
     }
-}
+};
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
@@ -174,8 +179,8 @@ function renderCards(lista) {
                 ${item.tipo === 'serie' ? `<div class="temp-badge">T${item.temporada || '1'} • E${item.episodio || '1'}</div>` : ''}
                 ${estaFinalizado ? `<div style="font-size:10px; color:#3b82f6;">⭐ A:${item.notas?.arthur || '-'} | D:${item.notas?.daiane || '-'}</div>` : ''}
                 <div style="display: ${estaFinalizado ? 'none' : 'flex'}; gap: 5px; margin-top: 8px;">
-                    <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; padding:8px;">✅</button>
-                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="padding:8px; background:#ef4444; border:none; color:white; border-radius:4px;">Excluir</button>
+                    <button onclick="finalizarItem('${item.firebaseId}')" style="background:#10b981; border:none; color:white; border-radius:4px; padding:8px; cursor:pointer;">✅</button>
+                    <button class="btn-danger" onclick="excluirItem('${item.firebaseId}')" style="padding:8px; background:#ef4444; border:none; color:white; border-radius:4px; cursor:pointer;">Excluir</button>
                 </div>
             </div>
         </div>`;
@@ -197,17 +202,7 @@ function renderSugestoes(lista) {
     `).join("");
 }
 
-// MAPEAMENTO GLOBAL
-window.navegar = navegar;
-window.abrirModal = abrirModal;
-window.abrirEdicao = (id) => abrirModal(id);
-window.fecharModal = fecharModal;
-window.adicionar = adicionar; 
-window.excluirItem = excluir;
-window.toggleSerieFields = atualizarCamposModal;
-window.toggleRatingFields = atualizarCamposModal;
-window.render = render;
-
+// MATCH E BLOCK
 window.darMatch = async function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (item) {
@@ -215,22 +210,23 @@ window.darMatch = async function(id) {
         data = await getData();
         render();
     }
-}
+};
 
 window.darBlock = function(id) {
     let escondidos = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
     escondidos.push(id);
     localStorage.setItem('escondidos_' + perfilAtivo, JSON.stringify(escondidos));
     render();
-}
+};
 
 window.finalizarItem = function(id) {
-    const item = data.find(i => i.firebaseId === id);
-    if (item) {
-        abrirModal(id); 
+    window.abrirModal(id); 
+    setTimeout(() => {
         document.getElementById("status").value = "assistido";
-        atualizarCamposModal();
-    }
-}
+        window.toggleRatingFields();
+    }, 100);
+};
+
+window.abrirEdicao = (id) => window.abrirModal(id);
 
 iniciarApp();
