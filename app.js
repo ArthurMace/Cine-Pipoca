@@ -192,7 +192,7 @@ function renderSugestoes(lista) {
         <div class="card card-sugestao">
             <img src="${item.imagem}">
             <div class="overlay-sugestao">
-                <p class="pergunta-sugestao">Ver com ${perfilAtivo === 'arthur' ? 'a Day' : 'o Arthur'}?</p>
+                <p class="pergunta-sugestao">Ver "${item.nome}" com ${perfilAtivo === 'arthur' ? 'a Day' : 'o Arthur'}?</p>
                 <div class="botoes-sugestao">
                     <button class="btn-match" onclick="darMatch('${item.firebaseId}')" title="Bora ver!">🍿</button>
                     <button class="btn-match" onclick="darBlock('${item.firebaseId}')" title="Não quero">🚫</button>
@@ -230,3 +230,4 @@ window.finalizarItem = function(id) {
 window.abrirEdicao = (id) => window.abrirModal(id);
 
 iniciarApp();
+
