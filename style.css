@@ -100,26 +100,7 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
     gap: 20px; 
     padding: 20px 5%; 
 }
-/* CLASSE DA TARJA DE FINALIZADO (CANTO SUPERIOR ESQUERDO) */
-.tarja-finalizado {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 0;
-    
-    /* Cria o triângulo no canto */
-    border-style: solid;
-    border-width: 50px 50px 0 0;
-    
-    /* COR DO SITE: Azul (#3b82f6) com transparência */
-    border-color: rgba(59, 130, 246, 0.9) transparent transparent transparent;
-    
-    z-index: 20; /* Fica acima da imagem */
-    pointer-events: none; /* Não atrapalha cliques nos botões próximos */
-}
-
-/* CLASSE DA TARJA DE ASSISTIDO NO CANTO DIREITO (CORRIGIDO) */
+/* --- TARJA DE FINALIZADO (CANTO SUPERIOR DIREITO) --- */
 .tarja-finalizado {
     position: absolute;
     top: 0;
@@ -127,7 +108,7 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
     width: 0;
     height: 0;
     
-    /* Cria o triângulo preenchendo o canto superior direito */
+    /* Desenha o triângulo perfeito no canto superior direito */
     border-style: solid;
     border-width: 0 65px 65px 0; 
     border-color: transparent rgba(59, 130, 246, 0.95) transparent transparent;
@@ -136,12 +117,12 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
     pointer-events: none;
 }
 
-/* O texto "ASSISTIDO" AJUSTADO PARA O LADO DIREITO (CORRIGIDO) */
+/* TEXTO "ASSISTIDO" DENTRO DA TARJA */
 .tarja-finalizado::after {
     content: 'ASSISTIDO';
     position: absolute;
     
-    /* Posição calculada para o triângulo 65x65 */
+    /* Posicionamento para centralizar na diagonal azul */
     top: 12px;
     right: -62px; 
     
@@ -150,7 +131,7 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
     font-weight: bold;
     text-transform: uppercase;
     
-    /* Rotação positiva para acompanhar a diagonal da direita */
+    /* Rotação positiva para o lado direito */
     transform: rotate(45deg); 
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     
@@ -182,6 +163,7 @@ header nav button { background-color: #1e293b; color: white; border: 1px solid #
 
 .floating-dice { position: fixed; bottom: 25px; right: 25px; font-size: 40px; cursor: pointer; z-index: 1000; }
 .overlay-perfil { position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+
 
 
 
