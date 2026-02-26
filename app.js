@@ -232,16 +232,42 @@ function renderCards(lista) {
     if (lista.length === 0) return `<p style="color:gray; padding:20px;">Vazio.</p>`;
     return lista.map(item => {
         const jaAssistido = item.status === 'assistido';
+        const emAvaliacao = item.status === 'avaliacao'; // Nova verificação
         
-        // --- ADICIONADO: Lógica para mudar o texto do botão ---
+        // --- MANTIDO: Sua lógica de texto do botão ---
         let textoBotao = "Finalizar ✅";
         if (item.tipo === 'serie' && item.status === 'quero') {
             textoBotao = "Assistir 📺";
         }
-        // -----------------------------------------------------
+        // ---------------------------------------------
+
+        // --- ADICIONADO: Lógica de quem falta votar ---
+        let avisoFalta = "";
+        let podeVotar = !jaAssistido; 
+
+        if (emAvaliacao) {
+            if (perfilAtivo === 'arthur') {
+                if (item.notaArthur) {
+                    avisoFalta = "<span style='color:#94a3b8;'>Aguardando nota da Day 👰‍♀️</span>";
+                    podeVotar = false; // Esconde o botão para você, pois já votou
+                } else {
+                    avisoFalta = "<span style='color:#fbbf24;'>Falta sua nota! 🤵‍♂️</span>";
+                    podeVotar = true;
+                }
+            } else if (perfilAtivo === 'day') {
+                if (item.notaDay) {
+                    avisoFalta = "<span style='color:#94a3b8;'>Aguardando nota do Arthur 🤵‍♂️</span>";
+                    podeVotar = false; // Esconde o botão para ela, pois já votou
+                } else {
+                    avisoFalta = "<span style='color:#fbbf24;'>Falta sua nota! 👰‍♀️</span>";
+                    podeVotar = true;
+                }
+            }
+        }
+        // ----------------------------------------------
 
         return `
-        <div class="card" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''}">
+        <div class="card" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''}">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
             
             ${!jaAssistido ? `<button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
@@ -254,11 +280,16 @@ function renderCards(lista) {
                 <b style="font-size:14px;">${item.nome}</b>
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
                 
-                ${!jaAssistido ? `
+                <p style="font-size:10px; margin-top:5px;">${avisoFalta}</p>
+
+                ${podeVotar ? `
                     <button onclick="window.finalizarRapido('${item.firebaseId}')" 
                             style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
-                        ${textoBotao}
+                        ${emAvaliacao ? 'Dar minha nota ⭐' : textoBotao}
                     </button>
+                ` : ''}
+
+                ${!jaAssistido ? `
                     <button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>
                 ` : ''}
 
@@ -333,6 +364,7 @@ window.sortearFilme = function() {
 
 // DISPARA O APP
 iniciarApp();
+
 
 
 
