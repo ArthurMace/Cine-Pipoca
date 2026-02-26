@@ -4,7 +4,13 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// --- FUNÇÕES DE PERFIL ---
+// Inicialização
+async function iniciarApp() {
+    data = await getData();
+    render();
+}
+
+// --- PERFIL ---
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome;
     document.getElementById('modal-perfil').style.display = 'none';
@@ -18,23 +24,13 @@ window.resetarPerfil = function() {
     document.getElementById('modal-perfil').style.display = 'flex';
 };
 
-async function iniciarApp() {
-    data = await getData();
-    render();
-}
-
+// --- NAVEGAÇÃO ---
 window.navegar = function(pagina) {
     paginaAtual = pagina;
     render();
 };
 
-window.toggleSerieFields = function() {
-    const tipo = document.getElementById("tipo").value;
-    const status = document.getElementById("status").value;
-    document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
-    document.getElementById("campos-finalizacao").style.display = (status === "assistido") ? "block" : "none";
-};
-
+// --- MODAL ---
 window.abrirModal = function(id = null) {
     limparModal();
     document.getElementById("modal").style.display = "block";
@@ -49,18 +45,24 @@ window.abrirModal = function(id = null) {
         document.getElementById("dono").value = item.dono || "casal";
         document.getElementById("temporada").value = item.temporada || "";
         document.getElementById("episodio").value = item.episodio || "";
-    } else {
-        document.getElementById("modal-title").innerText = "Adicionar Novo";
-        document.getElementById("dono").value = "casal";
     }
     window.toggleSerieFields();
 };
 
 window.fecharModal = function() { document.getElementById("modal").style.display = "none"; };
 
+window.toggleSerieFields = function() {
+    const tipo = document.getElementById("tipo").value;
+    const status = document.getElementById("status").value;
+    document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
+    document.getElementById("campos-finalizacao").style.display = (status === "assistido") ? "block" : "none";
+};
+
 function limparModal() {
     const ids = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comA", "comD"];
     ids.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
+    document.getElementById("modal-title").innerText = "Adicionar Novo";
+    document.getElementById("dono").value = "casal";
 }
 
 window.adicionar = async function() {
@@ -83,34 +85,35 @@ window.adicionar = async function() {
 };
 
 window.excluirItem = async function(id) {
-    if (confirm("Tem certeza que deseja excluir?")) {
+    if (confirm("Deseja excluir?")) {
         await deleteItem(id);
         data = await getData();
         render();
     }
 };
 
+// --- RENDERIZAÇÃO ---
 window.render = function() {
     if (!perfilAtivo) return;
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
     document.getElementById("page-" + paginaAtual).style.display = "block";
 
     const busca = document.getElementById("busca").value.toLowerCase();
-    const filtrados = data.filter(i => (i.dono === perfilAtivo || i.dono === 'casal' || !i.dono) && i.nome.toLowerCase().includes(busca));
+    const filtrados = data.filter(i => (i.dono === perfilAtivo || i.dono === 'casal') && i.nome.toLowerCase().includes(busca));
 
     if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
-        const finalizados = filtrados.filter(i => i.status === "assistido");
         const quero = filtrados.filter(i => i.status === "quero");
+        const finalizados = filtrados.filter(i => i.status === "assistido");
         const outro = perfilAtivo === 'arthur' ? 'day' : 'arthur';
         const escondidos = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
         const sugestoes = data.filter(i => i.dono === outro && !escondidos.includes(i.firebaseId));
 
         document.getElementById("home").innerHTML = `
-            ${assistindo.length ? `<h3>📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
-            ${sugestoes.length ? `<div class="secao-sugestoes"><h3>💡 Sugestões de ${outro === 'day' ? 'Daiane' : 'Arthur'}</h3><div class="carrossel">${renderSugestoes(sugestoes)}</div></div>` : ''}
-            ${quero.length ? `<h3>⭐ Minha Lista</h3><div class="carrossel">${renderCards(quero)}</div>` : ''}
-            ${finalizados.length ? `<h3>✅ Já Finalizados</h3><div class="carrossel">${renderCards(finalizados)}</div>` : ''}
+            ${assistindo.length ? `<h3>📺 Assistindo Agora</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
+            ${sugestoes.length ? `<h3>💡 De ${outro === 'day' ? 'Day' : 'Arthur'} para Você</h3><div class="carrossel">${renderSugestoes(sugestoes)}</div>` : ''}
+            ${quero.length ? `<h3>⭐ Nossa Lista</h3><div class="carrossel">${renderCards(quero)}</div>` : ''}
+            ${finalizados.length ? `<h3>✅ Finalizados</h3><div class="carrossel">${renderCards(finalizados)}</div>` : ''}
         `;
     } else {
         const target = paginaAtual === "series" ? "series" : paginaAtual === "filmes" ? "filmes" : "queroList";
@@ -120,28 +123,23 @@ window.render = function() {
 };
 
 function renderCards(lista) {
-    if (lista.length === 0) return `<p style="padding:20px; opacity:0.5;">Nenhum item.</p>`;
     return lista.map(item => `
-        <div class="card ${item.status === 'assistido' ? 'card-finalizado' : ''}">
-            <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
-            <button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>
+        <div class="card">
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Poster'">
             <div class="info">
-                <b>${item.nome}</b>
-                <div style="display: flex; gap: 5px; margin-top: 10px; width: 100%;">
-                    <button class="btn-primary" onclick="window.finalizarItem('${item.firebaseId}')" style="flex:1; padding:5px;">✅</button>
-                    <button class="btn-danger" onclick="window.excluirItem('${item.firebaseId}')" style="flex:1; padding:5px;">Excluir</button>
-                </div>
+                <b style="font-size:12px;">${item.nome}</b>
+                <button class="btn-primary" onclick="window.abrirModal('${item.firebaseId}')" style="font-size:10px; padding:5px;">Editar / Ver</button>
+                <button onclick="window.excluirItem('${item.firebaseId}')" style="background:none; border:none; color:red; cursor:pointer; margin-top:5px; font-size:10px;">Excluir</button>
             </div>
         </div>`).join("");
 }
 
 function renderSugestoes(lista) {
     return lista.map(item => `
-        <div class="card card-sugestao">
-            <img src="${item.imagem}" style="filter: brightness(0.4);">
-            <div class="overlay-sugestao" style="position:absolute; top:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px; text-align:center;">
-                <p style="font-size:11px; font-weight:bold;">Ver "${item.nome}"?</p>
+        <div class="card" style="opacity: 0.8;">
+            <img src="${item.imagem}" style="filter: grayscale(0.5);">
+            <div class="info" style="opacity:1;">
+                <p style="font-size:10px;">Bora ver?</p>
                 <div style="display:flex; gap:10px;">
                     <button onclick="window.darMatch('${item.firebaseId}')" style="background:none; border:none; font-size:20px; cursor:pointer;">🍿</button>
                     <button onclick="window.darBlock('${item.firebaseId}')" style="background:none; border:none; font-size:20px; cursor:pointer;">🚫</button>
@@ -150,44 +148,35 @@ function renderSugestoes(lista) {
         </div>`).join("");
 }
 
-// --- DADO (APENAS FILMES) ---
+// --- DADO (SORTEIO) ---
 window.sortearFilme = function() {
     const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
-    if (opcoes.length === 0) return alert("Sem filmes 'Quero Assistir' do Casal!");
+    if (opcoes.length === 0) return alert("Adicione filmes para o 'Casal' na lista 'Quero Assistir' primeiro!");
+    
     const sorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
     document.getElementById('container-sorteado').innerHTML = `
-        <img src="${sorteado.imagem}" style="width:100%;">
-        <div class="info-sorteio-viva">
-            <h2 style="font-size:1.1rem;">${sorteado.nome}</h2>
-            <button class="btn-primary" onclick="window.começarVer('${sorteado.firebaseId}')">Bora Assistir!</button>
-            <button class="btn-primary" onclick="window.sortearFilme()" style="background:#1f2937; margin-top:10px;">Sortear Outro</button>
-            <p onclick="window.fecharSorteio()" style="margin-top:15px; cursor:pointer; font-size:12px; color:#94a3b8;">Fechar</p>
+        <img src="${sorteado.imagem}" style="width:100%; border-radius:15px 15px 0 0;">
+        <div style="padding:15px; text-align:center; background:#1e293b; border-radius:0 0 15px 15px;">
+            <h3>${sorteado.nome}</h3>
+            <button class="btn-primary" onclick="window.fecharSorteio()">Fechar</button>
         </div>`;
     document.getElementById('modal-sorteio').style.display = 'flex';
 };
 
 window.fecharSorteio = () => { document.getElementById('modal-sorteio').style.display = 'none'; };
-window.começarVer = async (id) => { await updateItem(id, { status: 'assistindo' }); data = await getData(); render(); fecharSorteio(); };
 window.darMatch = async (id) => { await updateItem(id, { dono: 'casal' }); data = await getData(); render(); };
 window.darBlock = (id) => { 
     let esc = JSON.parse(localStorage.getItem('escondidos_' + perfilAtivo)) || [];
     esc.push(id); localStorage.setItem('escondidos_' + perfilAtivo, JSON.stringify(esc)); render();
 };
-window.finalizarItem = (id) => { window.abrirModal(id); setTimeout(() => { document.getElementById("status").value = "assistido"; window.toggleSerieFields(); }, 100); };
 
-// --- DRAG DADO ---
+// Drag do Dado
 document.addEventListener('DOMContentLoaded', () => {
     const d = document.getElementById('dado-flutuante');
-    if(!d) return;
-    let off = [0,0], down = false;
-    const s = (x,y) => { down = true; off = [d.offsetLeft - x, d.offsetTop - y]; d.style.transition = 'none'; };
-    const m = (x,y) => { if(!down) return; d.style.left = (x+off[0])+'px'; d.style.top = (y+off[1])+'px'; d.style.right='auto'; d.style.bottom='auto'; };
-    d.onmousedown = e => s(e.clientX, e.clientY);
-    document.onmousemove = e => m(e.clientX, e.clientY);
+    let down = false, off = [0,0];
+    d.onmousedown = (e) => { down = true; off = [d.offsetLeft - e.clientX, d.offsetTop - e.clientY]; };
+    document.onmousemove = (e) => { if(down) { d.style.left = (e.clientX + off[0]) + 'px'; d.style.top = (e.clientY + off[1]) + 'px'; d.style.bottom = 'auto'; d.style.right = 'auto'; } };
     document.onmouseup = () => down = false;
-    d.ontouchstart = e => s(e.touches[0].clientX, e.touches[0].clientY);
-    document.ontouchmove = e => m(e.touches[0].clientX, e.touches[0].clientY);
-    document.ontouchend = () => down = false;
 });
 
 iniciarApp();
