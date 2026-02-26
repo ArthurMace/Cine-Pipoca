@@ -1,142 +1,113 @@
-/* CONFIGURAÇÕES GERAIS E CENTRALIZAÇÃO */
-body { background-color: #0b101b; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
+/* 1. RESET E FUNDO */
+body { 
+    background-color: #0b101b; 
+    color: white; 
+    font-family: 'Segoe UI', Roboto, sans-serif; 
+    margin: 0; 
+    overflow-x: hidden; 
+}
 
-header { background-color: rgba(4, 7, 13, 0.95); padding: 1rem 4%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-header h1 { margin: 0; font-size: 1.5rem; color: #3b82f6; }
+/* 2. HEADER E MENU (AQUI ESTÁ A MUDANÇA) */
+header { 
+    background-color: #0f172a; 
+    padding: 15px 4%; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    position: sticky; 
+    top: 0; 
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
 
-/* BARRA DE BUSCA ARREDONDADA */
-.search-box { text-align: center; padding: 1.5rem; }
-.search-box input { width: 80%; max-width: 500px; padding: 12px 20px; border-radius: 25px; border: 1px solid #333; background-color: #1f2937; color: white; text-align: center; outline: none; }
+header h1 { margin: 0; font-size: 1.2rem; color: #3b82f6; cursor: pointer; }
 
-h3 { margin: 25px 0 10px 4%; color: #e5e5e5; font-size: 1.1rem; }
+header nav { display: flex; align-items: center; gap: 8px; }
 
-/* FLEXBOX PARA CENTRALIZAR OS CARDS */
-.carrossel { display: flex; overflow-x: auto; gap: 15px; padding: 10px 4% 30px 4%; scroll-behavior: smooth; }
-.carrossel::-webkit-scrollbar { display: none; }
+/* BOTÕES DO MENU (ADEUS BRANCO QUADRADO!) */
+header nav button {
+    background-color: #1e293b; /* Cinza Escuro */
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    padding: 8px 14px;
+    border-radius: 20px; /* Formato Pílula */
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+header nav button:hover {
+    background-color: #334155;
+    border-color: #3b82f6;
+    color: white;
+}
+
+/* BOTÃO DE MAIS (+) AZUL E REDONDO */
+.btn-add-novo {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    border: none !important;
+    width: 38px;
+    height: 38px;
+    border-radius: 50% !important;
+    font-size: 22px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* 3. BUSCA E CARDS */
+.search-box { text-align: center; padding: 20px; }
+.search-box input { 
+    width: 80%; max-width: 400px; padding: 12px; 
+    border-radius: 25px; border: 1px solid #333; 
+    background: #1f2937; color: white; text-align: center;
+}
 
 .grid-comum { 
     display: flex; flex-wrap: wrap; justify-content: center; 
     gap: 20px; padding: 20px; 
 }
 
-/* CARDS E INFOS */
-.card { flex: 0 0 160px; background-color: #1f2937; border-radius: 10px; overflow: hidden; position: relative; transition: transform 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.card { 
+    flex: 0 0 160px; background: #1f2937; border-radius: 12px; 
+    overflow: hidden; position: relative; transition: 0.3s;
+}
 .card:hover { transform: scale(1.05); }
-.card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; }
+.card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
 
 .info { 
-    padding: 10px; background: rgba(0, 0, 0, 0.9); position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-    opacity: 0; transition: opacity 0.3s ease; box-sizing: border-box;
+    position: absolute; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
+    justify-content: center; align-items: center; opacity: 0; transition: 0.3s;
 }
 .card:hover .info { opacity: 1; }
 
-/* ESTILO DOS BOTÕES (VOLTANDO AO BONITO) */
-.btn-primary { 
-    background: #3b82f6; color: white; border: none; padding: 10px 20px; 
-    border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; 
-}
-.btn-primary:hover { background: #2563eb; }
-
-.btn-danger { 
-    background: #ef4444; color: white; border: none; padding: 8px; 
-    border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%;
-}
-
-.btn-edit { 
-    position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); 
-    color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; 
-    width: 30px; height: 30px; cursor: pointer; z-index: 10;
-}
-
-/* DADO FLUTUANTE DARK */
+/* 4. DADO E MODAIS */
 .floating-dice {
-    position: fixed; bottom: 25px; right: 25px; width: 65px; height: 65px;
-    background: #0f172a; border: 1px solid #333; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 30px; cursor: grab; z-index: 9999; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
+    background: #1e293b; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 30px;
+    cursor: grab; z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-/* MODAL DE SORTEIO CENTRALIZADO */
 .overlay-sorteio {
-    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
+    display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
     z-index: 10001; align-items: center; justify-content: center;
 }
-.card-sorteado {
-    width: 280px; background: #1e293b; border-radius: 20px; overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.9); border: 1px solid #333;
+
+.btn-primary { 
+    background: #3b82f6; color: white; border: none; padding: 12px; 
+    border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;
 }
-.info-sorteio-viva { padding: 20px; text-align: center; }
 
-/* BOTÕES DE PERFIL */
-.perfil-tag { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; z-index: 5; }
-.overlay-perfil { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0b101b; z-index: 10005; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.perfil { cursor: pointer; text-align: center; transition: 0.3s; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.03); }
-.perfil:hover { background: rgba(255,255,255,0.1); transform: translateY(-5px); }
-
-/* TARJA ASSISTIDO */
-.card.card-finalizado::after {
+.card-finalizado::after {
     content: "ASSISTIDO"; position: absolute; top: 15px; right: -30px;
-    background: #1e293b; color: #3b82f6; font-size: 10px; font-weight: bold;
+    background: #1e293b; color: #3b82f6; font-size: 10px;
     padding: 5px 35px; transform: rotate(45deg); border: 1px solid #3b82f6;
 }
-/* --- NAVEGAÇÃO (HOME, SÉRIES, FILMES...) --- */
-header nav {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-header nav button {
-    background-color: #1f2937; /* Cor grafite */
-    color: white;
-    border: 1px solid #374151;
-    padding: 8px 15px;
-    border-radius: 20px; /* Arredondado estilo pílula */
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-header nav button:hover {
-    background-color: #374151;
-    border-color: #3b82f6; /* Brilha azul no hover */
-}
-
-/* --- BOTÃO DE ADICIONAR (+) --- */
-.btn-add-flutuante {
-    background-color: #3b82f6; /* Azul destaque */
-    color: white;
-    border: none;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%; /* Redondinho */
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
-    margin-left: 10px;
-}
-
-.btn-add-flutuante:hover {
-    transform: scale(1.1);
-    background-color: #2563eb;
-}
-
-/* --- BOTÃO DE SAIR/RESETAR PERFIL --- */
-.btn-sair {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 5px;
-    margin-left: 10px;
-}
-
