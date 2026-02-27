@@ -138,6 +138,25 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
     width: 70px;
     text-align: center;
 }
+/* Quando o item está finalizado, o card todo escurece */
+.card.finalizado {
+    filter: brightness(0.7); /* Deixa a imagem e textos mais escuros */
+    background: #0f172a; /* Fundo mais denso */
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Garante que a tarja não suma */
+.tarja-finalizado {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 40px 40px 0;
+    border-color: transparent #3b82f6 transparent transparent;
+    z-index: 10;
+}
 /* Resto do CSS mantido para não quebrar o visual */
 body { background-color: #0b101b; color: white; font-family: sans-serif; margin: 0; }
 header { background-color: #0f172a; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
@@ -212,6 +231,7 @@ header nav button { background-color: #1e293b; color: white; border: 1px solid #
 
 .floating-dice { position: fixed; bottom: 25px; right: 25px; font-size: 40px; cursor: pointer; z-index: 1000; }
 .overlay-perfil { position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+
 
 
 
