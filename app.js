@@ -84,6 +84,24 @@ function limparModal() {
     document.getElementById("status").value = "quero";
     document.getElementById("dono").value = "casal";
 }
+// Função para abrir/fechar o menu de bolinhas
+window.toggleMenuPerfil = function() {
+    const menu = document.getElementById('dropdownPerfil');
+    if (menu) {
+        menu.classList.toggle('show-menu');
+    }
+};
+
+// Adicione isso para o menu fechar sozinho se você clicar fora dele
+window.addEventListener('click', function(e) {
+    const menu = document.getElementById('dropdownPerfil');
+    const btn = document.querySelector('.perfil-bolinha-btn');
+    if (menu && menu.classList.contains('show-menu')) {
+        if (!btn.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.remove('show-menu');
+        }
+    }
+});
 
 // SALVAR NO FIREBASE
 window.adicionar = async function() {
@@ -345,6 +363,7 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
+
 
 
 
