@@ -62,6 +62,19 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
 }
 .card:hover .info { opacity: 1; }
 .btn-del { background: #ef4444; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px; font-size: 11px; }
+.info p {
+    white-space: normal; /* Permite que o texto pule linha */
+    word-wrap: break-word; /* Quebra palavras muito grandes */
+    overflow-wrap: break-word;
+    line-height: 1.4; /* Melhora a leitura */
+    margin-top: 5px;
+}
+
+/* Ajuste específico para a caixa de notas e comentários */
+.info div {
+    display: block; /* Garante que os blocos fiquem um abaixo do outro se necessário */
+    width: 100%;
+}
 
 /* --- TINDER CARD --- */
 .tinder-card { border: 2px solid #3b82f6; }
@@ -231,6 +244,7 @@ header nav button { background-color: #1e293b; color: white; border: 1px solid #
 
 .floating-dice { position: fixed; bottom: 25px; right: 25px; font-size: 40px; cursor: pointer; z-index: 1000; }
 .overlay-perfil { position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+
 
 
 
