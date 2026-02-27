@@ -145,37 +145,59 @@ header nav { display: flex; gap: 10px; }
 header nav button { background-color: #1e293b; color: white; border: 1px solid #334155; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
 .btn-add-novo { background-color: #3b82f6 !important; width: 40px; height: 40px; border-radius: 50% !important; border: none; font-size: 24px; color: white; cursor: pointer; }
 
-/* --- AJUSTE DO CARROSSEL PARA FUNCIONAR NO PC --- */
-.carrossel { 
-    display: flex; 
-    overflow-x: auto; /* Permite rolar para o lado */
-    overflow-y: hidden; 
-    gap: 15px; 
-    padding: 10px 5% 20px 5%; 
+/* Esconde a barra de rolagem mas mantém a função de rolar */
+.carrossel {
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    display: flex;
+    gap: 15px;
+    padding: 10px 0;
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* Melhora o deslize no celular */
+}
+.carrossel::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Brave */
 }
 
-/* Deixa a barra de rolagem visível e estilizada no Computador */
-.carrossel::-webkit-scrollbar { 
-    height: 8px; /* Altura da barra horizontal */
-    display: block; /* Garante que ela apareça no PC */
+/* Container do carrossel para posicionar as setas */
+.carrossel-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 30px;
 }
 
-.carrossel::-webkit-scrollbar-track {
-    background: #0f172a; /* Cor do fundo da barra */
-    border-radius: 10px;
+/* Estilo das Setas */
+.seta-carrossel {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 45px;
+    height: 45px;
+    background: rgba(15, 23, 42, 0.8);
+    color: white;
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: 0.3s;
+    opacity: 0; /* Fica invisível por padrão */
 }
 
-.carrossel::-webkit-scrollbar-thumb {
-    background: #334155; /* Cor do "pegador" da barra */
-    border-radius: 10px;
-    border: 2px solid #0f172a;
+/* Mostra as setas quando passa o mouse no container */
+.carrossel-container:hover .seta-carrossel {
+    opacity: 1;
 }
 
-.carrossel::-webkit-scrollbar-thumb:hover {
-    background: #3b82f6; /* Cor quando passa o mouse */
+.seta-carrossel:hover {
+    background: #3b82f6;
+    transform: translateY(-50%) scale(1.1);
 }
+
+.seta-esq { left: 10px; }
+.seta-dir { right: 10px; }
 .perfil-tag { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; z-index: 10; }
 .btn-edit { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; color: white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
 
@@ -190,6 +212,7 @@ header nav button { background-color: #1e293b; color: white; border: 1px solid #
 
 .floating-dice { position: fixed; bottom: 25px; right: 25px; font-size: 40px; cursor: pointer; z-index: 1000; }
 .overlay-perfil { position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+
 
 
 
