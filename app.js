@@ -17,25 +17,21 @@ async function iniciarApp() {
 // GESTÃO DE PERFIS
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome;
+    
+    // Esconde o modal de seleção inicial
     document.getElementById('modal-perfil').style.display = 'none';
-    const emoji = (nome === 'arthur') ? '🤵‍♂️' : '👰‍♀️';
-    document.getElementById('titulo-app').innerHTML = `🎬 Cine Pipoca - ${emoji}`;
+    
+    // Atualiza a letra na bolinha do header (A para Arthur, D para Day)
+    const letraElemento = document.getElementById('letra-perfil');
+    if (letraElemento) {
+        letraElemento.innerText = nome.charAt(0).toUpperCase();
+    }
+    
+    // Atualiza o título (Removi o emoji para manter o estilo moderno de degradê do CSS)
+    document.getElementById('titulo-app').innerHTML = `CINE PIPOCA`;
+    
     render();
 };
-
-window.resetarPerfil = function() {
-    perfilAtivo = null;
-    document.getElementById('modal-perfil').style.display = 'flex';
-};
-
-window.navegar = function(p) {
-    paginaAtual = p;
-    render();
-};
-function toggleMenuPerfil() {
-    const menu = document.getElementById('dropdownPerfil');
-    menu.classList.toggle('show-menu');
-}
 
 // CONTROLE DE CAMPOS DO MODAL
 window.toggleSerieFields = function() {
@@ -349,6 +345,7 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
+
 
 
 
