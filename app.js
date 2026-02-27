@@ -4,11 +4,10 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// --- FUNÇÃO NAVEGAR (FALTAVA NO SEU CÓDIGO) ---
+// --- FUNÇÃO DE NAVEGAÇÃO (ADICIONADA) ---
 window.navegar = function(pagina) {
     paginaAtual = pagina;
-    console.log("Navegando para:", paginaAtual);
-    render(); // Re-renderiza para aplicar os filtros de página
+    render();
 };
 
 // INICIALIZAÇÃO DO APP
@@ -21,7 +20,7 @@ async function iniciarApp() {
     }
 }
 
-// GESTÃO DE PERFIS - CORREÇÃO DE SEGURANÇA
+// GESTÃO DE PERFIS
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome.toLowerCase();
     
@@ -40,8 +39,6 @@ window.selecionarPerfil = function(nome) {
     
     const titulo = document.getElementById('titulo-app');
     if (titulo) titulo.innerHTML = `CINE PIPOCA`;
-    
-    console.log("Sistema: Perfil alterado para " + perfilAtivo);
     
     render();
 };
@@ -194,21 +191,20 @@ window.excluirItem = async function(id) {
     }
 };
 
-// RENDERIZAÇÃO PRINCIPAL - CORREÇÃO DE FILTROS
+// RENDERIZAÇÃO PRINCIPAL
 window.render = function() {
     if (!perfilAtivo) return;
     
-    // Mostra/Esconde as páginas no HTML
+    // Esconde todas as páginas primeiro
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
     
-    // Correção: Garante que estamos tentando mostrar o ID correto do HTML
-    const idPaginaAlvo = (paginaAtual === "home") ? "home" : "page-" + paginaAtual;
-    const pag = document.getElementById(idPaginaAlvo);
+    // Define qual ID de container deve aparecer no HTML
+    let idPagina = (paginaAtual === "home") ? "home" : "page-" + paginaAtual;
+    const pag = document.getElementById(idPagina);
     if(pag) pag.style.display = "block";
 
     const busca = document.getElementById("busca").value.toLowerCase();
     
-    // Filtro base por dono e busca
     const filtrados = data.filter(i => {
         const donoMatch = (i.dono === perfilAtivo || i.dono === 'casal');
         const nomeMatch = (i.nome || "").toLowerCase().includes(busca);
@@ -237,18 +233,20 @@ window.render = function() {
                 </div>`;
         };
 
-        document.getElementById("home").innerHTML = `
-            ${montarSecao("📺 Continuando...", renderCards(assistindo))}
-            ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
-            ${montarSecao("💡 Tinder (Sugestões de ${outroPerfil})", renderSugestoes(sugestoes))}
-            ${montarSecao("⭐ Nossa Lista", renderCards(quero))}
-            ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
-        `;
+        const containerHome = document.getElementById("home");
+        if(containerHome) {
+            containerHome.innerHTML = `
+                ${montarSecao("📺 Continuando...", renderCards(assistindo))}
+                ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
+                ${montarSecao("💡 Tinder (Sugestões de ${outroPerfil})", renderSugestoes(sugestoes))}
+                ${montarSecao("⭐ Nossa Lista", renderCards(quero))}
+                ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
+            `;
+        }
     } else {
         let listaFinal = [];
         let targetId = "";
         
-        // CORREÇÃO DOS FILTROS POR PÁGINA
         if (paginaAtual === "series") {
             listaFinal = filtrados.filter(i => i.tipo === "serie");
             targetId = "series";
