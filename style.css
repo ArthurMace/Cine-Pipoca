@@ -14,6 +14,24 @@ header {
     top: 0;
     z-index: 2000;
 }
+/* Estilização para o novo Logo em Imagem */
+.logo-cinepipoca {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#logo-app {
+    height: 42px; /* Altura ideal para alinhar com seus botões atuais */
+    width: auto;
+    border-radius: 8px; /* Arredondamento suave para combinar com os botões */
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.4)); /* Brilho azul sutil */
+}
+
+#logo-app:hover {
+    transform: scale(1.08); /* Efeito de destaque ao passar o mouse */
+}
 
 /* LOGO ESTILIZADA - FONTE MODERNA */
 header h1 {
@@ -222,4 +240,5 @@ header nav button:hover {
 
 /* --- DADO --- */
 .floating-dice { position: fixed; bottom: 30px; right: 30px; font-size: 45px; cursor: pointer; z-index: 1000; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); transition: 0.3s; }
+
 
