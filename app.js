@@ -292,6 +292,14 @@ function renderSugestoes(lista) {
             </div>
         </div>`).join("");
 }
+// Rolar carrosséis com a rodinha do mouse no PC
+document.addEventListener('wheel', function(e) {
+    if (e.target.closest('.carrossel')) {
+        e.preventDefault();
+        const container = e.target.closest('.carrossel');
+        container.scrollLeft += e.deltaY;
+    }
+}, { passive: false });
 
 // TINDER ACTIONS
 window.darMatch = async (id) => {
@@ -334,3 +342,4 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
+
