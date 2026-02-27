@@ -227,6 +227,16 @@ header nav button { background-color: #1e293b; color: white; border: 1px solid #
     background: #3b82f6;
     transform: translateY(-50%) scale(1.1);
 }
+/* Escurece o card de filmes já assistidos */
+.card-finalizado {
+    filter: brightness(0.6); /* Deixa o card mais escuro */
+    background: rgba(15, 23, 42, 0.9) !important; /* Fundo mais fechado */
+    transition: 0.3s;
+}
+
+.card-finalizado:hover {
+    filter: brightness(0.8); /* Dá um leve destaque ao passar o mouse */
+}
 
 .seta-esq { left: 10px; }
 .seta-dir { right: 10px; }
@@ -244,6 +254,7 @@ header nav button { background-color: #1e293b; color: white; border: 1px solid #
 
 .floating-dice { position: fixed; bottom: 25px; right: 25px; font-size: 40px; cursor: pointer; z-index: 1000; }
 .overlay-perfil { position: fixed; top:0; left:0; width:100%; height:100%; background: #0b101b; z-index: 5000; display: flex; align-items: center; justify-content: center; }
+
 
 
 
