@@ -190,12 +190,25 @@ window.render = function() {
         const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
         const sugestoes = data.filter(i => i.dono === outroPerfil && i.status === 'quero' && !escondidos.includes(i.firebaseId));
 
+        // FUNÇÃO INTERNA PARA CRIAR O CARROSSEL COM SETAS SEM APAGAR NADA
+        const montarSecao = (titulo, conteudo, cor = "#94a3b8") => {
+            if (!conteudo || conteudo.includes("Vazio.")) return "";
+            const idSetas = "scroll-" + Math.random().toString(36).substr(2, 5);
+            return `
+                <h3 class="section-title" style="color: ${cor}; padding: 0 5%;">${titulo}</h3>
+                <div class="carrossel-container">
+                    <button class="seta-carrossel seta-esq" onclick="document.getElementById('${idSetas}').scrollLeft -= 400">❮</button>
+                    <div class="carrossel" id="${idSetas}">${conteudo}</div>
+                    <button class="seta-carrossel seta-dir" onclick="document.getElementById('${idSetas}').scrollLeft += 400">❯</button>
+                </div>`;
+        };
+
         document.getElementById("home").innerHTML = `
-            ${assistindo.length ? `<h3 class="section-title">📺 Continuando...</h3><div class="carrossel">${renderCards(assistindo)}</div>` : ''}
-            ${aguardando.length ? `<h3 class="section-title" style="color: #fbbf24;">⏳ Aguardando Notas</h3><div class="carrossel">${renderCards(aguardando)}</div>` : ''}
-            ${sugestoes.length ? `<h3 class="section-title">💡 Tinder (Sugestões de ${outroPerfil})</h3><div class="carrossel">${renderSugestoes(sugestoes)}</div>` : ''}
-            <h3 class="section-title">⭐ Nossa Lista</h3><div class="carrossel">${renderCards(quero)}</div>
-            ${jaAssistidos.length ? `<h3 class="section-title">✅ Já Assistidos</h3><div class="carrossel">${renderCards(jaAssistidos)}</div>` : ''}
+            ${montarSecao("📺 Continuando...", renderCards(assistindo))}
+            ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
+            ${montarSecao("💡 Tinder (Sugestões de ${outroPerfil})", renderSugestoes(sugestoes))}
+            ${montarSecao("⭐ Nossa Lista", renderCards(quero))}
+            ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
         `;
     } else {
         let listaFinal = [];
@@ -218,7 +231,6 @@ window.render = function() {
         }
     }
 };
-
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="color:gray; padding:20px;">Vazio.</p>`;
     return lista.map(item => {
@@ -292,15 +304,6 @@ function renderSugestoes(lista) {
             </div>
         </div>`).join("");
 }
-// Rolar carrosséis com a rodinha do mouse no PC
-document.addEventListener('wheel', function(e) {
-    if (e.target.closest('.carrossel')) {
-        e.preventDefault();
-        const container = e.target.closest('.carrossel');
-        container.scrollLeft += e.deltaY;
-    }
-}, { passive: false });
-
 // TINDER ACTIONS
 window.darMatch = async (id) => {
     const item = data.find(i => i.firebaseId === id);
@@ -342,4 +345,5 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
+
 
