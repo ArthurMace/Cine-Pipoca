@@ -233,6 +233,22 @@ window.render = function() {
                 </div>`;
         };
 
+        // Tenta encontrar o container da Home por dois IDs possíveis para não ter erro
+        const containerHome = document.getElementById("home") || document.getElementById("page-home");
+        
+        if(containerHome) {
+            containerHome.innerHTML = `
+                ${montarSecao("📺 Continuando...", renderCards(assistindo))}
+                ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
+                ${montarSecao("💡 Tinder (Sugestões de ${outroPerfil})", renderSugestoes(sugestoes))}
+                ${montarSecao("⭐ Nossa Lista", renderCards(quero))}
+                ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
+            `;
+            console.log("Home renderizada com sucesso!");
+        } else {
+            console.error("ERRO: Não encontrei nenhum elemento com id='home' ou id='page-home' no seu HTML.");
+        }
+
         const containerHome = document.getElementById("home");
         if(containerHome) {
             containerHome.innerHTML = `
@@ -378,3 +394,4 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
+
