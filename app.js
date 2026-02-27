@@ -14,22 +14,34 @@ async function iniciarApp() {
     }
 }
 
-// GESTÃO DE PERFIS
+// GESTÃO DE PERFIS - CORREÇÃO DE SEGURANÇA
 window.selecionarPerfil = function(nome) {
-    perfilAtivo = nome;
+    // 1. Normalizamos para minúsculo para garantir que o filtro no render() funcione
+    perfilAtivo = nome.toLowerCase();
     
-    // Esconde o modal de seleção inicial
-    document.getElementById('modal-perfil').style.display = 'none';
+    // 2. Esconde o modal de seleção inicial (se estiver aberto)
+    const modalPerfis = document.getElementById('modal-perfil');
+    if (modalPerfis) modalPerfis.style.display = 'none';
     
-    // Atualiza a letra na bolinha do header (A para Arthur, D para Day)
+    // 3. Atualiza a letra na bolinha do header (A para Arthur, D para Day)
     const letraElemento = document.getElementById('letra-perfil');
     if (letraElemento) {
         letraElemento.innerText = nome.charAt(0).toUpperCase();
     }
     
-    // Atualiza o título (Removi o emoji para manter o estilo moderno de degradê do CSS)
-    document.getElementById('titulo-app').innerHTML = `CINE PIPOCA`;
+    // 4. FECHA O MENU DROP-DOWN (Isso é o que faltava e pode estar travando a tela)
+    const menu = document.getElementById('dropdownPerfil');
+    if (menu) {
+        menu.classList.remove('show-menu');
+    }
     
+    // 5. Garante que o título não tenha emojis que quebrem o layout do logo
+    const titulo = document.getElementById('titulo-app');
+    if (titulo) titulo.innerHTML = `CINE PIPOCA`;
+    
+    console.log("Sistema: Perfil alterado para " + perfilAtivo);
+    
+    // 6. Chama a renderização para filtrar os dados da Day
     render();
 };
 
@@ -363,6 +375,7 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
+
 
 
 
