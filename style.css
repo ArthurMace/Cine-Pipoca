@@ -1,28 +1,39 @@
 /* --- GERAL --- */
 body { background-color: #0b101b; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
 
-/* --- HEADER --- */
-header { 
-    background-color: #0f172a; padding: 15px 5%; display: flex; 
-    justify-content: space-between; align-items: center; 
-    position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-}
-header h1 { margin: 0; font-size: 1.2rem; color: #3b82f6; }
-header nav { display: flex; gap: 10px; align-items: center; }
-
-header nav button {
-    background-color: #1e293b; color: #e2e8f0; border: 1px solid #334155;
-    padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 11px;
-    font-weight: bold; text-transform: uppercase; transition: 0.3s;
-}
-header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
-
-.btn-add-novo {
-    background-color: #3b82f6 !important; width: 42px; height: 42px; 
-    border-radius: 50% !important; border: none; font-size: 24px; color: white;
-    display: flex; align-items: center; justify-content: center;
+/* --- HEADER MODERNO --- */
+header {
+    background: rgba(15, 23, 42, 0.8); /* Transparência leve */
+    backdrop-filter: blur(10px); /* Efeito de vidro (Glassmorphism) */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 5%;
 }
 
+/* LOGO ESTILIZADA */
+header h1 {
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+}
+
+/* BOTÕES DE PERFIL (ADEUS EMOJIS) */
+.btn-perfil-header {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 6px 15px;
+    border-radius: 8px; /* Menos redondo, mais "software" */
+    font-size: 12px;
+    transition: 0.3s;
+}
+
+.btn-perfil-header:hover {
+    background: #3b82f6;
+    color: white;
+}
 /* --- BUSCA --- */
 .search-box { text-align: center; padding: 25px 10px; }
 .search-box input {
@@ -130,3 +141,4 @@ header nav button:hover { background-color: #3b82f6; border-color: #3b82f6; }
 
 /* --- DADO --- */
 .floating-dice { position: fixed; bottom: 30px; right: 30px; font-size: 45px; cursor: pointer; z-index: 1000; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); transition: 0.3s; }
+
