@@ -263,8 +263,9 @@ function renderCards(lista) {
             }
         }
 
+        // ADICIONEI A CLASSE 'card-finalizado' PARA ESCURECER O CARD
         return `
-        <div class="card" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''}">
+        <div class="card ${jaAssistido ? 'card-finalizado' : ''}" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''}">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
             ${!jaAssistido ? `<button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
@@ -283,14 +284,13 @@ function renderCards(lista) {
                 ${jaAssistido ? `
                     <div style="margin-top:5px; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; text-align:center;">
                         <p style="font-size:11px; color:#fbbf24;">🤵‍♂️ A: ${item.notaArthur || '-'} | 👰‍♀️ D: ${item.notaDay || '-'}</p>
-                        <p style="font-size:10px; font-style:italic; color:#94a3b8; margin-top:5px;">"${item.comentario || 'Sem comentário.'}"</p>
+                        <p style="font-size:10px; font-style:italic; color:#94a3b8; margin-top:5px; white-space: normal; word-wrap: break-word;">"${item.comentario || 'Sem comentário.'}"</p>
                     </div>
                 ` : ''}
             </div>
         </div>`;
     }).join("");
 }
-
 function renderSugestoes(lista) {
     return lista.map(item => `
         <div class="card" style="border: 2px solid #3b82f6;">
@@ -345,5 +345,6 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
+
 
 
