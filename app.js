@@ -32,6 +32,10 @@ window.navegar = function(p) {
     paginaAtual = p;
     render();
 };
+function toggleMenuPerfil() {
+    const menu = document.getElementById('dropdownPerfil');
+    menu.classList.toggle('show-menu');
+}
 
 // CONTROLE DE CAMPOS DO MODAL
 window.toggleSerieFields = function() {
@@ -345,6 +349,7 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
+
 
 
 
