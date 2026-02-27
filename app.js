@@ -4,7 +4,7 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// --- FUNÇÃO DE NAVEGAÇÃO (ADICIONADA) ---
+// --- AJUSTE 1: FUNÇÃO DE NAVEGAÇÃO QUE FALTAVA ---
 window.navegar = function(pagina) {
     paginaAtual = pagina;
     render();
@@ -20,7 +20,7 @@ async function iniciarApp() {
     }
 }
 
-// GESTÃO DE PERFIS
+// GESTÃO DE PERFIS - CORREÇÃO DE SEGURANÇA
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome.toLowerCase();
     
@@ -39,6 +39,8 @@ window.selecionarPerfil = function(nome) {
     
     const titulo = document.getElementById('titulo-app');
     if (titulo) titulo.innerHTML = `CINE PIPOCA`;
+    
+    console.log("Sistema: Perfil alterado para " + perfilAtivo);
     
     render();
 };
@@ -94,7 +96,7 @@ function limparModal() {
     document.getElementById("status").value = "quero";
     document.getElementById("dono").value = "casal";
 }
-
+// Função para abrir/fechar o menu de bolinhas
 window.toggleMenuPerfil = function() {
     const menu = document.getElementById('dropdownPerfil');
     if (menu) {
@@ -195,13 +197,10 @@ window.excluirItem = async function(id) {
 window.render = function() {
     if (!perfilAtivo) return;
     
-    // Esconde todas as páginas primeiro
+    // --- AJUSTE 2: GARANTIA DE EXIBIÇÃO DA PÁGINA ---
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-    
-    // Define qual ID de container deve aparecer no HTML
-    let idPagina = (paginaAtual === "home") ? "home" : "page-" + paginaAtual;
-    const pag = document.getElementById(idPagina);
-    if(pag) pag.style.display = "block";
+    const containerPagina = document.getElementById("page-" + paginaAtual);
+    if(containerPagina) containerPagina.style.display = "block";
 
     const busca = document.getElementById("busca").value.toLowerCase();
     
@@ -233,25 +232,10 @@ window.render = function() {
                 </div>`;
         };
 
-        // Tenta encontrar o container da Home por dois IDs possíveis para não ter erro
-        const containerHome = document.getElementById("home") || document.getElementById("page-home");
-        
-        if(containerHome) {
-            containerHome.innerHTML = `
-                ${montarSecao("📺 Continuando...", renderCards(assistindo))}
-                ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
-                ${montarSecao("💡 Tinder (Sugestões de ${outroPerfil})", renderSugestoes(sugestoes))}
-                ${montarSecao("⭐ Nossa Lista", renderCards(quero))}
-                ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
-            `;
-            console.log("Home renderizada com sucesso!");
-        } else {
-            console.error("ERRO: Não encontrei nenhum elemento com id='home' ou id='page-home' no seu HTML.");
-        }
-
-        const containerHome = document.getElementById("home");
-        if(containerHome) {
-            containerHome.innerHTML = `
+        // --- AJUSTE 3: GARANTIR QUE ESCREVE NO LUGAR CERTO DA HOME ---
+        const homeDiv = document.getElementById("home") || document.getElementById("page-home");
+        if(homeDiv) {
+            homeDiv.innerHTML = `
                 ${montarSecao("📺 Continuando...", renderCards(assistindo))}
                 ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
                 ${montarSecao("💡 Tinder (Sugestões de ${outroPerfil})", renderSugestoes(sugestoes))}
@@ -355,6 +339,7 @@ function renderSugestoes(lista) {
         </div>`).join("");
 }
 
+// TINDER ACTIONS
 window.darMatch = async (id) => {
     const item = data.find(i => i.firebaseId === id);
     if(item) {
@@ -371,6 +356,7 @@ window.darBlock = (id) => {
     render();
 };
 
+// SORTEIO DE FILMES
 window.sortearFilme = function() {
     const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
     const container = document.getElementById("container-sorteado");
@@ -394,4 +380,3 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
-
