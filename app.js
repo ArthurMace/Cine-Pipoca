@@ -4,6 +4,13 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
+// --- FUNÇÃO NAVEGAR (FALTAVA NO SEU CÓDIGO) ---
+window.navegar = function(pagina) {
+    paginaAtual = pagina;
+    console.log("Navegando para:", paginaAtual);
+    render(); // Re-renderiza para aplicar os filtros de página
+};
+
 // INICIALIZAÇÃO DO APP
 async function iniciarApp() {
     try {
@@ -16,32 +23,26 @@ async function iniciarApp() {
 
 // GESTÃO DE PERFIS - CORREÇÃO DE SEGURANÇA
 window.selecionarPerfil = function(nome) {
-    // 1. Normalizamos para minúsculo para garantir que o filtro no render() funcione
     perfilAtivo = nome.toLowerCase();
     
-    // 2. Esconde o modal de seleção inicial (se estiver aberto)
     const modalPerfis = document.getElementById('modal-perfil');
     if (modalPerfis) modalPerfis.style.display = 'none';
     
-    // 3. Atualiza a letra na bolinha do header (A para Arthur, D para Day)
     const letraElemento = document.getElementById('letra-perfil');
     if (letraElemento) {
         letraElemento.innerText = nome.charAt(0).toUpperCase();
     }
     
-    // 4. FECHA O MENU DROP-DOWN (Isso é o que faltava e pode estar travando a tela)
     const menu = document.getElementById('dropdownPerfil');
     if (menu) {
         menu.classList.remove('show-menu');
     }
     
-    // 5. Garante que o título não tenha emojis que quebrem o layout do logo
     const titulo = document.getElementById('titulo-app');
     if (titulo) titulo.innerHTML = `CINE PIPOCA`;
     
     console.log("Sistema: Perfil alterado para " + perfilAtivo);
     
-    // 6. Chama a renderização para filtrar os dados da Day
     render();
 };
 
@@ -96,7 +97,7 @@ function limparModal() {
     document.getElementById("status").value = "quero";
     document.getElementById("dono").value = "casal";
 }
-// Função para abrir/fechar o menu de bolinhas
+
 window.toggleMenuPerfil = function() {
     const menu = document.getElementById('dropdownPerfil');
     if (menu) {
@@ -104,7 +105,6 @@ window.toggleMenuPerfil = function() {
     }
 };
 
-// Adicione isso para o menu fechar sozinho se você clicar fora dele
 window.addEventListener('click', function(e) {
     const menu = document.getElementById('dropdownPerfil');
     const btn = document.querySelector('.perfil-bolinha-btn');
@@ -194,16 +194,21 @@ window.excluirItem = async function(id) {
     }
 };
 
-// RENDERIZAÇÃO PRINCIPAL
+// RENDERIZAÇÃO PRINCIPAL - CORREÇÃO DE FILTROS
 window.render = function() {
     if (!perfilAtivo) return;
     
+    // Mostra/Esconde as páginas no HTML
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-    const pag = document.getElementById("page-" + paginaAtual);
+    
+    // Correção: Garante que estamos tentando mostrar o ID correto do HTML
+    const idPaginaAlvo = (paginaAtual === "home") ? "home" : "page-" + paginaAtual;
+    const pag = document.getElementById(idPaginaAlvo);
     if(pag) pag.style.display = "block";
 
     const busca = document.getElementById("busca").value.toLowerCase();
     
+    // Filtro base por dono e busca
     const filtrados = data.filter(i => {
         const donoMatch = (i.dono === perfilAtivo || i.dono === 'casal');
         const nomeMatch = (i.nome || "").toLowerCase().includes(busca);
@@ -220,7 +225,6 @@ window.render = function() {
         const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
         const sugestoes = data.filter(i => i.dono === outroPerfil && i.status === 'quero' && !escondidos.includes(i.firebaseId));
 
-        // FUNÇÃO INTERNA PARA CRIAR O CARROSSEL COM SETAS SEM APAGAR NADA
         const montarSecao = (titulo, conteudo, cor = "#94a3b8") => {
             if (!conteudo || conteudo.includes("Vazio.")) return "";
             const idSetas = "scroll-" + Math.random().toString(36).substr(2, 5);
@@ -244,6 +248,7 @@ window.render = function() {
         let listaFinal = [];
         let targetId = "";
         
+        // CORREÇÃO DOS FILTROS POR PÁGINA
         if (paginaAtual === "series") {
             listaFinal = filtrados.filter(i => i.tipo === "serie");
             targetId = "series";
@@ -261,6 +266,7 @@ window.render = function() {
         }
     }
 };
+
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="color:gray; padding:20px;">Vazio.</p>`;
     return lista.map(item => {
@@ -293,7 +299,6 @@ function renderCards(lista) {
             }
         }
 
-        // ADICIONEI A CLASSE 'card-finalizado' PARA ESCURECER O CARD
         return `
         <div class="card ${jaAssistido ? 'card-finalizado' : ''}" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''}">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
@@ -321,6 +326,7 @@ function renderCards(lista) {
         </div>`;
     }).join("");
 }
+
 function renderSugestoes(lista) {
     return lista.map(item => `
         <div class="card" style="border: 2px solid #3b82f6;">
@@ -334,7 +340,7 @@ function renderSugestoes(lista) {
             </div>
         </div>`).join("");
 }
-// TINDER ACTIONS
+
 window.darMatch = async (id) => {
     const item = data.find(i => i.firebaseId === id);
     if(item) {
@@ -351,7 +357,6 @@ window.darBlock = (id) => {
     render();
 };
 
-// SORTEIO DE FILMES
 window.sortearFilme = function() {
     const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
     const container = document.getElementById("container-sorteado");
@@ -375,10 +380,3 @@ window.sortearFilme = function() {
 };
 
 iniciarApp();
-
-
-
-
-
-
-
