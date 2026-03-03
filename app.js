@@ -210,61 +210,54 @@ window.render = function() {
         return donoMatch && nomeMatch;
     });
 
-    if (paginaAtual === "home") {
-        const assistindo = filtrados.filter(i => i.status === "assistindo");
+    // Função auxiliar para montar seções com carrossel
+    const montarSecao = (titulo, conteudo, cor = "#94a3b8") => {
+        if (!conteudo || conteudo.includes("Vazio.")) return "";
+        const idSetas = "scroll-" + Math.random().toString(36).substr(2, 5);
+        return `
+            <h3 class="section-title" style="color: ${cor}; padding: 0 5%;">${titulo}</h3>
+            <div class="carrossel-container">
+                <button class="seta-carrossel seta-esq" onclick="document.getElementById('${idSetas}').scrollLeft -= 400">❮</button>
+                <div class="carrossel" id="${idSetas}">${conteudo}</div>
+                <button class="seta-carrossel seta-dir" onclick="document.getElementById('${idSetas}').scrollLeft += 400">❯</button>
+            </div>`;
+    };
+
+    if (paginaAtual === "home" || paginaAtual === "series" || paginaAtual === "filmes") {
         
-        // NOVO: Divisão de Quero Assistir (Casal vs Pessoal)
-        const queroCasal = filtrados.filter(i => i.status === "quero" && i.dono === "casal");
-        const queroPessoal = filtrados.filter(i => i.status === "quero" && i.dono === perfilAtivo);
-        
-        const aguardando = filtrados.filter(i => i.status === "avaliacao");
-        const jaAssistidos = filtrados.filter(i => i.status === "assistido"); 
+        // Filtro específico por tipo se não estiver na home
+        let listaBase = filtrados;
+        if (paginaAtual === "series") listaBase = filtrados.filter(i => i.tipo === "serie");
+        if (paginaAtual === "filmes") listaBase = filtrados.filter(i => i.tipo === "filme");
+
+        const assistindo = listaBase.filter(i => i.status === "assistindo");
+        const queroCasal = listaBase.filter(i => i.status === "quero" && i.dono === "casal");
+        const queroPessoal = listaBase.filter(i => i.status === "quero" && i.dono === perfilAtivo);
+        const aguardando = listaBase.filter(i => i.status === "avaliacao");
+        const jaAssistidos = listaBase.filter(i => i.status === "assistido"); 
         
         const outroPerfil = (perfilAtivo === 'arthur') ? 'day' : 'arthur';
         const nomeOutroFormatado = outroPerfil.charAt(0).toUpperCase() + outroPerfil.slice(1);
         
         const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
-        const sugestoes = data.filter(i => i.dono === outroPerfil && i.status === 'quero' && !escondidos.includes(i.firebaseId));
+        const sugestoes = (paginaAtual === "home") ? data.filter(i => i.dono === outroPerfil && i.status === 'quero' && !escondidos.includes(i.firebaseId)) : [];
 
-        const montarSecao = (titulo, conteudo, cor = "#94a3b8") => {
-            if (!conteudo || conteudo.includes("Vazio.")) return "";
-            const idSetas = "scroll-" + Math.random().toString(36).substr(2, 5);
-            return `
-                <h3 class="section-title" style="color: ${cor}; padding: 0 5%;">${titulo}</h3>
-                <div class="carrossel-container">
-                    <button class="seta-carrossel seta-esq" onclick="document.getElementById('${idSetas}').scrollLeft -= 400">❮</button>
-                    <div class="carrossel" id="${idSetas}">${conteudo}</div>
-                    <button class="seta-carrossel seta-dir" onclick="document.getElementById('${idSetas}').scrollLeft += 400">❯</button>
-                </div>`;
-        };
-
-        const homeDiv = document.getElementById("home") || document.getElementById("page-home");
-        if(homeDiv) {
-            homeDiv.innerHTML = `
+        // Tenta encontrar o container pelo ID da página (ex: id="home" ou id="series")
+        const targetDiv = document.getElementById(paginaAtual) || document.getElementById("page-" + paginaAtual);
+        
+        if(targetDiv) {
+            targetDiv.innerHTML = `
                 ${montarSecao("📺 Continuando...", renderCards(assistindo))}
                 ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
-                ${montarSecao(`💡 Sugerido por ${nomeOutroFormatado}`, renderSugestoes(sugestoes))}
+                ${paginaAtual === "home" ? montarSecao(`💡 Sugerido por ${nomeOutroFormatado}`, renderSugestoes(sugestoes)) : ""}
                 ${montarSecao("⭐ Nossa Lista (Juntos)", renderCards(queroCasal))}
                 ${montarSecao(`👤 Minha Lista (${perfilAtivo.charAt(0).toUpperCase() + perfilAtivo.slice(1)})`, renderCards(queroPessoal), "#3b82f6")}
                 ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
             `;
         }
-    } else {
-        let listaFinal = [];
-        let targetId = "";
-        
-        if (paginaAtual === "series") {
-            listaFinal = filtrados.filter(i => i.tipo === "serie");
-            targetId = "series";
-        } else if (paginaAtual === "filmes") {
-            listaFinal = filtrados.filter(i => i.tipo === "filme");
-            targetId = "filmes";
-        } else if (paginaAtual === "quero") {
-            listaFinal = filtrados.filter(i => i.status === "quero");
-            targetId = "queroList";
-        }
-        
-        const container = document.getElementById(targetId);
+    } else if (paginaAtual === "quero") {
+        const listaFinal = filtrados.filter(i => i.status === "quero");
+        const container = document.getElementById("queroList");
         if (container) {
             container.innerHTML = `<div class="grid-comum">${renderCards(listaFinal)}</div>`;
         }
