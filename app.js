@@ -212,11 +212,17 @@ window.render = function() {
 
     if (paginaAtual === "home") {
         const assistindo = filtrados.filter(i => i.status === "assistindo");
-        const quero = filtrados.filter(i => i.status === "quero");
+        
+        // NOVO: Divisão de Quero Assistir (Casal vs Pessoal)
+        const queroCasal = filtrados.filter(i => i.status === "quero" && i.dono === "casal");
+        const queroPessoal = filtrados.filter(i => i.status === "quero" && i.dono === perfilAtivo);
+        
         const aguardando = filtrados.filter(i => i.status === "avaliacao");
         const jaAssistidos = filtrados.filter(i => i.status === "assistido"); 
         
         const outroPerfil = (perfilAtivo === 'arthur') ? 'day' : 'arthur';
+        const nomeOutroFormatado = outroPerfil.charAt(0).toUpperCase() + outroPerfil.slice(1);
+        
         const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
         const sugestoes = data.filter(i => i.dono === outroPerfil && i.status === 'quero' && !escondidos.includes(i.firebaseId));
 
@@ -232,14 +238,14 @@ window.render = function() {
                 </div>`;
         };
 
-        // --- AJUSTE 3: GARANTIR QUE ESCREVE NO LUGAR CERTO DA HOME ---
         const homeDiv = document.getElementById("home") || document.getElementById("page-home");
         if(homeDiv) {
             homeDiv.innerHTML = `
                 ${montarSecao("📺 Continuando...", renderCards(assistindo))}
                 ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
-                ${montarSecao("💡 Tinder (Sugestões de ${outroPerfil})", renderSugestoes(sugestoes))}
-                ${montarSecao("⭐ Nossa Lista", renderCards(quero))}
+                ${montarSecao(`💡 Sugerido por ${nomeOutroFormatado}`, renderSugestoes(sugestoes))}
+                ${montarSecao("⭐ Nossa Lista (Juntos)", renderCards(queroCasal))}
+                ${montarSecao(`👤 Minha Lista (${perfilAtivo.charAt(0).toUpperCase() + perfilAtivo.slice(1)})`, renderCards(queroPessoal), "#3b82f6")}
                 ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
             `;
         }
@@ -304,7 +310,7 @@ function renderCards(lista) {
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
             ${jaAssistido ? `<div class="tarja-finalizado"></div>` : ''}
             <div class="info">
-                <b style="font-size:14px;">${item.nome}</b>
+                <b style="font-size:14px; display: block; margin-top: 10px;">${item.nome}</b>
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
                 <p style="font-size:10px; margin-top:5px;">${avisoFalta}</p>
                 ${podeVotar ? `
@@ -330,7 +336,7 @@ function renderSugestoes(lista) {
         <div class="card" style="border: 2px solid #3b82f6;">
             <img src="${item.imagem}" style="filter: brightness(0.4);">
             <div class="info" style="opacity: 1; background: transparent;">
-                <p style="font-weight:bold; color:white;">${item.nome}</p>
+                <p style="font-weight:bold; color:white; margin-top: 10px;">${item.nome}</p>
                 <div style="display:flex; gap:15px; margin-top:10px;">
                     <button onclick="window.darMatch('${item.firebaseId}')" style="background:none; border:none; font-size:30px; cursor:pointer;">🍿</button>
                     <button onclick="window.darBlock('${item.firebaseId}')" style="background:none; border:none; font-size:30px; cursor:pointer;">🚫</button>
@@ -371,7 +377,7 @@ window.sortearFilme = function() {
     container.innerHTML = `
         <h2 style="color:#3b82f6;">O escolhido foi:</h2>
         <img src="${sorteado.imagem}" style="width:100%; max-width:180px; border-radius:12px; margin: 15px 0; border: 2px solid #3b82f6;">
-        <h3 style="color:white; margin:0;">${sorteado.nome}</h3>
+        <h3 style="color:white; margin:0; margin-top: 10px;">${sorteado.nome}</h3>
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
             <button class="btn-primary" onclick="window.finalizarRapido('${sorteado.firebaseId}')">Assistir este! ✅</button>
             <button class="btn-cancel" onclick="window.sortearFilme()">Sortear outro 🎲</button>
