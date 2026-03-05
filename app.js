@@ -4,11 +4,10 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// --- CONFIGURAÇÃO API TMDB ---
+// --- CONFIGURAÇÃO API TMDB (APENAS ACRESCENTADO) ---
 const API_KEY = 'efe4cf2c1021597fbb2171bda02231f4';
 const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
 
-// --- FUNÇÃO DE BUSCA AUTOMÁTICA COM DETALHES DE SÉRIE ---
 async function buscarNoTMDB(nome) {
     const url = `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=pt-BR&query=${encodeURIComponent(nome)}`;
     try {
@@ -40,7 +39,7 @@ async function buscarNoTMDB(nome) {
     return null;
 }
 
-// --- FUNÇÃO PARA RETOMAR SÉRIE (NOVA TEMPORADA) ---
+// --- FUNÇÃO PARA RETOMAR SÉRIE (ACRESCENTADO) ---
 window.retomarSerie = async function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (!item) return;
@@ -80,13 +79,9 @@ window.selecionarPerfil = function(nome) {
     const modalPerfis = document.getElementById('modal-perfil');
     if (modalPerfis) modalPerfis.style.display = 'none';
     const letraElemento = document.getElementById('letra-perfil');
-    if (letraElemento) {
-        letraElemento.innerText = nome.charAt(0).toUpperCase();
-    }
+    if (letraElemento) letraElemento.innerText = nome.charAt(0).toUpperCase();
     const menu = document.getElementById('dropdownPerfil');
-    if (menu) {
-        menu.classList.remove('show-menu');
-    }
+    if (menu) menu.classList.remove('show-menu');
     const titulo = document.getElementById('titulo-app');
     if (titulo) titulo.innerHTML = `CINE PIPOCA`;
     console.log("Sistema: Perfil alterado para " + perfilAtivo);
@@ -142,9 +137,7 @@ function limparModal() {
 
 window.toggleMenuPerfil = function() {
     const menu = document.getElementById('dropdownPerfil');
-    if (menu) {
-        menu.classList.toggle('show-menu');
-    }
+    if (menu) menu.classList.toggle('show-menu');
 };
 
 window.addEventListener('click', function(e) {
@@ -194,11 +187,8 @@ window.adicionar = async function() {
         ...extrasAuto
     };
     
-    if (id) {
-        await updateItem(id, itemDados);
-    } else {
-        await addItem(itemDados);
-    }
+    if (id) { await updateItem(id, itemDados); } 
+    else { await addItem(itemDados); }
     
     window.fecharModal();
     data = await getData();
@@ -290,7 +280,7 @@ window.render = function() {
         const jaAssistidos = listaBase.filter(i => i.status === "assistido"); 
         
         const outroPerfil = (perfilAtivo === 'arthur') ? 'day' : 'arthur';
-        const nomeOutroFormatado = outroPerfil.charAt(0).toUpperCase() + outroPerfil.slice(1);
+        const nomeOutro = outroPerfil.charAt(0).toUpperCase() + outroPerfil.slice(1);
         const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
         const sugestoes = (paginaAtual === "home") ? data.filter(i => i.dono === outroPerfil && i.status === 'quero' && !escondidos.includes(i.firebaseId)) : [];
 
@@ -299,17 +289,11 @@ window.render = function() {
             targetDiv.innerHTML = `
                 ${montarSecao("📺 Continuando...", renderCards(assistindo))}
                 ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
-                ${paginaAtual === "home" ? montarSecao(`💡 Sugerido por ${nomeOutroFormatado}`, renderSugestoes(sugestoes)) : ""}
+                ${paginaAtual === "home" ? montarSecao(`💡 Sugerido por ${nomeOutro}`, renderSugestoes(sugestoes)) : ""}
                 ${montarSecao("⭐ Nossa Lista (Juntos)", renderCards(queroCasal))}
                 ${montarSecao(`👤 Minha Lista (${perfilAtivo.charAt(0).toUpperCase() + perfilAtivo.slice(1)})`, renderCards(queroPessoal), "#3b82f6")}
                 ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
             `;
-        }
-    } else if (paginaAtual === "quero") {
-        const listaFinal = filtrados.filter(i => i.status === "quero");
-        const container = document.getElementById("queroList");
-        if (container) {
-            container.innerHTML = `<div class="grid-comum">${renderCards(listaFinal)}</div>`;
         }
     }
 };
@@ -334,7 +318,6 @@ function renderCards(lista) {
 
         const votou = (perfilAtivo === 'arthur' && item.notaArthur) || (perfilAtivo === 'day' && item.notaDay);
         let avisoFalta = "";
-        
         if (emAvaliacao) {
             if (perfilAtivo === 'arthur') {
                 avisoFalta = item.notaArthur ? "<span style='color:#94a3b8;'>Aguardando nota da Day 👰‍♀️</span>" : "<span style='color:#fbbf24;'>Falta sua nota! 🤵‍♂️</span>";
