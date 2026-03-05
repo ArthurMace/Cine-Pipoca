@@ -1,21 +1,21 @@
 import { getData, addItem, updateItem, deleteItem } from "./storage.js";
 
-// --- ESTADO GLOBAL ---
 let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
+// --- ACRÉSCIMO 1: CONFIGURAÇÃO API TMDB ---
 const API_KEY = 'efe4cf2c1021597fbb2171bda02231f4';
 const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
 
-// --- BUSCA AUTOMÁTICA TMDB ---
+// --- ACRÉSCIMO 2: FUNÇÃO DE BUSCA AUTOMÁTICA ---
 async function buscarNoTMDB(nome) {
     const url = `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=pt-BR&query=${encodeURIComponent(nome)}`;
     try {
         const resposta = await fetch(url);
         const dados = await resposta.json();
         if (dados.results && dados.results.length > 0) {
-            const item = dados.results[0];
+            const item = dados.results[0]; 
             return {
                 titulo: item.title || item.name,
                 imagem: item.poster_path ? BASE_IMG + item.poster_path : null,
@@ -28,48 +28,67 @@ async function buscarNoTMDB(nome) {
     return null;
 }
 
-// --- FUNÇÕES DE NAVEGAÇÃO E PERFIL (Chamadas no HTML) ---
+// --- AJUSTE 1: FUNÇÃO DE NAVEGAÇÃO QUE FALTAVA ---
 window.navegar = function(pagina) {
     paginaAtual = pagina;
-    document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-    const target = document.getElementById("page-" + pagina);
-    if (target) target.style.display = "block";
-    window.render();
+    render();
 };
 
+// INICIALIZAÇÃO DO APP
+async function iniciarApp() {
+    try {
+        data = await getData();
+        render();
+    } catch (error) {
+        console.error("Erro ao carregar dados do Firebase:", error);
+    }
+}
+
+// GESTÃO DE PERFIS - CORREÇÃO DE SEGURANÇA
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome.toLowerCase();
-    document.getElementById('modal-perfil').style.display = 'none';
-    document.getElementById('letra-perfil').innerText = nome.charAt(0).toUpperCase();
+    
+    const modalPerfis = document.getElementById('modal-perfil');
+    if (modalPerfis) modalPerfis.style.display = 'none';
+    
+    const letraElemento = document.getElementById('letra-perfil');
+    if (letraElemento) {
+        letraElemento.innerText = nome.charAt(0).toUpperCase();
+    }
+    
     const menu = document.getElementById('dropdownPerfil');
-    if (menu) menu.classList.remove('show-menu');
-    window.render();
+    if (menu) {
+        menu.classList.remove('show-menu');
+    }
+    
+    const titulo = document.getElementById('titulo-app');
+    if (titulo) titulo.innerHTML = `CINE PIPOCA`;
+    
+    console.log("Sistema: Perfil alterado para " + perfilAtivo);
+    
+    render();
 };
 
-window.resetarPerfil = function() {
-    document.getElementById('modal-perfil').style.display = 'flex';
-};
-
-window.toggleMenuPerfil = function() {
-    document.getElementById('dropdownPerfil').classList.toggle('show-menu');
-};
-
-// --- GESTÃO DO MODAL DE ADICIONAR/EDITAR ---
+// CONTROLE DE CAMPOS DO MODAL
 window.toggleSerieFields = function() {
     const tipo = document.getElementById("tipo").value;
     const status = document.getElementById("status").value;
+    
     document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
-    const mostrarNotas = (status === "assistido" || status === "avaliacao");
-    document.getElementById("campos-finalizacao").style.display = mostrarNotas ? "block" : "none";
+    
+    const deveMostrarNotas = (status === "assistido" || status === "avaliacao");
+    document.getElementById("campos-finalizacao").style.display = deveMostrarNotas ? "block" : "none";
 };
 
+// ABRIR E FECHAR MODAL
 window.abrirModal = function(id = null) {
-    limparCamposModal();
+    limparModal();
     document.getElementById("modal").style.display = "flex";
+    
     if (id && id !== 'add') {
         const item = data.find(i => i.firebaseId === id);
         if (item) {
-            document.getElementById("modal-title").innerText = "Editar " + (item.nome || "");
+            document.getElementById("modal-title").innerText = "Editar " + (item.nome || "Item");
             document.getElementById("item-id-hidden").value = id;
             document.getElementById("nome").value = item.nome || "";
             document.getElementById("imagem").value = item.imagem || "";
@@ -82,42 +101,71 @@ window.abrirModal = function(id = null) {
             document.getElementById("notaD").value = item.notaDay || "";
             document.getElementById("comentario").value = item.comentario || "";
         }
-    } else {
-        document.getElementById("modal-title").innerText = "Adicionar Novo";
     }
     window.toggleSerieFields();
 };
 
-window.fecharModal = function() {
-    document.getElementById("modal").style.display = "none";
+window.fecharModal = function() { 
+    document.getElementById("modal").style.display = "none"; 
 };
 
-function limparCamposModal() {
-    ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comentario"].forEach(id => {
+function limparModal() {
+    const campos = ["item-id-hidden", "nome", "imagem", "temporada", "episodio", "notaA", "notaD", "comentario"];
+    campos.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.value = "";
+        if(el) el.value = "";
     });
+    document.getElementById("modal-title").innerText = "Adicionar Novo";
+    document.getElementById("tipo").value = "filme";
+    document.getElementById("status").value = "quero";
+    document.getElementById("dono").value = "casal";
 }
 
-// --- OPERAÇÕES FIREBASE (ADICIONAR/EDITAR/EXCLUIR) ---
+// Função para abrir/fechar o menu de bolinhas
+window.toggleMenuPerfil = function() {
+    const menu = document.getElementById('dropdownPerfil');
+    if (menu) {
+        menu.classList.toggle('show-menu');
+    }
+};
+
+window.addEventListener('click', function(e) {
+    const menu = document.getElementById('dropdownPerfil');
+    const btn = document.querySelector('.perfil-bolinha-btn');
+    if (menu && menu.classList.contains('show-menu')) {
+        if (!btn.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.remove('show-menu');
+        }
+    }
+});
+
+// SALVAR NO FIREBASE - ACRESCENTADO BUSCA AUTOMÁTICA
 window.adicionar = async function() {
     const id = document.getElementById("item-id-hidden").value;
-    let nome = document.getElementById("nome").value;
-    let imagem = document.getElementById("imagem").value;
-    let extrasAuto = {};
+    let nomeInput = document.getElementById("nome").value;
+    let imagemInput = document.getElementById("imagem").value;
+    let tipoInput = document.getElementById("tipo").value;
+    let sinopseAuto = "";
+    let bannerAuto = "";
 
-    if (!id && !imagem && nome) {
-        const dadosTMDB = await buscarNoTMDB(nome);
+    // ACRÉSCIMO: Se não houver imagem, busca no TMDB automaticamente
+    if (!id && !imagemInput) {
+        const dadosTMDB = await buscarNoTMDB(nomeInput);
         if (dadosTMDB) {
-            nome = dadosTMDB.titulo;
-            imagem = dadosTMDB.imagem;
-            extrasAuto = { sinopse: dadosTMDB.sinopse, banner: dadosTMDB.banner };
+            nomeInput = dadosTMDB.titulo;
+            imagemInput = dadosTMDB.imagem;
+            tipoInput = dadosTMDB.tipo;
+            sinopseAuto = dadosTMDB.sinopse;
+            bannerAuto = dadosTMDB.banner;
         }
     }
 
     const itemDados = {
-        nome, imagem,
-        tipo: document.getElementById("tipo").value,
+        nome: nomeInput,
+        imagem: imagemInput,
+        tipo: tipoInput,
+        sinopse: sinopseAuto,
+        banner: bannerAuto,
         status: document.getElementById("status").value,
         dono: document.getElementById("dono").value,
         temporada: document.getElementById("temporada").value || null,
@@ -125,10 +173,9 @@ window.adicionar = async function() {
         notaArthur: document.getElementById("notaA").value || null,
         notaDay: document.getElementById("notaD").value || null,
         comentario: document.getElementById("comentario").value || "",
-        ultimaAtualizacao: Date.now(),
-        ...extrasAuto
+        ultimaAtualizacao: new Date().getTime()
     };
-
+    
     if (id) {
         await updateItem(id, itemDados);
     } else {
@@ -137,51 +184,18 @@ window.adicionar = async function() {
     
     window.fecharModal();
     data = await getData();
-    window.render();
+    render();
 };
 
-window.excluirItem = async function(id) {
-    if (confirm("Deseja excluir permanentemente?")) {
-        await deleteItem(id);
-        data = await getData();
-        window.render();
-    }
-};
-
-// --- SORTEIO E SINOPSE ---
-window.sortearFilme = function() {
-    const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
-    if (opcoes.length === 0) return alert("Nenhum filme do casal disponível para sorteio.");
-    const sorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
-    window.verSinopse(sorteado.firebaseId);
-};
-
-window.verSinopse = function(id) {
-    const item = data.find(i => i.firebaseId === id);
-    if (!item) return;
-    const modalSorteio = document.getElementById("modal-sorteio");
-    const container = document.getElementById("container-sorteado");
-    
-    modalSorteio.style.display = "flex";
-    container.innerHTML = `
-        <div style="background: url('${item.banner || ''}') center/cover; border-radius:15px; overflow:hidden;">
-            <div style="background:rgba(15, 23, 42, 0.95); padding:30px; backdrop-filter:blur(5px);">
-                <h2 style="color:#3b82f6; margin-bottom:15px;">${item.nome}</h2>
-                <p style="text-align:left; font-size:14px; line-height:1.6; color:#cbd5e1; max-height:250px; overflow-y:auto;">${item.sinopse || "Sem sinopse."}</p>
-                <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
-                    <button class="btn-primary" onclick="window.abrirModal('${item.firebaseId}'); document.getElementById('modal-sorteio').style.display='none'">Editar</button>
-                    <button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
-                </div>
-            </div>
-        </div>`;
-};
-
-// --- AVALIAÇÃO INDIVIDUAL ---
+// FINALIZAÇÃO RÁPIDA
 window.finalizarRapido = function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (!item) return;
+
     document.getElementById("aval-id-hidden").value = id;
-    document.getElementById("aval-titulo").innerText = `Avaliar: ${item.nome}`;
+    document.getElementById("aval-titulo").innerText = `Nota de ${perfilAtivo === 'arthur' ? 'Arthur' : 'Day'}`;
+    document.getElementById("aval-nota").value = "5";
+    document.getElementById("aval-comentario").value = "";
     document.getElementById("modal-avaliacao").style.display = "flex";
 };
 
@@ -189,105 +203,250 @@ window.salvarNotaIndividual = async function() {
     const id = document.getElementById("aval-id-hidden").value;
     const nota = document.getElementById("aval-nota").value;
     const coment = document.getElementById("aval-comentario").value;
-    const item = data.find(i => i.firebaseId === id);
     
+    const item = data.find(i => i.firebaseId === id);
+    let dadosAtualizados = { ...item };
+
     if (perfilAtivo === 'arthur') {
-        item.notaArthur = nota;
-        item.comentarioArthur = coment;
+        dadosAtualizados.notaArthur = nota;
+        dadosAtualizados.comentarioArthur = coment;
     } else {
-        item.notaDay = nota;
-        item.comentarioDay = coment;
+        dadosAtualizados.notaDay = nota;
+        dadosAtualizados.comentarioDay = coment;
     }
 
-    // Se ambos votaram, finaliza o status
-    if (item.notaArthur && item.notaDay) {
-        item.status = 'assistido';
-        item.comentario = `A: ${item.comentarioArthur || ""} | D: ${item.comentarioDay || ""}`;
+    if (dadosAtualizados.notaArthur && dadosAtualizados.notaDay) {
+        dadosAtualizados.status = 'assistido';
+        const cA = dadosAtualizados.comentarioArthur || "";
+        const cD = dadosAtualizados.comentarioDay || "";
+        dadosAtualizados.comentario = `A: ${cA} | D: ${cD}`;
     } else {
-        item.status = 'avaliacao';
+        dadosAtualizados.status = 'avaliacao';
     }
 
-    await updateItem(id, item);
+    await updateItem(id, dadosAtualizados);
     document.getElementById("modal-avaliacao").style.display = "none";
     data = await getData();
-    window.render();
+    render();
 };
 
-// --- RENDERIZAÇÃO ---
+window.excluirItem = async function(id) {
+    if (confirm("Deseja realmente remover este item?")) {
+        await deleteItem(id);
+        data = await getData();
+        render();
+    }
+};
+
+// RENDERIZAÇÃO PRINCIPAL
+window.render = function() {
+    if (!perfilAtivo) return;
+    
+    document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+    const containerPagina = document.getElementById("page-" + paginaAtual);
+    if(containerPagina) containerPagina.style.display = "block";
+
+    const busca = document.getElementById("busca").value.toLowerCase();
+    
+    const filtrados = data.filter(i => {
+        const donoMatch = (i.dono === perfilAtivo || i.dono === 'casal');
+        const nomeMatch = (i.nome || "").toLowerCase().includes(busca);
+        return donoMatch && nomeMatch;
+    });
+
+    const montarSecao = (titulo, conteudo, cor = "#94a3b8") => {
+        if (!conteudo || conteudo.includes("Vazio.")) return "";
+        const idSetas = "scroll-" + Math.random().toString(36).substr(2, 5);
+        return `
+            <h3 class="section-title" style="color: ${cor}; padding: 0 5%;">${titulo}</h3>
+            <div class="carrossel-container">
+                <button class="seta-carrossel seta-esq" onclick="document.getElementById('${idSetas}').scrollLeft -= 400">❮</button>
+                <div class="carrossel" id="${idSetas}">${conteudo}</div>
+                <button class="seta-carrossel seta-dir" onclick="document.getElementById('${idSetas}').scrollLeft += 400">❯</button>
+            </div>`;
+    };
+
+    if (paginaAtual === "home" || paginaAtual === "series" || paginaAtual === "filmes") {
+        let listaBase = filtrados;
+        if (paginaAtual === "series") listaBase = filtrados.filter(i => i.tipo === "serie");
+        if (paginaAtual === "filmes") listaBase = filtrados.filter(i => i.tipo === "filme");
+
+        const assistindo = listaBase.filter(i => i.status === "assistindo");
+        const queroCasal = listaBase.filter(i => i.status === "quero" && i.dono === "casal");
+        const queroPessoal = listaBase.filter(i => i.status === "quero" && i.dono === perfilAtivo);
+        const aguardando = listaBase.filter(i => i.status === "avaliacao");
+        const jaAssistidos = listaBase.filter(i => i.status === "assistido"); 
+        
+        const outroPerfil = (perfilAtivo === 'arthur') ? 'day' : 'arthur';
+        const nomeOutroFormatado = outroPerfil.charAt(0).toUpperCase() + outroPerfil.slice(1);
+        
+        const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
+        const sugestoes = (paginaAtual === "home") ? data.filter(i => i.dono === outroPerfil && i.status === 'quero' && !escondidos.includes(i.firebaseId)) : [];
+
+        const targetDiv = document.getElementById(paginaAtual) || document.getElementById("page-" + paginaAtual);
+        
+        if(targetDiv) {
+            targetDiv.innerHTML = `
+                ${montarSecao("📺 Continuando...", renderCards(assistindo))}
+                ${montarSecao("⏳ Aguardando Notas", renderCards(aguardando), "#fbbf24")}
+                ${paginaAtual === "home" ? montarSecao(`💡 Sugerido por ${nomeOutroFormatado}`, renderSugestoes(sugestoes)) : ""}
+                ${montarSecao("⭐ Nossa Lista (Juntos)", renderCards(queroCasal))}
+                ${montarSecao(`👤 Minha Lista (${perfilAtivo.charAt(0).toUpperCase() + perfilAtivo.slice(1)})`, renderCards(queroPessoal), "#3b82f6")}
+                ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
+            `;
+        }
+    } else if (paginaAtual === "quero") {
+        const listaFinal = filtrados.filter(i => i.status === "quero");
+        const container = document.getElementById("queroList");
+        if (container) {
+            container.innerHTML = `<div class="grid-comum">${renderCards(listaFinal)}</div>`;
+        }
+    }
+};
+
+// --- ACRÉSCIMO 3: GERADOR DE PIPOCAS ---
+function renderPipocas(nota) {
+    let pipocas = "";
+    for (let i = 1; i <= 5; i++) {
+        pipocas += `<span style="filter: ${i <= nota ? 'grayscale(0)' : 'grayscale(1) opacity(0.3)'}; font-size: 14px;">🍿</span>`;
+    }
+    return pipocas;
+}
+
 function renderCards(lista) {
-    if (lista.length === 0) return `<p style="color:gray; padding:20px; text-align:center; width:100%;">Nenhum item encontrado.</p>`;
+    if (lista.length === 0) return `<p style="color:gray; padding:20px;">Vazio.</p>`;
     return lista.map(item => {
         const jaAssistido = item.status === 'assistido';
-        const votou = (perfilAtivo === 'arthur' && item.notaArthur) || (perfilAtivo === 'day' && item.notaDay);
+        const emAvaliacao = item.status === 'avaliacao';
         
+        let textoBotao = "Finalizar ✅";
+        if (item.tipo === 'serie' && item.status === 'quero') textoBotao = "Assistir 📺";
+
+        let avisoFalta = "";
+        let podeVotar = !jaAssistido; 
+
+        if (emAvaliacao) {
+            if (perfilAtivo === 'arthur') {
+                if (item.notaArthur) {
+                    avisoFalta = "<span style='color:#94a3b8;'>Aguardando nota da Day 👰‍♀️</span>";
+                    podeVotar = false;
+                } else {
+                    avisoFalta = "<span style='color:#fbbf24;'>Falta sua nota! 🤵‍♂️</span>";
+                    podeVotar = true;
+                }
+            } else if (perfilAtivo === 'day') {
+                if (item.notaDay) {
+                    avisoFalta = "<span style='color:#94a3b8;'>Aguardando nota do Arthur 🤵‍♂️</span>";
+                    podeVotar = false;
+                } else {
+                    avisoFalta = "<span style='color:#fbbf24;'>Falta sua nota! 👰‍♀️</span>";
+                    podeVotar = true;
+                }
+            }
+        }
+
         return `
-        <div class="card ${jaAssistido ? 'card-finalizado' : ''}" onclick="window.verSinopse('${item.firebaseId}')">
+        <div class="card ${jaAssistido ? 'card-finalizado' : ''}" 
+             onclick="${item.sinopse ? `window.verSinopse('${item.firebaseId}')` : ''}"
+             style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''} cursor:pointer;">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
-            <button class="btn-edit" onclick="event.stopPropagation(); window.abrirModal('${item.firebaseId}')">✏️</button>
+            ${!jaAssistido ? `<button class="btn-edit" onclick="event.stopPropagation(); window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
-            ${jaAssistido ? '<div class="tarja-finalizado">FINALIZADO</div>' : ''}
+            ${jaAssistido ? `<div class="tarja-finalizado"></div>` : ''}
             <div class="info">
-                <b style="display:block; margin-bottom:5px;">${item.nome}</b>
-                ${item.tipo === 'serie' ? `<p style="font-size:11px; color:#94a3b8;">T${item.temporada || 1} • E${item.episodio || 1}</p>` : ''}
-                
-                <div style="margin-top:8px; border-top:1px solid #334155; padding-top:5px; font-size:11px;">
-                    <span>🤵‍♂️ ${'🍿'.repeat(item.notaArthur || 0)}</span><br>
-                    <span>👰‍♀️ ${'🍿'.repeat(item.notaDay || 0)}</span>
-                </div>
-
-                ${!jaAssistido && !votou ? `
-                    <button class="btn-primary" style="font-size:10px; padding:6px; margin-top:10px; width:100%;" 
-                        onclick="event.stopPropagation(); window.finalizarRapido('${item.firebaseId}')">
-                        ${item.status === 'quero' ? '📺 Assistir' : '⭐ Dar Nota'}
-                    </button>` : ''}
-
-                <button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" 
-                    style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:none; padding:5px 0; width:100%; border-radius:5px; cursor:pointer; font-size:9px; margin-top:8px; font-weight:bold;">
-                    EXCLUIR
-                </button>
+                <b style="font-size:14px; display: block; margin-top: 10px;">${item.nome}</b>
+                ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
+                <p style="font-size:10px; margin-top:5px;">${avisoFalta}</p>
+                ${podeVotar ? `
+                    <button onclick="event.stopPropagation(); window.finalizarRapido('${item.firebaseId}')" 
+                            style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
+                        ${emAvaliacao ? 'Dar minha nota ⭐' : textoBotao}
+                    </button>
+                ` : ''}
+                ${!jaAssistido ? `<button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>` : ''}
+                ${jaAssistido ? `
+                    <div style="margin-top:5px; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; text-align:center;">
+                        <p style="font-size:10px; color:#fbbf24;">🤵‍♂️ ${renderPipocas(item.notaArthur)}</p>
+                        <p style="font-size:10px; color:#fbbf24;">👰‍♀️ ${renderPipocas(item.notaDay)}</p>
+                        <p style="font-size:10px; font-style:italic; color:#94a3b8; margin-top:5px; white-space: normal; word-wrap: break-word;">"${item.comentario || 'Sem comentário.'}"</p>
+                    </div>
+                ` : ''}
             </div>
         </div>`;
     }).join("");
 }
 
-window.render = function() {
-    if (!perfilAtivo) return;
-    const busca = document.getElementById("busca").value.toLowerCase();
-    const filtrados = data.filter(i => (i.nome || "").toLowerCase().includes(busca) && (i.dono === perfilAtivo || i.dono === 'casal'));
+// --- ACRÉSCIMO 4: MODAL DE SINOPSE AO CLICAR NO CARD ---
+window.verSinopse = function(id) {
+    const item = data.find(i => i.firebaseId === id);
+    if (!item) return;
 
-    // HOME: Carrosséis específicos por status
-    const containerHome = document.getElementById("home");
-    if (paginaAtual === "home" && containerHome) {
-        containerHome.innerHTML = `
-            <h3 class="section-title">📺 Assistindo Agora</h3>
-            <div class="carrossel-estilizado">${renderCards(filtrados.filter(i => i.status === "assistindo"))}</div>
-            <h3 class="section-title">⏳ Esperando Notas</h3>
-            <div class="carrossel-estilizado">${renderCards(filtrados.filter(i => i.status === "avaliacao"))}</div>
-            <h3 class="section-title">⭐ Quero Ver</h3>
-            <div class="carrossel-estilizado">${renderCards(filtrados.filter(i => i.status === "quero"))}</div>
-            <h3 class="section-title">✅ Já Assistidos</h3>
-            <div class="carrossel-estilizado">${renderCards(filtrados.filter(i => i.status === "assistido"))}</div>`;
-    }
+    // Se o seu HTML ainda não tiver o modal de sinopse, ele pode ser o mesmo do sorteio adaptado
+    const container = document.getElementById("container-sorteado");
+    document.getElementById("modal-sorteio").style.display = "flex";
 
-    // PÁGINAS ESPECÍFICAS: Séries, Filmes, Quero
-    const containerSeries = document.getElementById("series");
-    if (paginaAtual === "series" && containerSeries) {
-        containerSeries.innerHTML = renderCards(filtrados.filter(i => i.tipo === "serie"));
-    }
+    container.innerHTML = `
+        <div style="background-image: url('${item.banner || ''}'); background-size: cover; background-position: center; border-radius: 12px; margin-bottom: 15px;">
+            <div style="background: rgba(0,0,0,0.7); padding: 20px; border-radius: 12px;">
+                <h2 style="color:#3b82f6; margin:0;">${item.nome}</h2>
+                <p style="color:#f1f5f9; font-size:13px; margin-top:15px; line-height:1.5; text-align:left;">${item.sinopse || 'Sinopse não cadastrada.'}</p>
+                <button class="btn-cancel" style="margin-top:20px;" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
+            </div>
+        </div>`;
+};
 
-    const containerFilmes = document.getElementById("filmes");
-    if (paginaAtual === "filmes" && containerFilmes) {
-        containerFilmes.innerHTML = renderCards(filtrados.filter(i => i.tipo === "filme"));
-    }
+function renderSugestoes(lista) {
+    return lista.map(item => `
+        <div class="card" style="border: 2px solid #3b82f6;">
+            <img src="${item.imagem}" style="filter: brightness(0.4);">
+            <div class="info" style="opacity: 1; background: transparent;">
+                <p style="font-weight:bold; color:white; margin-top: 10px;">${item.nome}</p>
+                <div style="display:flex; gap:15px; margin-top:10px;">
+                    <button onclick="window.darMatch('${item.firebaseId}')" style="background:none; border:none; font-size:30px; cursor:pointer;">🍿</button>
+                    <button onclick="window.darBlock('${item.firebaseId}')" style="background:none; border:none; font-size:30px; cursor:pointer;">🚫</button>
+                </div>
+            </div>
+        </div>`).join("");
+}
 
-    const containerQuero = document.getElementById("queroList");
-    if (paginaAtual === "quero" && containerQuero) {
-        containerQuero.innerHTML = renderCards(filtrados.filter(i => i.status === "quero"));
+// TINDER ACTIONS
+window.darMatch = async (id) => {
+    const item = data.find(i => i.firebaseId === id);
+    if(item) {
+        await updateItem(id, { ...item, dono: 'casal' });
+        data = await getData();
+        render();
     }
 };
 
-async function init() {
-    data = await getData();
-    window.render();
-}
-init();
+window.darBlock = (id) => {
+    let escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
+    escondidos.push(id);
+    localStorage.setItem('esc_' + perfilAtivo, JSON.stringify(escondidos));
+    render();
+};
+
+// SORTEIO DE FILMES
+window.sortearFilme = function() {
+    const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
+    const container = document.getElementById("container-sorteado");
+    document.getElementById("modal-sorteio").style.display = "flex";
+
+    if (opcoes.length === 0) {
+        container.innerHTML = `<div style="padding: 20px;"><h2 style="color: #ef4444;">Ops! 🍿</h2><p style="color: #94a3b8;">Não há filmes do Casal.</p><button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button></div>`;
+        return;
+    }
+
+    const sorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
+    container.innerHTML = `
+        <h2 style="color:#3b82f6;">O escolhido foi:</h2>
+        <img src="${sorteado.imagem}" style="width:100%; max-width:180px; border-radius:12px; margin: 15px 0; border: 2px solid #3b82f6;">
+        <h3 style="color:white; margin:0; margin-top: 10px;">${sorteado.nome}</h3>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+            <button class="btn-primary" onclick="window.finalizarRapido('${sorteado.firebaseId}')">Assistir este! ✅</button>
+            <button class="btn-cancel" onclick="window.sortearFilme()">Sortear outro 🎲</button>
+            <button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
+        </div>`;
+};
+
+iniciarApp();
