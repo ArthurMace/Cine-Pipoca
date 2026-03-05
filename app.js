@@ -364,11 +364,19 @@ function renderCards(lista) {
                     </button>
                 ` : ''}
                 ${!jaAssistido ? `<button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>` : ''}
+                
                 ${jaAssistido ? `
                     <div style="margin-top:5px; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; text-align:center;">
                         <p style="font-size:10px; color:#fbbf24;">🤵‍♂️ ${renderPipocas(item.notaArthur)}</p>
                         <p style="font-size:10px; color:#fbbf24;">👰‍♀️ ${renderPipocas(item.notaDay)}</p>
                         <p style="font-size:10px; font-style:italic; color:#94a3b8; margin-top:5px; white-space: normal; word-wrap: break-word;">"${item.comentario || 'Sem comentário.'}"</p>
+                        
+                        <button onclick="event.stopPropagation(); window.ressuscitar('${item.firebaseId}')" 
+                                style="margin-top:10px; background:rgba(59, 130, 246, 0.2); color:#3b82f6; border:1px solid #3b82f6; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:9px; font-weight:bold; width: 100%;">
+                            🔄 Ver de novo (Ressuscitar)
+                        </button>
+
+                        <button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="margin-top:8px; background:none; color:#ef4444; border:none; cursor:pointer; font-size:9px; text-decoration:underline;">Excluir Permanentemente</button>
                     </div>
                 ` : ''}
             </div>
@@ -448,5 +456,21 @@ window.sortearFilme = function() {
             <button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
         </div>`;
 };
+window.ressuscitar = async function(id) {
+    if (!confirm("Deseja mover este item de volta para 'Quero Assistir'?")) return;
+    
+    const item = data.find(i => i.firebaseId === id);
+    if (item) {
+        item.status = 'quero'; // Move de volta
+        item.notaArthur = null; // Limpa notas para nova avaliação futuramente
+        item.notaDay = null;
+        item.comentario = "";
+        
+        await updateItem(id, item);
+        data = await getData();
+        window.render();
+    }
+};
 
 iniciarApp();
+
