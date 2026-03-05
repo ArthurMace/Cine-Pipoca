@@ -1,15 +1,12 @@
 import { getData, addItem, updateItem, deleteItem } from "./storage.js";
 
-// --- ESTADO GLOBAL ---
 let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// --- CONFIGURAÇÃO API TMDB ---
 const API_KEY = 'efe4cf2c1021597fbb2171bda02231f4';
 const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
 
-// --- BUSCA AUTOMÁTICA TMDB ---
 async function buscarNoTMDB(nome) {
     const url = `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=pt-BR&query=${encodeURIComponent(nome)}`;
     try {
@@ -19,8 +16,7 @@ async function buscarNoTMDB(nome) {
             const item = dados.results[0];
             let extras = { temporadas: null, episodios: null };
             if (item.media_type === 'tv') {
-                const urlDet = `https://api.themoviedb.org/3/tv/${item.id}?api_key=${API_KEY}&language=pt-BR`;
-                const resDet = await fetch(urlDet);
+                const resDet = await fetch(`https://api.themoviedb.org/3/tv/${item.id}?api_key=${API_KEY}&language=pt-BR`);
                 const det = await resDet.json();
                 extras.temporadas = det.number_of_seasons;
                 extras.episodios = det.number_of_episodes;
@@ -35,22 +31,18 @@ async function buscarNoTMDB(nome) {
                 totalEpisodes: extras.episodios
             };
         }
-    } catch (e) { console.error("Erro TMDB:", e); }
+    } catch (e) { console.error(e); }
     return null;
 }
 
-// --- NAVEGAÇÃO ---
 window.navegar = function(pagina) {
     paginaAtual = pagina;
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
     const target = document.getElementById("page-" + pagina);
-    if (target) {
-        target.style.display = "block";
-    }
+    if (target) target.style.display = "block";
     window.render();
 };
 
-// --- GESTÃO DE PERFIL ---
 window.selecionarPerfil = function(nome) {
     perfilAtivo = nome.toLowerCase();
     document.getElementById('modal-perfil').style.display = 'none';
@@ -63,13 +55,12 @@ window.selecionarPerfil = function(nome) {
 window.resetarPerfil = () => { document.getElementById('modal-perfil').style.display = 'flex'; };
 window.toggleMenuPerfil = () => { document.getElementById('dropdownPerfil').classList.toggle('show-menu'); };
 
-// --- MODAIS ---
 window.toggleSerieFields = function() {
     const tipo = document.getElementById("tipo").value;
     const status = document.getElementById("status").value;
     document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
-    const deveMostrarNotas = (status === "assistido" || status === "avaliacao");
-    document.getElementById("campos-finalizacao").style.display = deveMostrarNotas ? "block" : "none";
+    const notas = (status === "assistido" || status === "avaliacao");
+    document.getElementById("campos-finalizacao").style.display = notas ? "block" : "none";
 };
 
 window.abrirModal = function(id = null) {
@@ -104,7 +95,6 @@ function limparModal() {
     });
 }
 
-// --- CRUD FIREBASE ---
 window.adicionar = async function() {
     const id = document.getElementById("item-id-hidden").value;
     let nome = document.getElementById("nome").value;
@@ -116,12 +106,7 @@ window.adicionar = async function() {
         if (dadosTMDB) {
             nome = dadosTMDB.titulo;
             imagem = dadosTMDB.imagem;
-            extrasAuto = {
-                sinopse: dadosTMDB.sinopse,
-                banner: dadosTMDB.banner,
-                totalSeasons: dadosTMDB.totalSeasons,
-                totalEpisodes: dadosTMDB.totalEpisodes
-            };
+            extrasAuto = { sinopse: dadosTMDB.sinopse, banner: dadosTMDB.banner };
         }
     }
 
@@ -153,7 +138,6 @@ window.excluirItem = async (id) => {
     }
 };
 
-// --- SORTEIO E SINOPSE ---
 window.sortearFilme = function() {
     const opcoes = data.filter(i => i.tipo === 'filme' && i.status === 'quero' && i.dono === 'casal');
     if (opcoes.length === 0) return alert("Nenhum filme do casal disponível.");
@@ -164,23 +148,17 @@ window.sortearFilme = function() {
 window.verSinopse = function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (!item) return;
-    const modal = document.getElementById("modal-sorteio");
-    const container = document.getElementById("container-sorteado");
-    modal.style.display = "flex";
-    container.innerHTML = `
+    document.getElementById("modal-sorteio").style.display = "flex";
+    document.getElementById("container-sorteado").innerHTML = `
         <div style="background: url('${item.banner || ''}') center/cover; border-radius:15px; overflow:hidden;">
             <div style="background:rgba(15, 23, 42, 0.95); padding:30px; backdrop-filter:blur(5px);">
                 <h2 style="color:#3b82f6; margin-bottom:15px;">${item.nome}</h2>
-                <p style="text-align:left; font-size:14px; line-height:1.6; color: #cbd5e1; max-height:300px; overflow-y:auto;">${item.sinopse || "Sinopse não cadastrada."}</p>
-                <div style="margin-top:20px; display:flex; gap:10px;">
-                    <button class="btn-primary" onclick="window.abrirModal('${item.firebaseId}'); document.getElementById('modal-sorteio').style.display='none'">Editar</button>
-                    <button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
-                </div>
+                <p style="text-align:left; font-size:14px; line-height:1.6; color: #cbd5e1;">${item.sinopse || "Sem sinopse."}</p>
+                <button class="btn-cancel" onclick="document.getElementById('modal-sorteio').style.display='none'" style="margin-top:20px;">Fechar</button>
             </div>
         </div>`;
 };
 
-// --- NOTAS RÁPIDAS ---
 window.finalizarRapido = function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (!item) return;
@@ -205,7 +183,6 @@ window.salvarNotaIndividual = async function() {
 
     if (item.notaArthur && item.notaDay) {
         item.status = 'assistido';
-        item.comentario = `A: ${item.comentarioArthur || ""} | D: ${item.comentarioDay || ""}`;
     } else {
         item.status = 'avaliacao';
     }
@@ -216,13 +193,10 @@ window.salvarNotaIndividual = async function() {
     window.render();
 };
 
-// --- RENDERIZAÇÃO ---
 function renderCards(lista) {
-    if (lista.length === 0) return `<p style="color:gray; padding:20px; text-align:center; width:100%;">Nenhum item encontrado.</p>`;
+    if (lista.length === 0) return `<p style="color:gray; padding:20px; text-align:center; width:100%;">Vazio.</p>`;
     return lista.map(item => {
         const jaAssistido = item.status === 'assistido';
-        const votou = (perfilAtivo === 'arthur' && item.notaArthur) || (perfilAtivo === 'day' && item.notaDay);
-        
         return `
         <div class="card ${jaAssistido ? 'card-finalizado' : ''}" onclick="window.verSinopse('${item.firebaseId}')">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
@@ -230,25 +204,13 @@ function renderCards(lista) {
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
             ${jaAssistido ? '<div class="tarja-finalizado">FINALIZADO</div>' : ''}
             <div class="info">
-                <b style="display:block; margin-bottom:5px;">${item.nome}</b>
-                ${item.tipo === 'serie' ? `<p style="font-size:11px; color:#94a3b8;">Temporada ${item.temporada || 1} • Ep ${item.episodio || 1}</p>` : ''}
-                
-                ${!jaAssistido && !votou ? `
-                    <button class="btn-primary" style="font-size:10px; padding:6px; margin-top:8px; width:100%;" 
-                        onclick="event.stopPropagation(); ${item.status === 'quero' ? `window.abrirModal('${item.firebaseId}')` : `window.finalizarRapido('${item.firebaseId}')`}">
-                        ${item.status === 'quero' ? '📺 Assistir' : '⭐ Dar Nota'}
-                    </button>` : ''}
-
-                ${jaAssistido || item.status === 'avaliacao' ? `
-                    <div style="margin-top:8px; border-top:1px solid #334155; padding-top:5px; font-size:11px;">
-                        <span style="display:block;">🤵‍♂️ ${'🍿'.repeat(item.notaArthur || 0)}</span>
-                        <span style="display:block;">👰‍♀️ ${'🍿'.repeat(item.notaDay || 0)}</span>
-                    </div>` : ''}
-                
-                <button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" 
-                    style="background:rgba(239, 68, 68, 0.15); color:#ef4444; border:none; padding:4px 0; width:100%; border-radius:5px; cursor:pointer; font-size:9px; margin-top:8px; font-weight:bold;">
-                    EXCLUIR
-                </button>
+                <b>${item.nome}</b>
+                ${item.tipo === 'serie' ? `<p>T${item.temporada || 1} • E${item.episodio || 1}</p>` : ''}
+                <div style="margin-top:8px; font-size:11px;">
+                    <span>🤵‍♂️ ${'🍿'.repeat(item.notaArthur || 0)}</span><br>
+                    <span>👰‍♀️ ${'🍿'.repeat(item.notaDay || 0)}</span>
+                </div>
+                <button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:9px; margin-top:10px; font-weight:bold;">EXCLUIR</button>
             </div>
         </div>`;
     }).join("");
@@ -259,43 +221,31 @@ window.render = function() {
     const busca = document.getElementById("busca").value.toLowerCase();
     const filtrados = data.filter(i => (i.nome || "").toLowerCase().includes(busca) && (i.dono === perfilAtivo || i.dono === 'casal'));
 
-    // HOME
-    const containerHome = document.getElementById("home");
-    if (paginaAtual === "home" && containerHome) {
-        containerHome.innerHTML = `
-            <h3 class="section-title">📺 Continuando...</h3>
+    const h = document.getElementById("home");
+    if (paginaAtual === "home" && h) {
+        h.innerHTML = `
+            <h3 class="section-title">📺 Assistindo Agora</h3>
             <div class="carrossel">${renderCards(filtrados.filter(i => i.status === "assistindo"))}</div>
-            <h3 class="section-title">⏳ Aguardando Notas</h3>
+            <h3 class="section-title">⏳ Esperando Notas</h3>
             <div class="carrossel">${renderCards(filtrados.filter(i => i.status === "avaliacao"))}</div>
-            <h3 class="section-title">⭐ Nossa Lista</h3>
+            <h3 class="section-title">⭐ Quero Ver</h3>
             <div class="carrossel">${renderCards(filtrados.filter(i => i.status === "quero"))}</div>
-            <h3 class="section-title">✅ Já Assistidos</h3>
+            <h3 class="section-title">✅ Assistidos</h3>
             <div class="carrossel">${renderCards(filtrados.filter(i => i.status === "assistido"))}</div>`;
     }
 
-    // SÉRIES
-    const containerSeries = document.getElementById("series");
-    if (paginaAtual === "series" && containerSeries) {
-        containerSeries.innerHTML = renderCards(filtrados.filter(i => i.tipo === "serie"));
-    }
+    const s = document.getElementById("series");
+    if (paginaAtual === "series" && s) s.innerHTML = renderCards(filtrados.filter(i => i.tipo === "serie"));
 
-    // FILMES
-    const containerFilmes = document.getElementById("filmes");
-    if (paginaAtual === "filmes" && containerFilmes) {
-        containerFilmes.innerHTML = renderCards(filtrados.filter(i => i.tipo === "filme"));
-    }
+    const f = document.getElementById("filmes");
+    if (paginaAtual === "filmes" && f) f.innerHTML = renderCards(filtrados.filter(i => i.tipo === "filme"));
 
-    // QUERO VER
-    const containerQuero = document.getElementById("queroList");
-    if (paginaAtual === "quero" && containerQuero) {
-        containerQuero.innerHTML = renderCards(filtrados.filter(i => i.status === "quero"));
-    }
+    const q = document.getElementById("queroList");
+    if (paginaAtual === "quero" && q) q.innerHTML = renderCards(filtrados.filter(i => i.status === "quero"));
 };
 
 async function init() {
-    try {
-        data = await getData();
-        window.render();
-    } catch (e) { console.error("Falha ao carregar dados iniciais:", e); }
+    data = await getData();
+    window.render();
 }
 init();
