@@ -4,7 +4,7 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
-// --- CONFIGURAÇÃO API TMDB (APENAS ACRESCENTADO) ---
+// --- CONFIGURAÇÃO API TMDB (ACRESCENTADO) ---
 const API_KEY = 'efe4cf2c1021597fbb2171bda02231f4';
 const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
 
@@ -39,7 +39,7 @@ async function buscarNoTMDB(nome) {
     return null;
 }
 
-// --- FUNÇÃO PARA RETOMAR SÉRIE (ACRESCENTADO) ---
+// --- FUNÇÃO PARA RETOMAR SÉRIE (NOVA TEMPORADA) ---
 window.retomarSerie = async function(id) {
     const item = data.find(i => i.firebaseId === id);
     if (!item) return;
@@ -79,21 +79,30 @@ window.selecionarPerfil = function(nome) {
     const modalPerfis = document.getElementById('modal-perfil');
     if (modalPerfis) modalPerfis.style.display = 'none';
     const letraElemento = document.getElementById('letra-perfil');
-    if (letraElemento) letraElemento.innerText = nome.charAt(0).toUpperCase();
+    if (letraElemento) {
+        letraElemento.innerText = nome.charAt(0).toUpperCase();
+    }
     const menu = document.getElementById('dropdownPerfil');
     if (menu) menu.classList.remove('show-menu');
-    const titulo = document.getElementById('titulo-app');
-    if (titulo) titulo.innerHTML = `CINE PIPOCA`;
+    
     console.log("Sistema: Perfil alterado para " + perfilAtivo);
     render();
+};
+
+window.resetarPerfil = function() {
+    const modalPerfis = document.getElementById('modal-perfil');
+    if (modalPerfis) modalPerfis.style.display = 'flex';
 };
 
 window.toggleSerieFields = function() {
     const tipo = document.getElementById("tipo").value;
     const status = document.getElementById("status").value;
-    document.getElementById("serie-fields").style.display = (tipo === "serie") ? "flex" : "none";
+    const serieFields = document.getElementById("serie-fields");
+    const camposFinalizacao = document.getElementById("campos-finalizacao");
+    
+    if (serieFields) serieFields.style.display = (tipo === "serie") ? "flex" : "none";
     const deveMostrarNotas = (status === "assistido" || status === "avaliacao");
-    document.getElementById("campos-finalizacao").style.display = deveMostrarNotas ? "block" : "none";
+    if (camposFinalizacao) camposFinalizacao.style.display = deveMostrarNotas ? "block" : "none";
 };
 
 window.abrirModal = function(id = null) {
@@ -142,9 +151,9 @@ window.toggleMenuPerfil = function() {
 
 window.addEventListener('click', function(e) {
     const menu = document.getElementById('dropdownPerfil');
-    const btn = document.querySelector('.perfil-bolinha-btn');
+    const btn = document.getElementById('perfilBtn');
     if (menu && menu.classList.contains('show-menu')) {
-        if (!btn.contains(e.target) && !menu.contains(e.target)) {
+        if (btn && !btn.contains(e.target) && !menu.contains(e.target)) {
             menu.classList.remove('show-menu');
         }
     }
@@ -295,6 +304,10 @@ window.render = function() {
                 ${montarSecao("✅ Já Assistidos", renderCards(jaAssistidos))}
             `;
         }
+    } else if (paginaAtual === "quero") {
+        const listaFinal = filtrados.filter(i => i.status === "quero");
+        const container = document.getElementById("queroList");
+        if (container) container.innerHTML = `<div class="grid-comum">${renderCards(listaFinal)}</div>`;
     }
 };
 
@@ -312,9 +325,12 @@ function renderCards(lista) {
         const jaAssistido = item.status === 'assistido';
         const emAvaliacao = item.status === 'avaliacao';
         const emQuero = item.status === 'quero';
+        const emAssistindo = item.status === 'assistindo';
         
         let textoBotao = "Finalizar ✅";
-        if (item.tipo === 'serie' && emQuero) textoBotao = "Assistir 📺";
+        if (item.tipo === 'serie' && (emQuero || emAssistindo)) {
+            textoBotao = "Assistir 📺";
+        }
 
         const votou = (perfilAtivo === 'arthur' && item.notaArthur) || (perfilAtivo === 'day' && item.notaDay);
         let avisoFalta = "";
