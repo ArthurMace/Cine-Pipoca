@@ -4,6 +4,30 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
+// --- ACRÉSCIMO 1: CONFIGURAÇÃO API TMDB ---
+const API_KEY = 'efe4cf2c1021597fbb2171bda02231f4';
+const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
+
+// --- ACRÉSCIMO 2: FUNÇÃO DE BUSCA AUTOMÁTICA ---
+async function buscarNoTMDB(nome) {
+    const url = `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=pt-BR&query=${encodeURIComponent(nome)}`;
+    try {
+        const resposta = await fetch(url);
+        const dados = await resposta.json();
+        if (dados.results && dados.results.length > 0) {
+            const item = dados.results[0]; 
+            return {
+                titulo: item.title || item.name,
+                imagem: item.poster_path ? BASE_IMG + item.poster_path : null,
+                sinopse: item.overview || "Sem sinopse disponível.",
+                banner: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : null,
+                tipo: item.media_type === 'tv' ? 'serie' : 'filme'
+            };
+        }
+    } catch (e) { console.error("Erro TMDB:", e); }
+    return null;
+}
+
 // --- AJUSTE 1: FUNÇÃO DE NAVEGAÇÃO QUE FALTAVA ---
 window.navegar = function(pagina) {
     paginaAtual = pagina;
@@ -96,6 +120,7 @@ function limparModal() {
     document.getElementById("status").value = "quero";
     document.getElementById("dono").value = "casal";
 }
+
 // Função para abrir/fechar o menu de bolinhas
 window.toggleMenuPerfil = function() {
     const menu = document.getElementById('dropdownPerfil');
@@ -114,13 +139,33 @@ window.addEventListener('click', function(e) {
     }
 });
 
-// SALVAR NO FIREBASE
+// SALVAR NO FIREBASE - ACRESCENTADO BUSCA AUTOMÁTICA
 window.adicionar = async function() {
     const id = document.getElementById("item-id-hidden").value;
+    let nomeInput = document.getElementById("nome").value;
+    let imagemInput = document.getElementById("imagem").value;
+    let tipoInput = document.getElementById("tipo").value;
+    let sinopseAuto = "";
+    let bannerAuto = "";
+
+    // ACRÉSCIMO: Se não houver imagem, busca no TMDB automaticamente
+    if (!id && !imagemInput) {
+        const dadosTMDB = await buscarNoTMDB(nomeInput);
+        if (dadosTMDB) {
+            nomeInput = dadosTMDB.titulo;
+            imagemInput = dadosTMDB.imagem;
+            tipoInput = dadosTMDB.tipo;
+            sinopseAuto = dadosTMDB.sinopse;
+            bannerAuto = dadosTMDB.banner;
+        }
+    }
+
     const itemDados = {
-        nome: document.getElementById("nome").value,
-        imagem: document.getElementById("imagem").value,
-        tipo: document.getElementById("tipo").value,
+        nome: nomeInput,
+        imagem: imagemInput,
+        tipo: tipoInput,
+        sinopse: sinopseAuto,
+        banner: bannerAuto,
         status: document.getElementById("status").value,
         dono: document.getElementById("dono").value,
         temporada: document.getElementById("temporada").value || null,
@@ -197,7 +242,6 @@ window.excluirItem = async function(id) {
 window.render = function() {
     if (!perfilAtivo) return;
     
-    // --- AJUSTE 2: GARANTIA DE EXIBIÇÃO DA PÁGINA ---
     document.querySelectorAll(".page").forEach(p => p.style.display = "none");
     const containerPagina = document.getElementById("page-" + paginaAtual);
     if(containerPagina) containerPagina.style.display = "block";
@@ -210,7 +254,6 @@ window.render = function() {
         return donoMatch && nomeMatch;
     });
 
-    // Função auxiliar para montar seções com carrossel
     const montarSecao = (titulo, conteudo, cor = "#94a3b8") => {
         if (!conteudo || conteudo.includes("Vazio.")) return "";
         const idSetas = "scroll-" + Math.random().toString(36).substr(2, 5);
@@ -224,8 +267,6 @@ window.render = function() {
     };
 
     if (paginaAtual === "home" || paginaAtual === "series" || paginaAtual === "filmes") {
-        
-        // Filtro específico por tipo se não estiver na home
         let listaBase = filtrados;
         if (paginaAtual === "series") listaBase = filtrados.filter(i => i.tipo === "serie");
         if (paginaAtual === "filmes") listaBase = filtrados.filter(i => i.tipo === "filme");
@@ -242,7 +283,6 @@ window.render = function() {
         const escondidos = JSON.parse(localStorage.getItem('esc_' + perfilAtivo)) || [];
         const sugestoes = (paginaAtual === "home") ? data.filter(i => i.dono === outroPerfil && i.status === 'quero' && !escondidos.includes(i.firebaseId)) : [];
 
-        // Tenta encontrar o container pelo ID da página (ex: id="home" ou id="series")
         const targetDiv = document.getElementById(paginaAtual) || document.getElementById("page-" + paginaAtual);
         
         if(targetDiv) {
@@ -263,6 +303,15 @@ window.render = function() {
         }
     }
 };
+
+// --- ACRÉSCIMO 3: GERADOR DE PIPOCAS ---
+function renderPipocas(nota) {
+    let pipocas = "";
+    for (let i = 1; i <= 5; i++) {
+        pipocas += `<span style="filter: ${i <= nota ? 'grayscale(0)' : 'grayscale(1) opacity(0.3)'}; font-size: 14px;">🍿</span>`;
+    }
+    return pipocas;
+}
 
 function renderCards(lista) {
     if (lista.length === 0) return `<p style="color:gray; padding:20px;">Vazio.</p>`;
@@ -297,9 +346,11 @@ function renderCards(lista) {
         }
 
         return `
-        <div class="card ${jaAssistido ? 'card-finalizado' : ''}" style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''}">
+        <div class="card ${jaAssistido ? 'card-finalizado' : ''}" 
+             onclick="${item.sinopse ? `window.verSinopse('${item.firebaseId}')` : ''}"
+             style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''} cursor:pointer;">
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
-            ${!jaAssistido ? `<button class="btn-edit" onclick="window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
+            ${!jaAssistido ? `<button class="btn-edit" onclick="event.stopPropagation(); window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
             ${jaAssistido ? `<div class="tarja-finalizado"></div>` : ''}
             <div class="info">
@@ -307,15 +358,16 @@ function renderCards(lista) {
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
                 <p style="font-size:10px; margin-top:5px;">${avisoFalta}</p>
                 ${podeVotar ? `
-                    <button onclick="window.finalizarRapido('${item.firebaseId}')" 
+                    <button onclick="event.stopPropagation(); window.finalizarRapido('${item.firebaseId}')" 
                             style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
                         ${emAvaliacao ? 'Dar minha nota ⭐' : textoBotao}
                     </button>
                 ` : ''}
-                ${!jaAssistido ? `<button onclick="window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>` : ''}
+                ${!jaAssistido ? `<button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>` : ''}
                 ${jaAssistido ? `
                     <div style="margin-top:5px; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; text-align:center;">
-                        <p style="font-size:11px; color:#fbbf24;">🤵‍♂️ A: ${item.notaArthur || '-'} | 👰‍♀️ D: ${item.notaDay || '-'}</p>
+                        <p style="font-size:10px; color:#fbbf24;">🤵‍♂️ ${renderPipocas(item.notaArthur)}</p>
+                        <p style="font-size:10px; color:#fbbf24;">👰‍♀️ ${renderPipocas(item.notaDay)}</p>
                         <p style="font-size:10px; font-style:italic; color:#94a3b8; margin-top:5px; white-space: normal; word-wrap: break-word;">"${item.comentario || 'Sem comentário.'}"</p>
                     </div>
                 ` : ''}
@@ -323,6 +375,25 @@ function renderCards(lista) {
         </div>`;
     }).join("");
 }
+
+// --- ACRÉSCIMO 4: MODAL DE SINOPSE AO CLICAR NO CARD ---
+window.verSinopse = function(id) {
+    const item = data.find(i => i.firebaseId === id);
+    if (!item) return;
+
+    // Se o seu HTML ainda não tiver o modal de sinopse, ele pode ser o mesmo do sorteio adaptado
+    const container = document.getElementById("container-sorteado");
+    document.getElementById("modal-sorteio").style.display = "flex";
+
+    container.innerHTML = `
+        <div style="background-image: url('${item.banner || ''}'); background-size: cover; background-position: center; border-radius: 12px; margin-bottom: 15px;">
+            <div style="background: rgba(0,0,0,0.7); padding: 20px; border-radius: 12px;">
+                <h2 style="color:#3b82f6; margin:0;">${item.nome}</h2>
+                <p style="color:#f1f5f9; font-size:13px; margin-top:15px; line-height:1.5; text-align:left;">${item.sinopse || 'Sinopse não cadastrada.'}</p>
+                <button class="btn-cancel" style="margin-top:20px;" onclick="document.getElementById('modal-sorteio').style.display='none'">Fechar</button>
+            </div>
+        </div>`;
+};
 
 function renderSugestoes(lista) {
     return lista.map(item => `
