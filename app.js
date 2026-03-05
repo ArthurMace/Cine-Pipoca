@@ -348,42 +348,51 @@ function renderCards(lista) {
         return `
         <div class="card ${jaAssistido ? 'card-finalizado' : ''}" 
              onclick="${item.sinopse ? `window.verSinopse('${item.firebaseId}')` : ''}"
-             style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''} cursor:pointer;">
+             style="${jaAssistido ? 'border: 1px solid rgba(59, 130, 246, 0.5);' : ''} ${emAvaliacao ? 'border: 1px solid #fbbf24;' : ''} cursor:pointer; position: relative;">
+            
             <div class="perfil-tag">${item.dono === 'arthur' ? '🤵‍♂️' : (item.dono === 'day' ? '👰‍♀️' : '🍿')}</div>
+            
+            ${jaAssistido ? `
+                <div onclick="event.stopPropagation(); window.ressuscitar('${item.firebaseId}')" 
+                     title="Assistir novamente"
+                     style="position: absolute; top: 10px; left: 10px; background: rgba(15, 23, 42, 0.9); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid #3b82f6; font-size: 14px; cursor: pointer;">
+                     🔄
+                </div>
+            ` : ''}
+
             ${!jaAssistido ? `<button class="btn-edit" onclick="event.stopPropagation(); window.abrirModal('${item.firebaseId}')">✏️</button>` : ''}
+            
             <img src="${item.imagem}" onerror="this.src='https://via.placeholder.com/200x300?text=Sem+Imagem'">
+            
             ${jaAssistido ? `<div class="tarja-finalizado"></div>` : ''}
+            
             <div class="info">
                 <b style="font-size:14px; display: block; margin-top: 10px;">${item.nome}</b>
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
                 <p style="font-size:10px; margin-top:5px;">${avisoFalta}</p>
+                
                 ${podeVotar ? `
                     <button onclick="event.stopPropagation(); window.finalizarRapido('${item.firebaseId}')" 
                             style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
                         ${emAvaliacao ? 'Dar minha nota ⭐' : textoBotao}
                     </button>
                 ` : ''}
+
                 ${!jaAssistido ? `<button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>` : ''}
                 
                 ${jaAssistido ? `
                     <div style="margin-top:5px; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; text-align:center;">
                         <p style="font-size:10px; color:#fbbf24;">🤵‍♂️ ${renderPipocas(item.notaArthur)}</p>
                         <p style="font-size:10px; color:#fbbf24;">👰‍♀️ ${renderPipocas(item.notaDay)}</p>
-                        <p style="font-size:10px; font-style:italic; color:#94a3b8; margin-top:5px; white-space: normal; word-wrap: break-word;">"${item.comentario || 'Sem comentário.'}"</p>
+                        <p style="font-size:10px; font-style:italic; color:#94a3b8; margin-top:5px; white-space: normal; word-wrap: break-word; line-height: 1.2;">"${item.comentario || 'Sem comentário.'}"</p>
                         
-                        <button onclick="event.stopPropagation(); window.ressuscitar('${item.firebaseId}')" 
-                                style="margin-top:10px; background:rgba(59, 130, 246, 0.2); color:#3b82f6; border:1px solid #3b82f6; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:9px; font-weight:bold; width: 100%;">
-                            🔄 Ver de novo (Ressuscitar)
-                        </button>
-
-                        <button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="margin-top:8px; background:none; color:#ef4444; border:none; cursor:pointer; font-size:9px; text-decoration:underline;">Excluir Permanentemente</button>
+                        <button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="margin-top:8px; background:none; color:#ef4444; border:none; cursor:pointer; font-size:9px; text-decoration:underline; opacity: 0.6;">Excluir Permanentemente</button>
                     </div>
                 ` : ''}
             </div>
         </div>`;
     }).join("");
 }
-
 // --- ACRÉSCIMO 4: MODAL DE SINOPSE AO CLICAR NO CARD ---
 window.verSinopse = function(id) {
     const item = data.find(i => i.firebaseId === id);
@@ -461,16 +470,14 @@ window.ressuscitar = async function(id) {
     
     const item = data.find(i => i.firebaseId === id);
     if (item) {
-        item.status = 'quero'; // Move de volta
-        item.notaArthur = null; // Limpa notas para nova avaliação futuramente
+        item.status = 'quero'; // Altera o status
+        item.notaArthur = null; // Limpa as notas antigas
         item.notaDay = null;
         item.comentario = "";
         
-        await updateItem(id, item);
-        data = await getData();
-        window.render();
+        await updateItem(id, item); // Salva no Firebase
+        data = await getData();     // Atualiza a lista local
+        window.render();            // Renderiza a tela novamente
     }
 };
-
 iniciarApp();
-
