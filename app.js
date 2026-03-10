@@ -4,6 +4,11 @@ let data = [];
 let paginaAtual = "home";
 let perfilAtivo = null;
 
+window.onerror = function(msg, url, linenumber) {
+    alert('Erro detectado: ' + msg + '\nLinha: ' + linenumber);
+    return true;
+};
+
 // --- ACRÉSCIMO 1: CONFIGURAÇÃO API TMDB ---
 const API_KEY = 'efe4cf2c1021597fbb2171bda02231f4';
 const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
@@ -481,3 +486,4 @@ window.ressuscitar = async function(id) {
     }
 };
 iniciarApp();
+
