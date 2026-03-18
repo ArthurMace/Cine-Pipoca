@@ -208,31 +208,32 @@ window.salvarNotaIndividual = async function() {
     const id = document.getElementById("aval-id-hidden").value;
     const nota = document.getElementById("aval-nota").value;
     const coment = document.getElementById("aval-comentario").value;
-    
     const item = data.find(i => i.firebaseId === id);
-    let dadosAtualizados = { ...item };
+    
+    if (!item || !perfilAtivo) return;
 
+    // Salva a nota e o comentário específico de quem está logado
     if (perfilAtivo === 'arthur') {
-        dadosAtualizados.notaArthur = nota;
-        dadosAtualizados.comentarioArthur = coment;
-    } else {
-        dadosAtualizados.notaDay = nota;
-        dadosAtualizados.comentarioDay = coment;
+        item.notaArthur = nota;
+        item.comentarioArthur = coment;
+    } else if (perfilAtivo === 'day') {
+        item.notaDay = nota;
+        item.comentarioDay = coment;
     }
 
-    if (dadosAtualizados.notaArthur && dadosAtualizados.notaDay) {
-        dadosAtualizados.status = 'assistido';
-        const cA = dadosAtualizados.comentarioArthur || "";
-        const cD = dadosAtualizados.comentarioDay || "";
-        dadosAtualizados.comentario = `A: ${cA} | D: ${cD}`;
+    // LÓGICA DE FINALIZAÇÃO AUTOMÁTICA:
+    // Se ambos já deram nota, ele muda para assistido e junta os comentários
+    if (item.notaArthur && item.notaDay) {
+        item.status = 'assistido';
+        item.comentario = `🤵‍♂️: ${item.comentarioArthur || "Sem coment."} | 👰‍♀️: ${item.comentarioDay || "Sem coment."}`;
     } else {
-        dadosAtualizados.status = 'avaliacao';
+        item.status = 'avaliacao'; // Fica aguardando o outro
     }
 
-    await updateItem(id, dadosAtualizados);
+    await updateItem(id, item);
     document.getElementById("modal-avaliacao").style.display = "none";
     data = await getData();
-    render();
+    window.render();
 };
 
 window.excluirItem = async function(id) {
