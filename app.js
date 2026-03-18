@@ -376,12 +376,12 @@ function renderCards(lista) {
                 ${item.tipo === 'serie' ? `<p style="font-size:11px;">T${item.temporada || '1'} | E${item.episodio || '1'}</p>` : ''}
                 <p style="font-size:10px; margin-top:5px;">${avisoFalta}</p>
                 
-                ${podeVotar ? `
-                    <button onclick="event.stopPropagation(); window.finalizarRapido('${item.firebaseId}')" 
-                            style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:10px; margin: 10px 0; font-weight:bold;">
-                        ${emAvaliacao ? 'Dar minha nota ⭐' : textoBotao}
-                    </button>
-                ` : ''}
+               ${podeVotar ? `
+    <button onclick="event.stopPropagation(); ${item.status === 'quero' ? `window.comecarAssistir('${item.firebaseId}')` : `window.finalizarRapido('${item.firebaseId}')`}" 
+            style="background:#10b981; color:white; border:none; padding:8px 10px; border-radius:5px; cursor:pointer; font-size:11px; margin: 10px 0; font-weight:bold; width:100%;">
+        ${item.status === 'quero' ? '📺 Começar a Assistir' : '⭐ Dar minha nota'}
+    </button>
+` : ''}
 
                 ${!jaAssistido ? `<button onclick="event.stopPropagation(); window.excluirItem('${item.firebaseId}')" style="margin-top:10px; background:#ef4444; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Excluir</button>` : ''}
                 
@@ -483,6 +483,15 @@ window.ressuscitar = async function(id) {
         await updateItem(id, item); // Salva no Firebase
         data = await getData();     // Atualiza a lista local
         window.render();            // Renderiza a tela novamente
+    }
+};
+window.comecarAssistir = async function(id) {
+    const item = data.find(i => i.firebaseId === id);
+    if (item) {
+        item.status = 'assistindo';
+        await updateItem(id, item);
+        data = await getData();
+        window.render();
     }
 };
 iniciarApp();
