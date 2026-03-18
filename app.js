@@ -212,22 +212,24 @@ window.salvarNotaIndividual = async function() {
     
     if (!item || !perfilAtivo) return;
 
-    // Salva a nota e o comentário específico de quem está logado
+    // 1. Salva a nota e o comentário EM CAMPOS SEPARADOS
     if (perfilAtivo === 'arthur') {
         item.notaArthur = nota;
-        item.comentarioArthur = coment;
+        item.comentarioArthur = coment || "";
     } else if (perfilAtivo === 'day') {
         item.notaDay = nota;
-        item.comentarioDay = coment;
+        item.comentarioDay = coment || "";
     }
 
-    // LÓGICA DE FINALIZAÇÃO AUTOMÁTICA:
-    // Se ambos já deram nota, ele muda para assistido e junta os comentários
+    // 2. LÓGICA DE FINALIZAÇÃO AUTOMÁTICA
+    // Só muda para 'assistido' se AMBOS tiverem dado nota
     if (item.notaArthur && item.notaDay) {
         item.status = 'assistido';
+        // Aqui a mágica: junta os dois comentários para aparecer no card final
         item.comentario = `🤵‍♂️: ${item.comentarioArthur || "Sem coment."} | 👰‍♀️: ${item.comentarioDay || "Sem coment."}`;
     } else {
-        item.status = 'avaliacao'; // Fica aguardando o outro
+        // Se só um votou, o status vai para 'avaliacao' (Aguardando Notas)
+        item.status = 'avaliacao';
     }
 
     await updateItem(id, item);
